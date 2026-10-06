@@ -39,6 +39,28 @@ Recommended packaging rules:
 4. Clearly mark any modified OpenCC dictionary/configuration files as modified.
 5. Re-check third-party components separately if they are bundled directly rather than merely used as build/runtime dependencies.
 
+## Phase 1B importer baseline
+
+The first real OpenCC importer is pinned to commit:
+
+`3ac34aa439a9908dd49fa92b5174b46314787ac2`
+
+Initial reviewed/imported phrase files:
+
+- `STPhrases.txt` — script-stage `zh-CN -> zh-Hant`
+- `HKPhrases.txt` — regional-stage `zh-Hant -> zh-HK`
+- `TWPhrases.txt` — regional-stage `zh-Hant -> zh-TW`
+
+The importer intentionally preserves OpenCC's staged model and multiple target candidates. It does not claim to reproduce the full OpenCC runtime segmentation/match-policy behaviour yet. See `docs/OPENCC_IMPORTER.md`.
+
+Implementation:
+
+- `scripts/import_opencc_dictionaries.py`
+- `tests/test_opencc_importer.py`
+- `data/fixtures/opencc/`
+
+Each imported dictionary records its own SHA-256 and `source_versions` provenance.
+
 ## Update method
 Prefer pinned OpenCC releases / tags or a recorded upstream commit. A database-builder job may periodically check the official BYVoid/OpenCC repository for a newer release and rebuild the local conversion resources after tests pass.
 
@@ -46,4 +68,4 @@ Prefer pinned OpenCC releases / tags or a recorded upstream commit. A database-b
 The official OpenCC README identifies the project licence as Apache License 2.0. The repository's Apache-2.0 LICENSE grants reproduction, modification and redistribution rights subject to section 4 conditions. OpenCC dictionary files such as `STCharacters.txt`, `HKVariants.txt`, `TWVariants.txt` and `TSPhrases.txt` explicitly state `License: Apache-2.0 (see LICENSE)`, which is important because this project intends to redistribute dictionary data, not only link to the conversion library.
 
 Last reviewed: 2026-10-06
-Review status: formal first-pass review complete; re-check before first public binary/data release.
+Review status: formal first-pass review complete; Phase 1B phrase importer implemented and CI-tested; re-check before first public binary/data release.
