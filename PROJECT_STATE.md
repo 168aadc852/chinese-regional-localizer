@@ -4,145 +4,143 @@ Last updated: 2026-10-06
 
 ## Current phase
 
-**Phase 0 — Data governance and source research remains open for 3 unresolved sources.**
+- **Phase 0** — data governance remains open for 3 unresolved sources.
+- **Phase 0.5** — SQLite/manifest PoC complete and CI-validated.
+- **Phase 1A** — LSHK pronunciation importer complete and CI-validated.
+- **Phase 1B** — initial OpenCC phrase importer complete and CI-validated.
+- **Phase 1C** — Wikidata entity/localized-name importer complete and CI-validated.
+- **Phase 2A** — deterministic localization/resolution engine complete and CI-validated.
+- **Phase 2B** — OpenCC character/regional-variant expansion complete and CI-validated.
 
-**Phase 0.5 proof of concept is complete and CI-validated.**
-
-**Phase 1A LSHK pronunciation importer is complete and CI-validated.**
-
-**Phase 1B OpenCC regional phrase importer is complete and CI-validated.**
-
-**Phase 1C Wikidata entity/localized-name importer is complete and CI-validated.**
-
-**Phase 2A deterministic localization/resolution engine is complete and CI-validated.**
-
-The project can now build a small offline SQLite database, recognize regional entity names, compose staged terminology rules, localize text deterministically and return source-aware explanations/review flags.
+The project can now build a small offline SQLite database, recognize regional entity names, perform phrase and character script conversion, apply HK/TW regional terminology and variants, preserve phrase exceptions, and return source-aware explanations/review flags.
 
 ## Objective
 
-Build a legally and technically traceable offline CN / HK / TW localization data foundation and deterministic engine before application UI work.
+Build a legally and technically traceable offline CN / HK / TW localization foundation and deterministic engine before application UI work.
 
-## Completed
+## Major completed capabilities
 
-- GitHub established as the single source of truth for humans and AI tools.
-- Source registry expanded to 23 records.
-- First-pass usable conclusions completed for 20 of 23 source records.
-- Machine-readable ingestion policy added at `data-registry/sources.yaml`.
-- Licence packaging classes defined: core, attribution, ShareAlike, reference-only and pending.
-- SQLite schema v0.1 implemented with source/version provenance.
-- Manifest-enforced Phase 0.5 PoC implemented and CI-validated; Issue #2 closed.
+### Governance / data safety
 
-### Phase 1A — LSHK Jyutping Table
+- GitHub is the durable source of truth for humans and AI tools.
+- 23 source records are tracked; 20 have usable first-pass conclusions.
+- `data-registry/sources.yaml` is the machine-readable ingestion gate.
+- Licence packs remain separable: core, attribution, ShareAlike, reference-only and pending.
+- SQLite schema v0.1 preserves source/version/evidence provenance.
+
+### Phase 1A — LSHK Jyutping
 
 - Pinned upstream commit `dad2dd6d6f02fc51138ecc6818f7b38eba5c2ad3`.
-- Added `schema/migrations/0002_pronunciations.sql` supporting multiple pronunciations per character.
-- Added `scripts/import_lshk_jyutping.py` with manifest enforcement, local/pinned-download modes, strict TSV validation, Unicode checks, SHA-256 and full source-version provenance.
-- Added fixtures/tests and `docs/PRONUNCIATION_SCHEMA.md`.
-- CI passed and Issue #3 closed.
+- Multiple readings per character supported through `schema/migrations/0002_pronunciations.sql`.
+- Strict TSV validation, SHA-256, revision/URL provenance and offline tests.
+- Issue #3 closed.
 
-### Phase 1B — OpenCC regional phrase dictionaries
+### Phases 1B / 2B — OpenCC
 
-- Pinned upstream OpenCC commit `3ac34aa439a9908dd49fa92b5174b46314787ac2`.
-- Added `scripts/import_opencc_dictionaries.py`.
-- Initial real dictionary scope:
-  - `STPhrases.txt` — `zh-CN -> zh-Hant` script stage;
-  - `HKPhrases.txt` — `zh-Hant -> zh-HK` regional stage;
-  - `TWPhrases.txt` — `zh-Hant -> zh-TW` regional stage.
-- Preserved OpenCC's staged model and multi-candidate order.
-- Added separate source versions, checksums, strict validation, fixtures/tests and `docs/OPENCC_IMPORTER.md`.
-- CI passed and Issue #4 closed.
+Pinned upstream commit:
 
-### Phase 1C — Wikidata entity/localized names
+`3ac34aa439a9908dd49fa92b5174b46314787ac2`
 
-- Added `scripts/import_wikidata_entities.py` using Wikidata structured EntityData JSON within the approved CC0 scope.
-- Added stable QID identity, explicit concept types, labels/aliases, regional locale separation and full source/revision/retrieval/checksum provenance.
-- Enforced no-fabrication of missing regional labels.
-- Added offline fixtures/tests and `docs/WIKIDATA_ENTITY_IMPORTER.md`.
-- CI passed and Issue #5 closed.
+Current imported forward resources:
 
-### Phase 2A — Deterministic localization/resolution engine
+Script `zh-CN -> zh-Hant`:
+1. `STPhrases.txt`
+2. `STCharacters.txt`
 
-- Added Python behavior/reference engine at `src/localizer_engine.py`.
-- Added CLI at `scripts/localize_text.py`.
-- Added one-command fixture database builder at `scripts/build_demo_database.py`.
-- Added evaluation corpus at `data/fixtures/evaluation_cases.json`.
-- Entity handling:
-  - source-locale names/aliases are matched longest-first;
-  - unique entity + unique preferred target-regional name is localized directly;
-  - localized entity spans are protected from later generic rules;
-  - ambiguous entities or missing/conflicting target names are preserved and marked `review_needed`.
-- Term-rule handling:
-  - explicit route stages are composed instead of flattened;
-  - deterministic longest phrase wins before priority;
-  - highest-priority target candidate wins for the same source phrase;
-  - lower candidates remain exposed as alternatives;
-  - equal-priority conflicting targets are preserved and marked for review;
-  - repeated global string replacement is not used.
-- Explainability output includes entity/QID or rule provenance, revisions, URLs, checksums and confidence where available.
-- Added integration tests in `tests/test_localizer_engine.py` covering entity localization, staged terminology, entity protection, longest-match behavior, ambiguous entity/rule handling and provenance.
-- GitHub Actions passed all integrated tests and demo-build steps on 2026-10-06.
-- Added `docs/LOCALIZER_ENGINE.md`.
-- Recorded D-009: deterministic localization precedence and no-guess policy.
+Hong Kong `zh-Hant -> zh-HK`:
+1. `HKPhrases.txt`
+2. `HKVariantsPhrases.txt`
+3. `HKVariants.txt`
 
-## Approved / approved-with-conditions sources
+Taiwan `zh-Hant -> zh-TW`:
+1. `TWPhrases.txt`
+2. `TWVariantsPhrases.txt`
+3. `TWVariants.txt`
 
-### Core/permissive or attribution-capable
-- OpenCC
-- Wikidata
-- Taiwan Government / verified NAER terminology datasets
-- DATA.GOV.HK qualifying portal data
-- Words.hk public-domain word-list/pronunciation subset
-- Rime Cantonese (file-level split licensing)
-- Unicode / Unihan / CLDR machine-readable Data Files
-- MusicBrainz Core Data
-- THUOCL published word-list/frequency package
-- PanLex
-- Chinese Open WordNet
-- HKCanCor
-- LSHK Jyutping Table
-- individually reviewed Kaifangcidian datasets such as `kfcd/hyzd`
+Implemented behavior:
 
-### ShareAlike-isolated sources
-- Chinese Wikipedia
-- Chinese Wiktionary
-- CC-CEDICT
-- CC-Canto
-- ConceptNet
-- CFDICT
-- Rime `jyut6ping3.maps` under ODbL
+- staged conversion is preserved instead of flattening dictionaries;
+- dictionary-level short-circuit precedence is represented separately from candidate rank;
+- multiple target candidates remain stored in source order;
+- phrase exceptions win through longest-match behavior before character fallback;
+- each dictionary has its own source version, pinned revision, URL and SHA-256;
+- strict OpenCC header/line validation remains enforced.
 
-## Pending rights/version clarification
+Regression coverage now includes:
 
-1. Combined DoJ Glossaries of Legal Terms — adaptation rights for a redistributable derived terminology database remain unclear.
-2. DBnary — snapshot-level CC BY-SA version must be pinned because reviewed surfaces show version inconsistency.
-3. OpenHowNet downloadable core data — repository/API MIT licence is clear, but data-specific redistribution rights remain unconfirmed.
+- `布拉德·皮特 -> 畢·彼特` (HK regional phrase);
+- `人工智能 -> 人工智慧` (TW regional vocabulary);
+- `一见钟情 -> 一見鍾情` (ST phrase);
+- `见 -> 見` (ST character fallback);
+- `檯 -> 枱` (HK character variant);
+- `爲 -> 為` (TW character variant);
+- `張棟樑` remains unchanged because the Taiwan phrase exception prevents the `樑 -> 梁` character rule from damaging the name;
+- identity and multi-candidate mappings.
+
+OpenCC implementation/docs:
+
+- `scripts/import_opencc_dictionaries.py`
+- `tests/test_opencc_importer.py`
+- `data/fixtures/opencc/`
+- `docs/OPENCC_IMPORTER.md`
+
+Issues #4 and #7 cover the initial phrase and expanded variant work respectively.
+
+### Phase 1C — Wikidata entities
+
+- Wikidata structured EntityData is used only within reviewed CC0 scope.
+- Stable QIDs, explicit concept types, regional labels/aliases, revisions, retrieval timestamps, URLs and canonical entity checksums are preserved.
+- Missing `zh-CN` / `zh-HK` / `zh-TW` labels are not invented from generic Chinese labels.
+- Issue #5 closed.
+
+### Phase 2A — deterministic reference engine
+
+- `src/localizer_engine.py` defines tested behavior before the future Rust port.
+- `scripts/localize_text.py` provides a local CLI.
+- `scripts/build_demo_database.py` creates a small offline fixture database.
+- Entity names are resolved before generic terms and protected from later conversion.
+- Longest match wins before rule priority.
+- Equal-priority conflicts and ambiguous entities are preserved and flagged `review_needed` instead of guessed.
+- CN→HK/TW uses explicit staged routes.
+- Applied decisions return source/QID/rule/version/URL/checksum evidence where available.
+- D-009 records the precedence/no-guess contract.
+- Issue #6 closed.
+
+## Pending licensing clarification
+
+1. Combined DoJ Glossaries of Legal Terms — derived/adaptation rights remain unclear.
+2. DBnary — exact snapshot CC BY-SA version must be pinned.
+3. OpenHowNet downloadable core data — data-specific redistribution rights remain unconfirmed.
 
 ## Next recommended work
 
-1. Expand OpenCC ingestion beyond phrase dictionaries to the character/variant resources required for broad real-world text conversion.
-2. Add user/protected-term precedence and a separate user dictionary model after core conversion coverage is broader.
-3. Expand the evaluation corpus with ordinary sentences, punctuation, overlapping names, IT, transport, legal and ambiguous terms.
-4. Continue Issue #1 for the 3 remaining licensing ambiguities.
-5. After deterministic behavior and coverage stabilize, port the tested engine semantics to the planned Rust runtime.
-6. Only then expose the stable core to Tauri desktop/mobile UI.
+1. Add a separate user dictionary / protected-term layer with explicit precedence over canonical rules.
+2. Expand the regression/evaluation corpus beyond fixtures into realistic paragraphs covering IT, transport, entertainment, legal terminology, punctuation and ambiguous words.
+3. Add reverse-direction resources/routes only after their OpenCC semantics are explicitly modelled and tested.
+4. Continue Issue #1 for the three unresolved data licences.
+5. Once reference behavior is stable, port the deterministic engine semantics to Rust.
+6. Then expose the stable core through Tauri desktop/mobile UI and database updater workflows.
 
 ## Not started
 
 - Production Rust localization engine
 - Desktop application
 - Mobile application
-- Database auto-updater/release pipeline
+- Production database auto-updater/release pipeline
 
 ## Current technical direction
 
 - Cross-platform app: Tauri 2
-- Core runtime: Rust
+- Production core: Rust
 - Local database: SQLite
-- Data-build/import tooling: Python is acceptable where practical
-- Deterministic conversion: staged OpenCC-compatible rules plus entity/localized-name resolution
-- Entity/terminology layer: multi-source knowledge base
-- Optional future ambiguity layer: local LLM only if deterministic/context rules are insufficient
+- Data-build/import tooling: Python where practical
+- Deterministic conversion: staged OpenCC-compatible rules + entity/localized-name resolution + future user overrides
+- Optional local LLM: only for unresolved ambiguity after deterministic/context rules
 
-## Important constraint
+## Important constraints
 
-Importers must enforce `data-registry/sources.yaml`, including `ingest_allowed`, `ingest_scope`, `excluded_scope` and pack separation. Pending/reference-only/rejected sources must not enter redistributable data builds. Missing regional entity names and ambiguous decisions must not be silently invented.
+- Importers must enforce `data-registry/sources.yaml`.
+- Pending/reference-only/rejected data must never silently enter redistributable builds.
+- Regional names must not be invented when evidence is missing.
+- Ambiguity must be surfaced rather than guessed.
+- OpenCC generated dictionaries, reverse directions and full runtime segmentation/match semantics are not yet claimed as implemented.
