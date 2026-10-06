@@ -29,3 +29,8 @@
 - Added `data/fixtures/evaluation_cases.json`, one-command fixture DB builder and integrated engine tests.
 - Verified person CN→HK/TW localization, Taiwan terminology conversion, script-stage conversion, mixed entity+term conversion, entity protection, longest-match precedence, and ambiguous entity/rule review behavior in CI.
 - Added `docs/LOCALIZER_ENGINE.md` and decision D-009 defining deterministic localization precedence and no-guess policy.
+- Added Phase 2B OpenCC character/variant coverage: `STCharacters.txt`, `HKVariantsPhrases.txt`, `HKVariants.txt`, `TWVariantsPhrases.txt` and `TWVariants.txt`.
+- Added dictionary-level base priorities reflecting reviewed OpenCC short-circuit order, separate from candidate rank.
+- Expanded OpenCC fixtures/importer tests from 3 to 8 dictionaries.
+- Added regression coverage for `见→見`, `檯→枱`, `爲→為` and Taiwan phrase-exception protection of `張棟樑` from the `樑→梁` character rule.
+- Updated OpenCC documentation to state current forward coverage and remaining generated/reverse/runtime limitations; all Phase 2B tests passed CI.
