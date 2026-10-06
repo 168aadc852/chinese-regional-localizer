@@ -60,3 +60,27 @@ Rules:
 - `core`, `attribution`, `sharealike`, `reference_only` and `pending` packs must remain separable so licensing obligations cannot silently contaminate other release layers.
 
 Reason: This allows Codex, Gemini, Claude, OpenCode, future AI tools and production importers to follow the same verified data-policy decisions without re-interpreting prose or chat history.
+
+## D-009 — Deterministic localization precedence and no-guess policy
+
+Date: 2026-10-06
+
+Decision: The core localization engine must remain deterministic and use the following precedence unless a later explicit decision supersedes it:
+
+1. recognize exact/longest known entity names or aliases in the declared source locale;
+2. if an entity resolves uniquely and has one preferred target-regional name, use it and protect the resulting span from generic rules;
+3. if an entity is ambiguous or lacks a unique target-regional name, preserve the source span and mark it for review rather than guessing;
+4. apply generic/script/regional term rules in explicit conversion stages rather than flattening all dictionaries together;
+5. within a term-rule stage, longest source phrase wins before rule priority is considered;
+6. for the same source phrase, the highest-priority target candidate is selected;
+7. equal-priority conflicting targets are not guessed: preserve the span and mark it for review;
+8. every applied or review-required decision must remain explainable through stored provenance.
+
+The initial route model is:
+
+- `zh-CN -> zh-HK`: entity pass, `zh-CN -> zh-Hant`, then `zh-Hant -> zh-HK`;
+- `zh-CN -> zh-TW`: entity pass, `zh-CN -> zh-Hant`, then `zh-Hant -> zh-TW`;
+- `zh-Hant -> zh-HK`: entity pass, then regional stage;
+- `zh-Hant -> zh-TW`: entity pass, then regional stage.
+
+Reason: Proper names must not be corrupted by general dictionaries, longest-match behavior reduces partial replacements, OpenCC's staged semantics should not be lost, and uncertain cases should be visible to the user instead of silently hallucinated.
