@@ -43,13 +43,54 @@ Recommended uses:
 
 Do **not** automatically ingest arbitrary prose from project/help/talk/other non-structured namespaces into the CC0 core database.
 
+## Phase 1C importer baseline
+
+The first entity importer uses Wikidata's documented stable Linked Data interface:
+
+`https://www.wikidata.org/wiki/Special:EntityData/<QID>.json`
+
+Implementation:
+
+- `scripts/import_wikidata_entities.py`
+- `tests/test_wikidata_importer.py`
+- `data/fixtures/wikidata/entities.json`
+- `data/fixtures/wikidata/entity_types.json`
+- `docs/WIKIDATA_ENTITY_IMPORTER.md`
+
+Initial locale scope:
+
+- `en`
+- `mul`
+- `zh`
+- `zh-hans`
+- `zh-hant`
+- `zh-cn`
+- `zh-hk`
+- `zh-tw`
+
+Regional locale codes are normalized to BCP-47-style casing in SQLite. Missing regional labels are **not synthesized** from generic Chinese labels.
+
+Each entity records:
+
+- stable Wikidata QID in `external_ids`;
+- explicit project concept type;
+- labels as preferred names;
+- aliases as alias names;
+- `lastrevid` and modified timestamp where present;
+- retrieval time;
+- revision-pinned upstream URL for real source data;
+- canonical per-entity SHA-256;
+- evidence rows for each imported label/alias.
+
+The initial fixture uses Brad Pitt (`Q35332`) and Oppenheimer (2023 film, `Q108839994`) only to test the data model offline. Fixture revision numbers are deliberately non-authoritative and use `fixture://` provenance URLs.
+
 ## Update method
 Preferred sources:
 1. Official JSON dumps for full rebuilds. Wikidata states that JSON dumps are produced weekly and are the recommended stable dump format.
 2. Official incremental / add-change dumps for daily changes where appropriate.
-3. Documented API / SPARQL access for targeted enrichment, subject to operational limits.
+3. Documented Linked Data/API access for targeted entity enrichment, subject to operational limits.
 
-Record the dump date or extraction timestamp in build metadata so a released local database can be reproduced.
+For selected-entity refreshes, record `lastrevid` and use revision-specific EntityData URLs where practical. Record the dump date or extraction timestamp in build metadata so a released local database can be reproduced.
 
 ## Review evidence / rationale
 Wikidata's official licensing page states that structured data in the main, Property, Lexeme and EntitySchema namespaces is released under CC0. Its official database-download page explicitly states that the databases may be used for personal or commercial use, backups or offline use, and documents both weekly full JSON dumps and incremental dumps.
@@ -57,4 +98,4 @@ Wikidata's official licensing page states that structured data in the main, Prop
 Because the planned use is structured entities, labels, aliases and identifiers, it fits directly within the CC0 scope. This makes Wikidata suitable for the project's permissive/core entity layer.
 
 Last reviewed: 2026-10-06
-Review status: formal first-pass review complete; re-check scope before first public data release.
+Review status: formal first-pass review complete; Phase 1C selected-entity importer implemented and CI-tested; re-check scope before first public data release.
