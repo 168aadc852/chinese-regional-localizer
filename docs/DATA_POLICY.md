@@ -1,89 +1,45 @@
 # Data Policy
 
-## Purpose
-
-This policy controls what external data may be researched, imported, transformed, packaged or redistributed by the project.
-
 ## Fundamental rule
 
-**Public access is not the same as open licensing.**
+Public access is not the same as permission to ingest, transform or redistribute data.
 
-A source must not enter a redistributable project data pack merely because it can be viewed or queried online.
+## Review states
 
-## Source statuses
+`approved`, `approved_with_conditions`, `reference_only`, `pending_review`, and `rejected` describe the human/legal review conclusion. They do not by themselves authorize an importer.
 
-### approved
+## Production ingestion gate
 
-Licence and intended use have been verified as compatible with the planned use.
+An implemented importer must require:
 
-### approved_with_conditions
+1. `ingest_allowed: true`;
+2. an exact identifier in `ingest_resources`;
+3. the expected licence `pack`;
+4. format/resource identity validation;
+5. source/version/URL/checksum/retrieval provenance.
 
-Usable only under recorded conditions such as attribution, share-alike, separation into a distinct data pack or other obligations.
+If a source is broadly approved but has no machine-readable resource allow-list for the proposed importer, ingestion remains blocked until the manifest is narrowed from reviewed evidence.
 
-### reference_only
+`null` rights never mean permission. In particular, unresolved modification/adaptation rights must not be converted into permission for a derived terminology database.
 
-May be consulted for research or manual verification but must not be bulk imported or redistributed without additional permission.
+## Licence-pack separation
 
-### pending_review
+Data is separated into core, attribution and share-alike packs. The SQLite build metadata records `pack_type`, and importers reject attempts to mix a source from a different pack into that database by default.
 
-Potentially useful, but licensing or technical conditions are not yet sufficiently verified.
+Reference-only, pending and rejected material is not packaged into redistributable data builds.
 
-### rejected
+## Provenance and updates
 
-Known to be incompatible with the project use, or intentionally excluded.
+Normalization or storage in SQLite does not remove upstream obligations. Records retain source/version provenance. Refreshes preserve historical versions but mark only the current resource snapshot active for runtime resolution.
 
-## Required review fields
+## APIs and scraping
 
-Before approval, record:
-
-- official source name and publisher;
-- official source URL;
-- licence name and authoritative evidence URL;
-- data/content covered by that licence;
-- commercial-use permission;
-- modification permission;
-- redistribution permission;
-- attribution requirements;
-- share-alike/copyleft obligations;
-- database-specific rights if relevant;
-- API/download/scraping restrictions;
-- update method and versioning;
-- intended project use;
-- review date and reviewer notes.
-
-## Data-layer separation
-
-The project should be designed so data with different licence obligations can remain separable.
-
-Proposed conceptual layers:
-
-- **Core/permissive layer** — data suitable for broad reuse with minimal restrictions.
-- **Attribution layer** — data requiring source acknowledgement.
-- **Share-alike layer** — derivative datasets that may carry share-alike obligations.
-- **Reference-only layer** — never packaged into redistributable builds.
-- **User layer** — local user-defined terminology and preferences.
-
-## Provenance
-
-Imported records should preserve provenance wherever practical, including source identifier, source URL or canonical ID, licence identifier, source revision/version and retrieval/update date.
-
-## No licence laundering
-
-Transforming, normalizing, converting formats or storing data in SQLite does not automatically remove original licence obligations.
-
-## Scraping and APIs
-
-Do not implement bulk scraping simply because a website is technically accessible. Review published terms, API policies, robots/access constraints and licence coverage first.
+Use documented APIs/dumps/download mechanisms only after rights and operational conditions are reviewed. Technical accessibility is never the approval criterion.
 
 ## Contributions
 
-Community contributions should either:
-
-- be original contributions under a clearly stated project-compatible data licence; or
-- identify an approved source and preserve required provenance.
-
-Unverifiable copied terminology should not be merged into the canonical database.
+Community data must be original under a compatible declared licence or traceable to an approved exact source resource. Unverifiable copied terminology is not accepted into canonical packs.
 
 ## Legal note
 
-Repository documentation records project due diligence but is not a substitute for professional legal advice when required.
+Repository reviews document project due diligence and engineering policy; they are not a substitute for professional legal advice where needed.
