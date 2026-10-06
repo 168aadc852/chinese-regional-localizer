@@ -1,0 +1,10 @@
+# Open Chinese Convert (OpenCC) Dictionary
+# File: HKVariantsPhrases.txt
+# Format: key	value(s) (values separated by spaces)
+# License: Apache-2.0 (see LICENSE)
+# Source: https://github.com/ByVoid/OpenCC
+# Used in configs: s2hk.json, t2hk.json
+
+一幻拉麪	一幻拉麵
+北環線	北環綫
+匯豐	滙豐
