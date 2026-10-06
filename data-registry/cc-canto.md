@@ -1,21 +1,41 @@
 # CC-Canto
 
-Status: `pending_review`
+Status: **approved_with_conditions**
 
-## Preliminary evidence
+## Intended use
+Cantonese vocabulary, Jyutping readings, Traditional/Simplified forms and Cantonese-English semantic support.
 
-- Official site: https://www.cc-canto.org/
-- Download page: https://www.cc-canto.org/download.html
-- The official download page states that CC-Canto and related Cantonese readings are open-source and distributed under Creative Commons Attribution-ShareAlike 3.0.
+## Region coverage
+Hong Kong / Cantonese
 
-## Potential project use
+## Official source
+Website: https://www.cc-canto.org/
+Download/licence page: https://www.cc-canto.org/download.html
+Publisher: CC-Canto / Pleco Software Incorporated
 
-- Cantonese vocabulary
-- Traditional/Simplified forms
-- Jyutping readings
-- Hong Kong lexical signals
-- Cantonese-English semantic support
+## Licence review
+The official download page states that CC-Canto and the Cantonese readings for CC-CEDICT are distributed under **Creative Commons Attribution-ShareAlike 3.0**.
 
-## Review required
+- Commercial use: **Yes**
+- Modification/adaptation: **Yes**
+- Redistribution: **Yes**
+- Attribution: **Required**
+- Share-alike/copyleft: **Yes** for adapted material
+- Format: distributed in CC-CEDICT-style format with Jyutping readings
 
-Confirm exact files covered, attribution wording, ShareAlike implications and whether the data should live in a separate CC BY-SA data pack.
+## Packaging decision
+Do not merge CC-Canto-derived content into the permissive core database.
+
+Use a separate ShareAlike-compatible Cantonese lexical pack with:
+- source attribution;
+- licence notice/link;
+- source version/download date;
+- indication of modifications;
+- separation from CC0 / Apache / permissive datasets.
+
+If CC-CEDICT content and CC-Canto content are combined, record the licence/provenance of each component and ensure the resulting pack satisfies the applicable ShareAlike obligations.
+
+## Update method
+Use the official downloadable CC-Canto and Cantonese-reading files. Do not scrape website search results when official downloads are available.
+
+Last reviewed: 2026-10-06
