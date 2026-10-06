@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""Import selected OpenCC phrase dictionaries into the project SQLite schema.
+"""Import reviewed OpenCC dictionaries into the project SQLite schema.
 
-Phase 1B intentionally models OpenCC as staged conversion data rather than
-flattening HK/TW localisation into a single global replacement table.
+The importer preserves OpenCC's staged conversion model, dictionary-level
+short-circuit precedence, and multi-candidate ordering rather than flattening
+all resources into a naive global replacement table.
 """
 
 from __future__ import annotations
@@ -31,21 +32,42 @@ class DictionarySpec:
     target_locale: str
     rule_type: str
     stage: str
+    base_priority: int
 
     @property
     def pinned_url(self) -> str:
         return f"{BASE_RAW_URL}/{self.filename}"
 
 
+# Base priorities encode the reviewed OpenCC short-circuit dictionary order.
+# Candidate rank is subtracted within each dictionary, preserving alternatives.
 DICTIONARIES = {
+    # Script stage: phrase rules before character fallback.
     "STPhrases.txt": DictionarySpec(
-        "STPhrases.txt", "zh-CN", "zh-Hant", "opencc_st_phrase", "script"
+        "STPhrases.txt", "zh-CN", "zh-Hant", "opencc_st_phrase", "script", 300_000
     ),
+    "STCharacters.txt": DictionarySpec(
+        "STCharacters.txt", "zh-CN", "zh-Hant", "opencc_st_character", "script", 200_000
+    ),
+    # Hong Kong regional stage: vocabulary phrases, variant phrase exceptions, chars.
     "HKPhrases.txt": DictionarySpec(
-        "HKPhrases.txt", "zh-Hant", "zh-HK", "opencc_hk_phrase", "regional"
+        "HKPhrases.txt", "zh-Hant", "zh-HK", "opencc_hk_phrase", "regional", 500_000
     ),
+    "HKVariantsPhrases.txt": DictionarySpec(
+        "HKVariantsPhrases.txt", "zh-Hant", "zh-HK", "opencc_hk_variant_phrase", "regional", 400_000
+    ),
+    "HKVariants.txt": DictionarySpec(
+        "HKVariants.txt", "zh-Hant", "zh-HK", "opencc_hk_variant_character", "regional", 300_000
+    ),
+    # Taiwan regional stage: vocabulary phrases, variant phrase exceptions, chars.
     "TWPhrases.txt": DictionarySpec(
-        "TWPhrases.txt", "zh-Hant", "zh-TW", "opencc_tw_phrase", "regional"
+        "TWPhrases.txt", "zh-Hant", "zh-TW", "opencc_tw_phrase", "regional", 500_000
+    ),
+    "TWVariantsPhrases.txt": DictionarySpec(
+        "TWVariantsPhrases.txt", "zh-Hant", "zh-TW", "opencc_tw_variant_phrase", "regional", 400_000
+    ),
+    "TWVariants.txt": DictionarySpec(
+        "TWVariants.txt", "zh-Hant", "zh-TW", "opencc_tw_variant_character", "regional", 300_000
     ),
 }
 
@@ -66,7 +88,7 @@ def download_pinned(spec: DictionarySpec, destination: Path) -> Path:
     destination.parent.mkdir(parents=True, exist_ok=True)
     request = urllib.request.Request(
         spec.pinned_url,
-        headers={"User-Agent": "chinese-regional-localizer/phase-1b"},
+        headers={"User-Agent": "chinese-regional-localizer/phase-2b"},
     )
     with urllib.request.urlopen(request, timeout=60) as response, destination.open("wb") as output:
         while True:
@@ -158,7 +180,11 @@ def add_source_version(
             retrieved_at,
             upstream_url,
             checksum,
-            f"OpenCC {spec.filename}; stage={spec.stage}; locales={spec.source_locale}->{spec.target_locale}",
+            (
+                f"OpenCC {spec.filename}; stage={spec.stage}; "
+                f"locales={spec.source_locale}->{spec.target_locale}; "
+                f"dictionary_base_priority={spec.base_priority}"
+            ),
         ),
     )
     return int(cursor.lastrowid)
@@ -183,10 +209,12 @@ def import_dictionary(
         keys += 1
         for rank, target_text in enumerate(targets, start=1):
             candidates += 1
+            priority = spec.base_priority - rank
             context = json.dumps(
                 {
                     "dictionary": spec.filename,
                     "stage": spec.stage,
+                    "dictionary_base_priority": spec.base_priority,
                     "candidate_rank": rank,
                     "candidate_count": len(targets),
                 },
@@ -208,7 +236,7 @@ def import_dictionary(
                     source_text,
                     target_text,
                     spec.rule_type,
-                    10000 - rank,
+                    priority,
                     context,
                     SOURCE_ID,
                     source_version_id,
@@ -221,6 +249,7 @@ def import_dictionary(
         "filename": spec.filename,
         "source_version_id": source_version_id,
         "sha256": checksum,
+        "base_priority": spec.base_priority,
         "keys": keys,
         "candidates": candidates,
     }
@@ -293,12 +322,12 @@ def main() -> int:
     mode.add_argument(
         "--fixture-dir",
         type=Path,
-        help="Import the three reviewed dictionary filenames from a local directory",
+        help="Import all reviewed dictionary filenames from a local directory",
     )
     mode.add_argument(
         "--download",
         action="store_true",
-        help="Download the three commit-pinned upstream dictionaries before importing",
+        help="Download all reviewed commit-pinned upstream dictionaries before importing",
     )
     parser.add_argument("--db", type=Path, default=repo_root / "build" / "opencc.sqlite")
     parser.add_argument("--reset", action="store_true")
