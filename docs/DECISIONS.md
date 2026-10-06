@@ -43,3 +43,20 @@ Decision: Significant findings, decisions and progress must be committed to repo
 Date: 2026-10-06
 
 Direction: Tauri 2 + Rust core + SQLite is the leading architecture candidate for desktop/mobile reuse. This remains subject to proof-of-concept validation before implementation lock-in.
+
+## D-008 — Machine-readable source manifest controls ingestion
+
+Date: 2026-10-06
+
+Decision: `data-registry/sources.yaml` is the machine-readable ingestion policy for external data sources.
+
+Rules:
+
+- Detailed evidence remains in individual `data-registry/*.md` review records.
+- Automated import is permitted only where the relevant manifest entry has `ingest_allowed: true`.
+- `null` permission fields are unresolved and must never be interpreted as permission.
+- Importers must enforce `ingest_scope` and `excluded_scope` at source/file/subset level.
+- Multi-licence sources should be split into separate manifest entries when practical.
+- `core`, `attribution`, `sharealike`, `reference_only` and `pending` packs must remain separable so licensing obligations cannot silently contaminate other release layers.
+
+Reason: This allows Codex, Gemini, Claude, OpenCode, future AI tools and production importers to follow the same verified data-policy decisions without re-interpreting prose or chat history.
