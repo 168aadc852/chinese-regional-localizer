@@ -1,0 +1,378 @@
+manifest_version: 1
+last_updated: 2026-10-06
+project: chinese-regional-localizer
+
+status_values:
+  - approved
+  - approved_with_conditions
+  - pending_review
+  - reference_only
+  - rejected
+
+pack_values:
+  - core
+  - attribution
+  - sharealike
+  - reference_only
+  - pending
+
+sources:
+  - id: opencc
+    name: OpenCC
+    status: approved_with_conditions
+    pack: core
+    licence: Apache-2.0
+    commercial_use: true
+    modification_allowed: true
+    redistribution_allowed: true
+    attribution_required: true
+    share_alike: false
+    ingest_allowed: true
+    ingest_scope: "OpenCC project and dictionary files covered by Apache-2.0."
+    excluded_scope: "None assumed beyond files whose licence cannot be verified."
+    review_record: data-registry/opencc.md
+
+  - id: wikidata
+    name: Wikidata structured data
+    status: approved
+    pack: core
+    licence: CC0-1.0
+    commercial_use: true
+    modification_allowed: true
+    redistribution_allowed: true
+    attribution_required: false
+    share_alike: false
+    ingest_allowed: true
+    ingest_scope: "Structured data in main, Property, Lexeme and EntitySchema namespaces, plus official dumps covered by CC0."
+    excluded_scope: "Non-structured textual content outside the approved CC0 scope."
+    review_record: data-registry/wikidata.md
+
+  - id: chinese-wikipedia
+    name: Chinese Wikipedia
+    status: approved_with_conditions
+    pack: sharealike
+    licence: CC-BY-SA-4.0
+    commercial_use: true
+    modification_allowed: true
+    redistribution_allowed: true
+    attribution_required: true
+    share_alike: true
+    ingest_allowed: true
+    ingest_scope: "Regional names, conversion rules, NoteTA/shared conversion groups and other text-derived data with provenance."
+    excluded_scope: "Do not merge into permissive-only core releases."
+    review_record: data-registry/wikipedia.md
+
+  - id: taiwan-naer-open-data
+    name: Taiwan Government / verified NAER terminology datasets
+    status: approved_with_conditions
+    pack: attribution
+    licence: Open Government Data License, Taiwan v1.0
+    commercial_use: true
+    modification_allowed: true
+    redistribution_allowed: true
+    attribution_required: true
+    share_alike: false
+    ingest_allowed: true
+    ingest_scope: "Only individually verified datasets explicitly carrying OGL-Taiwan v1, including reviewed NAER terminology datasets."
+    excluded_scope: "Do not assume all Taiwan government datasets use the same licence."
+    review_record: data-registry/taiwan-government.md
+
+  - id: data-gov-hk
+    name: DATA.GOV.HK qualifying datasets
+    status: approved_with_conditions
+    pack: attribution
+    licence: DATA.GOV.HK Terms and Conditions
+    commercial_use: true
+    modification_allowed: null
+    redistribution_allowed: true
+    attribution_required: true
+    share_alike: false
+    ingest_allowed: true
+    ingest_scope: "Qualifying portal datasets within rights explicitly granted by DATA.GOV.HK terms."
+    excluded_scope: "Do not assume adaptation/derivative rights not expressly granted; dataset-specific terms may override."
+    review_record: data-registry/hk-government.md
+
+  - id: hk-doj-glossary
+    name: Combined DoJ Glossaries of Legal Terms
+    status: pending_review
+    pack: pending
+    licence: null
+    commercial_use: null
+    modification_allowed: null
+    redistribution_allowed: null
+    attribution_required: null
+    share_alike: null
+    ingest_allowed: false
+    ingest_scope: "None until explicit reuse/adaptation rights are confirmed."
+    excluded_scope: "Entire glossary for derived-database ingestion while licence remains unresolved."
+    review_record: data-registry/doj-glossary.md
+
+  - id: cc-cedict
+    name: CC-CEDICT
+    status: approved_with_conditions
+    pack: sharealike
+    licence: CC-BY-SA-4.0
+    commercial_use: true
+    modification_allowed: true
+    redistribution_allowed: true
+    attribution_required: true
+    share_alike: true
+    ingest_allowed: true
+    ingest_scope: "Dictionary entries and lexical mappings under the published CC BY-SA terms."
+    excluded_scope: "Do not merge into a permissive-only database release."
+    review_record: data-registry/cc-cedict.md
+
+  - id: words-hk-public-domain
+    name: Words.hk public-domain word-list/pronunciation subset
+    status: approved_with_conditions
+    pack: core
+    licence: Public Domain
+    commercial_use: true
+    modification_allowed: true
+    redistribution_allowed: true
+    attribution_required: false
+    share_alike: false
+    ingest_allowed: true
+    ingest_scope: "Only datasets explicitly released by Words.hk as public domain, including approved word-list/pronunciation subsets."
+    excluded_scope: "Full Words.hk dictionary content under the Non-Commercial Open Data License."
+    review_record: data-registry/words-hk.md
+
+  - id: rime-cantonese-main
+    name: Rime Cantonese main data
+    status: approved_with_conditions
+    pack: attribution
+    licence: CC-BY-4.0
+    commercial_use: true
+    modification_allowed: true
+    redistribution_allowed: true
+    attribution_required: true
+    share_alike: false
+    ingest_allowed: true
+    ingest_scope: "Main Rime Cantonese lexical/pronunciation content covered by CC BY 4.0."
+    excluded_scope: "jyut6ping3.maps and other files carrying different licences."
+    review_record: data-registry/rime-cantonese.md
+
+  - id: rime-cantonese-maps
+    name: Rime Cantonese jyut6ping3.maps
+    status: approved_with_conditions
+    pack: sharealike
+    licence: ODbL-1.0
+    commercial_use: true
+    modification_allowed: true
+    redistribution_allowed: true
+    attribution_required: true
+    share_alike: true
+    ingest_allowed: true
+    ingest_scope: "Only the map/database content explicitly covered by ODbL 1.0."
+    excluded_scope: "Keep separate from the CC BY main-content pack."
+    review_record: data-registry/rime-cantonese.md
+
+  - id: unicode-unihan-cldr
+    name: Unicode / Unihan / CLDR machine-readable Data Files
+    status: approved_with_conditions
+    pack: core
+    licence: Unicode-3.0
+    commercial_use: true
+    modification_allowed: true
+    redistribution_allowed: true
+    attribution_required: true
+    share_alike: false
+    ingest_allowed: true
+    ingest_scope: "Clearly identified machine-readable Data Files covered by the Unicode License v3."
+    excluded_scope: "Code charts, standards text, fonts or other material not covered as Data Files."
+    review_record: data-registry/unicode-cldr.md
+
+  - id: musicbrainz-core
+    name: MusicBrainz Core Data
+    status: approved_with_conditions
+    pack: core
+    licence: CC0-1.0
+    commercial_use: true
+    modification_allowed: true
+    redistribution_allowed: true
+    attribution_required: false
+    share_alike: false
+    ingest_allowed: true
+    ingest_scope: "MusicBrainz Core Data only, including permitted identifiers and aliases."
+    excluded_scope: "Supplementary Data licensed CC BY-NC-SA 3.0."
+    review_record: data-registry/musicbrainz.md
+
+  - id: thuocl
+    name: THUOCL
+    status: approved_with_conditions
+    pack: core
+    licence: MIT
+    commercial_use: true
+    modification_allowed: true
+    redistribution_allowed: true
+    attribution_required: true
+    share_alike: false
+    ingest_allowed: true
+    ingest_scope: "Published repository word lists and frequency signals, retaining MIT notice and provenance."
+    excluded_scope: "No rights are inferred for third-party upstream raw corpora or sites from which lexical signals were originally derived."
+    review_record: data-registry/thuocl.md
+
+  - id: panlex
+    name: PanLex official snapshots
+    status: approved
+    pack: core
+    licence: CC0-1.0
+    commercial_use: true
+    modification_allowed: true
+    redistribution_allowed: true
+    attribution_required: false
+    share_alike: false
+    ingest_allowed: true
+    ingest_scope: "Official PanLex database snapshots and other exports explicitly released under CC0."
+    excluded_scope: "Any upstream material not included in the CC0 snapshot scope."
+    review_record: data-registry/panlex.md
+
+  - id: cc-canto
+    name: CC-Canto
+    status: approved_with_conditions
+    pack: sharealike
+    licence: CC-BY-SA-3.0
+    commercial_use: true
+    modification_allowed: true
+    redistribution_allowed: true
+    attribution_required: true
+    share_alike: true
+    ingest_allowed: true
+    ingest_scope: "CC-Canto dictionary/readings covered by the official CC BY-SA 3.0 release terms."
+    excluded_scope: "Do not merge into permissive-only core releases."
+    review_record: data-registry/cc-canto.md
+
+  - id: chinese-wiktionary
+    name: Chinese Wiktionary
+    status: approved_with_conditions
+    pack: sharealike
+    licence: CC-BY-SA-4.0
+    commercial_use: true
+    modification_allowed: true
+    redistribution_allowed: true
+    attribution_required: true
+    share_alike: true
+    ingest_allowed: true
+    ingest_scope: "Text-derived lexical data with page/revision provenance and required attribution."
+    excluded_scope: "Do not merge into permissive-only core releases; media may have separate licences."
+    review_record: data-registry/chinese-wiktionary.md
+
+  - id: dbnary
+    name: DBnary
+    status: pending_review
+    pack: pending
+    licence: null
+    commercial_use: null
+    modification_allowed: null
+    redistribution_allowed: null
+    attribution_required: null
+    share_alike: true
+    ingest_allowed: false
+    ingest_scope: "None until the exact Chinese snapshot and its licence URI/version are pinned."
+    excluded_scope: "All DBnary exports while 3.0/4.0 licence-version evidence remains inconsistent."
+    review_record: data-registry/dbnary.md
+
+  - id: conceptnet
+    name: ConceptNet
+    status: approved_with_conditions
+    pack: sharealike
+    licence: CC-BY-SA-4.0
+    commercial_use: true
+    modification_allowed: true
+    redistribution_allowed: true
+    attribution_required: true
+    share_alike: true
+    ingest_allowed: true
+    ingest_scope: "ConceptNet semantic data under CC BY-SA 4.0, with upstream attribution retained where required."
+    excluded_scope: "Do not merge into permissive-only core releases."
+    review_record: data-registry/conceptnet.md
+
+  - id: chinese-open-wordnet
+    name: Chinese Open WordNet
+    status: approved_with_conditions
+    pack: core
+    licence: custom-permissive
+    commercial_use: true
+    modification_allowed: true
+    redistribution_allowed: true
+    attribution_required: true
+    share_alike: false
+    ingest_allowed: true
+    ingest_scope: "Chinese Open WordNet data under its permission notice, preserving copyright and disclaimer text."
+    excluded_scope: "No additional upstream data is assumed covered unless its notice is also preserved."
+    review_record: data-registry/chinese-open-wordnet.md
+
+  - id: hkcancor
+    name: Hong Kong Cantonese Corpus (HKCanCor)
+    status: approved_with_conditions
+    pack: attribution
+    licence: CC-BY-4.0
+    commercial_use: true
+    modification_allowed: true
+    redistribution_allowed: true
+    attribution_required: true
+    share_alike: false
+    ingest_allowed: true
+    ingest_scope: "Corpus and derived lexical/frequency signals with attribution and transformation provenance."
+    excluded_scope: "No claim is made over external materials not included in the licensed corpus."
+    review_record: data-registry/hkcancor.md
+
+  - id: lshk-jyutping-table
+    name: LSHK Jyutping Table
+    status: approved_with_conditions
+    pack: attribution
+    licence: CC-BY-4.0
+    commercial_use: true
+    modification_allowed: true
+    redistribution_allowed: true
+    attribution_required: true
+    share_alike: false
+    ingest_allowed: true
+    ingest_scope: "Current Jyutping table files explicitly released under CC BY 4.0."
+    excluded_scope: "Historical or third-party source material with different terms, if any."
+    review_record: data-registry/lshk-jyutping-table.md
+
+  - id: kaifangcidian-hyzd
+    name: Kaifangcidian / kfcd-hyzd
+    status: approved_with_conditions
+    pack: attribution
+    licence: CC-BY-3.0
+    commercial_use: true
+    modification_allowed: true
+    redistribution_allowed: true
+    attribution_required: true
+    share_alike: false
+    ingest_allowed: true
+    ingest_scope: "Only the individually reviewed kfcd/hyzd dataset."
+    excluded_scope: "Other Kaifangcidian repositories until each dataset is separately reviewed."
+    review_record: data-registry/kaifangcidian.md
+
+  - id: cfdict
+    name: CFDICT
+    status: approved_with_conditions
+    pack: sharealike
+    licence: CC-BY-SA-3.0
+    commercial_use: true
+    modification_allowed: true
+    redistribution_allowed: true
+    attribution_required: true
+    share_alike: true
+    ingest_allowed: true
+    ingest_scope: "Published CFDICT dictionary snapshot under CC BY-SA 3.0."
+    excluded_scope: "Treat as a static/abandoned upstream source; do not assume current terminology coverage."
+    review_record: data-registry/cfdict.md
+
+  - id: openhownet-core-data
+    name: OpenHowNet downloadable HowNet core data
+    status: pending_review
+    pack: pending
+    licence: null
+    commercial_use: null
+    modification_allowed: null
+    redistribution_allowed: null
+    attribution_required: null
+    share_alike: null
+    ingest_allowed: false
+    ingest_scope: "None until data-specific redistribution rights are verified."
+    excluded_scope: "Downloaded HowNet core data; MIT licence for repository/API code must not be assumed to license separate data downloads."
+    review_record: data-registry/openhownet.md
