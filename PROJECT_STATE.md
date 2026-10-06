@@ -14,7 +14,9 @@ Last updated: 2026-10-06
 
 **Phase 1C Wikidata entity/localized-name importer is complete and CI-validated.**
 
-The project now has working ingestion paths for pronunciation data, deterministic script/regional phrase rules, and stable real-world entity names. The next engineering step is a deterministic lookup/resolution engine that composes those layers and returns explainable results.
+**Phase 2A deterministic localization/resolution engine is complete and CI-validated.**
+
+The project can now build a small offline SQLite database, recognize regional entity names, compose staged terminology rules, localize text deterministically and return source-aware explanations/review flags.
 
 ## Objective
 
@@ -46,25 +48,41 @@ Build a legally and technically traceable offline CN / HK / TW localization data
   - `STPhrases.txt` — `zh-CN -> zh-Hant` script stage;
   - `HKPhrases.txt` — `zh-Hant -> zh-HK` regional stage;
   - `TWPhrases.txt` — `zh-Hant -> zh-TW` regional stage.
-- Preserved OpenCC's staged model rather than flattening regional conversion into one global replacement table.
-- Preserved multiple target candidates in source order using rule priority plus `candidate_rank`/`candidate_count` metadata.
-- Added separate `source_versions` rows per dictionary with pinned revision, upstream URL and SHA-256.
-- Added strict header/line validation, identity-mapping support, fixtures/tests and `docs/OPENCC_IMPORTER.md`.
+- Preserved OpenCC's staged model and multi-candidate order.
+- Added separate source versions, checksums, strict validation, fixtures/tests and `docs/OPENCC_IMPORTER.md`.
 - CI passed and Issue #4 closed.
 
 ### Phase 1C — Wikidata entity/localized names
 
 - Added `scripts/import_wikidata_entities.py` using Wikidata structured EntityData JSON within the approved CC0 scope.
-- Added local offline fixtures for a person and a film plus explicit QID-to-concept-type mapping.
-- Added locale normalization for `zh-CN`, `zh-HK`, `zh-TW`, `zh-Hans`, `zh-Hant`, `zh`, `en` and `mul`.
-- Enforced a hard no-fabrication rule: a missing regional label is not synthesized from generic `zh`/`zh-Hans`/`zh-Hant`.
-- Stored stable Wikidata QIDs in `external_ids`.
-- Stored labels as preferred names and aliases as aliases without overwriting claims from other sources.
-- Preserved per-entity `lastrevid`, modified/retrieval timestamps, revision-aware upstream URL, canonical JSON SHA-256 and per-name evidence.
-- Added malformed-QID/entity validation and explicit type-map validation.
-- Added `tests/test_wikidata_importer.py` and `docs/WIKIDATA_ENTITY_IMPORTER.md`.
-- Recorded the importer baseline in `data-registry/wikidata.md`.
-- GitHub Actions completed successfully after the final provenance/retrieval-time update on 2026-10-06.
+- Added stable QID identity, explicit concept types, labels/aliases, regional locale separation and full source/revision/retrieval/checksum provenance.
+- Enforced no-fabrication of missing regional labels.
+- Added offline fixtures/tests and `docs/WIKIDATA_ENTITY_IMPORTER.md`.
+- CI passed and Issue #5 closed.
+
+### Phase 2A — Deterministic localization/resolution engine
+
+- Added Python behavior/reference engine at `src/localizer_engine.py`.
+- Added CLI at `scripts/localize_text.py`.
+- Added one-command fixture database builder at `scripts/build_demo_database.py`.
+- Added evaluation corpus at `data/fixtures/evaluation_cases.json`.
+- Entity handling:
+  - source-locale names/aliases are matched longest-first;
+  - unique entity + unique preferred target-regional name is localized directly;
+  - localized entity spans are protected from later generic rules;
+  - ambiguous entities or missing/conflicting target names are preserved and marked `review_needed`.
+- Term-rule handling:
+  - explicit route stages are composed instead of flattened;
+  - deterministic longest phrase wins before priority;
+  - highest-priority target candidate wins for the same source phrase;
+  - lower candidates remain exposed as alternatives;
+  - equal-priority conflicting targets are preserved and marked for review;
+  - repeated global string replacement is not used.
+- Explainability output includes entity/QID or rule provenance, revisions, URLs, checksums and confidence where available.
+- Added integration tests in `tests/test_localizer_engine.py` covering entity localization, staged terminology, entity protection, longest-match behavior, ambiguous entity/rule handling and provenance.
+- GitHub Actions passed all integrated tests and demo-build steps on 2026-10-06.
+- Added `docs/LOCALIZER_ENGINE.md`.
+- Recorded D-009: deterministic localization precedence and no-guess policy.
 
 ## Approved / approved-with-conditions sources
 
@@ -101,17 +119,17 @@ Build a legally and technically traceable offline CN / HK / TW localization data
 
 ## Next recommended work
 
-1. Build Phase 2A deterministic lookup/resolution engine.
-2. Match known entities before generic terminology rules when an exact/longest entity name is found.
-3. Compose staged script/regional rules for CN -> HK/TW rather than flattening OpenCC stages.
-4. Return structured explanation/provenance for every applied change.
-5. Build a compact evaluation corpus covering people, films, IT terms, transport, legal terms, Cantonese/HK terms and ambiguous words.
-6. Continue Issue #1 for the 3 remaining licensing ambiguities.
-7. After the deterministic engine is stable, expose it through a small local API/CLI before desktop/mobile UI work.
+1. Expand OpenCC ingestion beyond phrase dictionaries to the character/variant resources required for broad real-world text conversion.
+2. Add user/protected-term precedence and a separate user dictionary model after core conversion coverage is broader.
+3. Expand the evaluation corpus with ordinary sentences, punctuation, overlapping names, IT, transport, legal and ambiguous terms.
+4. Continue Issue #1 for the 3 remaining licensing ambiguities.
+5. After deterministic behavior and coverage stabilize, port the tested engine semantics to the planned Rust runtime.
+6. Only then expose the stable core to Tauri desktop/mobile UI.
 
 ## Not started
 
-- Production desktop application
+- Production Rust localization engine
+- Desktop application
 - Mobile application
 - Database auto-updater/release pipeline
 
@@ -127,4 +145,4 @@ Build a legally and technically traceable offline CN / HK / TW localization data
 
 ## Important constraint
 
-Importers must enforce `data-registry/sources.yaml`, including `ingest_allowed`, `ingest_scope`, `excluded_scope` and pack separation. Pending/reference-only/rejected sources must not enter redistributable data builds. Missing regional entity names must not be silently invented.
+Importers must enforce `data-registry/sources.yaml`, including `ingest_allowed`, `ingest_scope`, `excluded_scope` and pack separation. Pending/reference-only/rejected sources must not enter redistributable data builds. Missing regional entity names and ambiguous decisions must not be silently invented.
