@@ -1,306 +1,91 @@
-# Database Schema v0.1
+# Database Schema v0.2
 
-Status: **implementation draft for the first SQLite proof of concept**.
-
-This schema is intentionally source/provenance-first. The project must be able to explain where a regional term or proper name came from and keep differently licensed data separable.
+Schema v0.2 is the update-safe reference SQLite model. `schema/sqlite-v0.1.sql` remains the historical Phase 0.5 baseline; new databases use `schema/sqlite-v0.2.sql`. Existing v0.1 databases are upgraded by `schema/migrations/0003_core_hardening.sql`.
 
 ## Design goals
 
-- Support `zh-CN`, `zh-HK`, `zh-TW` without requiring all three forms on every record.
-- Separate real-world entities from generic terminology rules.
-- Preserve source, source version, upstream record/revision and transformation provenance.
-- Allow multiple sources to support the same localized name.
-- Allow conflicting claims to coexist until ranking/review resolves them.
-- Keep ShareAlike/attribution/core packs separable.
-- Keep user overrides separate from canonical upstream data.
-- Support deterministic offline lookup before any optional LLM layer.
-
-## 1. `sources`
-
-One row per machine-readable entry in `data-registry/sources.yaml`.
+- keep source/version provenance for every imported claim;
+- preserve history without letting old snapshots remain active;
+- keep core, attribution and share-alike packs separately releasable;
+- support deterministic offline entity/term lookup;
+- allow conflicting claims to coexist while the resolver applies no-guess behavior;
+- keep user-local overrides outside canonical downloaded databases.
 
-Fields:
+## `sources`
 
-- `source_id TEXT PRIMARY KEY`
-- `name TEXT NOT NULL`
-- `status TEXT NOT NULL`
-- `pack TEXT NOT NULL`
-- `licence TEXT`
-- `commercial_use INTEGER` — `1`, `0`, or `NULL`
-- `modification_allowed INTEGER`
-- `redistribution_allowed INTEGER`
-- `attribution_required INTEGER`
-- `share_alike INTEGER`
-- `ingest_allowed INTEGER NOT NULL`
-- `ingest_scope TEXT`
-- `excluded_scope TEXT`
-- `review_record TEXT NOT NULL`
-- `manifest_version INTEGER NOT NULL`
-- `updated_at TEXT`
+One row per manifest source. The database copy is refreshed from `data-registry/sources.yaml` on every production import, rather than only when a database is first created.
 
-Hard rule: no importer may insert source-derived rows when the matching manifest entry has `ingest_allowed != 1`.
-
-## 2. `source_versions`
-
-Represents the exact upstream snapshot/dump/revision used in a build.
-
-Fields:
+Important policy fields include status, pack, licence, rights flags, `ingest_allowed`, human-readable scope and the review-record path.
 
-- `source_version_id INTEGER PRIMARY KEY`
-- `source_id TEXT NOT NULL REFERENCES sources(source_id)`
-- `version_label TEXT`
-- `revision_id TEXT`
-- `published_at TEXT`
-- `retrieved_at TEXT NOT NULL`
-- `upstream_url TEXT`
-- `checksum_sha256 TEXT`
-- `notes TEXT`
-
-A database build should never say only “from Wikipedia” or “from Wikidata”; it should identify the source version/snapshot whenever practical.
+## `source_versions`
 
-## 3. `concepts`
+Each exact upstream resource snapshot is stored with:
 
-Represents a generic lexical concept or a real-world entity.
+- `source_id`;
+- `resource_key` — stable project key such as `opencc:TWPhrases.txt` or `wikidata:Q35332`;
+- `is_current` — exactly which snapshot the runtime should treat as current for that resource;
+- version/revision identifiers;
+- publication/retrieval time;
+- upstream URL;
+- SHA-256;
+- notes.
 
-Fields:
+Importers reuse an identical current revision/checksum instead of inserting duplicate snapshots. A changed snapshot marks the previous resource version non-current while preserving history.
 
-- `concept_id INTEGER PRIMARY KEY`
-- `concept_type TEXT NOT NULL`
-- `canonical_key TEXT`
-- `domain TEXT`
-- `created_at TEXT`
-
-Suggested `concept_type` values:
-
-- `general_term`
-- `person`
-- `film`
-- `tv`
-- `book`
-- `music_artist`
-- `music_work`
-- `organisation`
-- `place`
-- `product`
-- `legal_term`
-- `technical_term`
-- `game`
-- `sports_entity`
-- `other`
-
-`canonical_key` is an optional project-stable identity key, not a display name.
+## `concepts` and `external_ids`
 
-## 4. `external_ids`
+`concepts` represents lexical concepts and real-world entities. `external_ids` holds stable identifiers such as Wikidata QIDs or Unicode code points. External identifiers remain unique by `(namespace, external_value)`.
 
-Links concepts to stable external identifiers.
+## `localized_names`
 
-Fields:
-
-- `external_id_id INTEGER PRIMARY KEY`
-- `concept_id INTEGER NOT NULL REFERENCES concepts(concept_id)`
-- `namespace TEXT NOT NULL`
-- `external_value TEXT NOT NULL`
-- `source_id TEXT REFERENCES sources(source_id)`
-
-Recommended unique constraint:
-
-`UNIQUE(namespace, external_value)`
-
-Examples of namespaces:
-
-- `wikidata`
-- `musicbrainz_artist`
-- `musicbrainz_work`
-- `isbn`
-- other stable open identifiers added later
-
-## 5. `localized_names`
-
-Stores unique localized/display names independently from evidence, allowing several sources to support the same name.
-
-Fields:
-
-- `localized_name_id INTEGER PRIMARY KEY`
-- `concept_id INTEGER NOT NULL REFERENCES concepts(concept_id)`
-- `locale TEXT NOT NULL`
-- `text TEXT NOT NULL`
-- `name_type TEXT NOT NULL`
-- `domain TEXT`
-- `is_preferred INTEGER NOT NULL DEFAULT 0`
-- `confidence REAL`
+Stores normalized display names independently from evidence. A row may remain historically present after an upstream rename; runtime resolution considers whether it still has current evidence.
 
-Recommended unique constraint:
+The `is_preferred` flag describes the claim type, not snapshot freshness. Freshness comes from evidence joined to current source versions.
 
-`UNIQUE(concept_id, locale, text, name_type)`
+## `name_evidence`
 
-Suggested `name_type` values:
+Connects localized names to source/version provenance. Runtime entity resolution ignores evidence whose `source_version_id` has been superseded. `current_name_evidence` exposes the current subset.
 
-- `preferred`
-- `official`
-- `alias`
-- `historical`
-- `colloquial`
-- `transliteration`
-- `original_title`
+## `term_rules`
 
-Locales should use BCP-47-like identifiers, with first-class support for:
+Stores deterministic conversion rules with source/target locale, text, priority, provenance and `active` state.
 
-- `zh-CN`
-- `zh-HK`
-- `zh-TW`
-- `zh-Hans`
-- `zh-Hant`
-- `en`
+OpenCC refreshes deactivate rules belonging to superseded resource versions. The primary lookup index is ordered around the actual runtime query:
 
-Additional locales may be stored when useful for entity matching.
+`(source_locale, target_locale, active, source_text, priority)`.
 
-## 6. `name_evidence`
-
-Preserves provenance for each localized-name claim.
+`context_constraint` stores JSON. Metadata-only objects are allowed; executable restrictions live under a `constraints` object. The reference engine currently enforces domain, preceding/following text and optional ASCII word-boundary constraints.
 
-Fields:
+## `pronunciations`
 
-- `evidence_id INTEGER PRIMARY KEY`
-- `localized_name_id INTEGER NOT NULL REFERENCES localized_names(localized_name_id)`
-- `source_id TEXT NOT NULL REFERENCES sources(source_id)`
-- `source_version_id INTEGER REFERENCES source_versions(source_version_id)`
-- `upstream_record_id TEXT`
-- `upstream_url TEXT`
-- `upstream_revision TEXT`
-- `evidence_type TEXT`
-- `confidence REAL`
-- `transformation_note TEXT`
-- `retrieved_at TEXT`
+Added by migration `0002_pronunciations.sql`. Pronunciation rows preserve source-version provenance. `current_pronunciations` filters out superseded source versions after migration 0003.
 
-Suggested `evidence_type` values:
+## `build_metadata`
 
-- `direct_label`
-- `alias`
-- `redirect`
-- `conversion_rule`
-- `dictionary_entry`
-- `official_term`
-- `derived_from_corpus`
-- `manual_review`
+Important keys now include:
 
-This table is central to explainable conversion: a UI can show why a name was chosen and where it came from.
+- `schema_version`;
+- `pack_type`;
+- source-specific last revision/checksum keys;
+- fixture/build markers where applicable.
 
-## 7. `term_rules`
+`pack_type` is an enforcement boundary: a core database cannot silently accept attribution/share-alike data, and vice versa.
 
-For deterministic regional terminology conversion not necessarily tied to a unique real-world entity.
+## User-local data
 
-Fields:
-
-- `rule_id INTEGER PRIMARY KEY`
-- `source_locale TEXT`
-- `target_locale TEXT NOT NULL`
-- `source_text TEXT NOT NULL`
-- `target_text TEXT NOT NULL`
-- `domain TEXT`
-- `rule_type TEXT NOT NULL`
-- `priority INTEGER NOT NULL DEFAULT 0`
-- `context_constraint TEXT`
-- `source_id TEXT NOT NULL REFERENCES sources(source_id)`
-- `source_version_id INTEGER REFERENCES source_versions(source_version_id)`
-- `upstream_record_id TEXT`
-- `upstream_url TEXT`
-- `confidence REAL`
-- `active INTEGER NOT NULL DEFAULT 1`
-
-Suggested `rule_type` values:
-
-- `character`
-- `lexical`
-- `regional_term`
-- `proper_name`
-- `protected`
-- `exception`
-
-Do not use a naive global search-and-replace implementation. Matching should eventually support longest-match, priorities, protected spans and context constraints.
-
-## 8. `build_metadata`
-
-Records how a distributable SQLite pack was built.
-
-Fields:
-
-- `key TEXT PRIMARY KEY`
-- `value TEXT NOT NULL`
-
-Recommended keys:
-
-- `schema_version`
-- `build_id`
-- `built_at`
-- `manifest_version`
-- `pack_type`
-- `generator_version`
-- `source_count`
-
-## 9. User-local data must be separate
-
-Do **not** mix personal user overrides into the canonical downloaded database.
-
-Use a separate local database such as `user_dictionary.sqlite` for:
-
-### `protected_terms`
-- text/pattern
-- locale/domain scope
-- created_at
-
-### `user_overrides`
-- source text
-- preferred target text
-- source/target locale
-- domain/context
-- priority
-- created_at / updated_at
-
-This allows the canonical database to be replaced during updates without losing user preferences.
-
-## Pack separation
-
-Recommended future files:
-
-- `regional_core.sqlite`
-- `regional_attribution.sqlite`
-- `regional_sharealike.sqlite`
-- `user_dictionary.sqlite`
-
-The exact final packaging may change after the proof of concept, but a database build must never make it impossible to recover source/licence obligations.
+Personal protected terms and user overrides must remain in a separate local database such as `user_dictionary.sqlite`. Canonical packs must be replaceable without deleting user preferences.
 
 ## Importer safety contract
 
-Before importing a source or file, the importer must:
+A production importer must:
 
-1. load `data-registry/sources.yaml`;
-2. locate the exact manifest `id`;
-3. require `ingest_allowed: true`;
-4. enforce `ingest_scope` and `excluded_scope`;
-5. assign the correct `pack`;
-6. create/update `sources` and `source_versions` first;
-7. attach source/version provenance to every imported rule or evidence row;
-8. reject pending/reference-only/rejected sources by default.
-
-## Conflict strategy
-
-Do not overwrite conflicting data simply because a later importer runs.
-
-Examples:
-
-- two sources may disagree on a Hong Kong film title;
-- an official terminology source may disagree with community usage;
-- a historic alias may still be useful even if no longer preferred.
-
-Store the claims/evidence separately. Preference/ranking logic belongs in a later resolution layer.
-
-## Minimum proof-of-concept target
-
-The first SQLite proof of concept should use only a small set of approved, non-ShareAlike sources and demonstrate:
-
-- one generic CN/HK/TW terminology example;
-- one film/entity example;
-- one person/entity example;
-- one Cantonese/Hong Kong lexical signal;
-- provenance display for every result;
-- safe refusal to import a `pending_review` source.
+1. validate the source manifest;
+2. require `ingest_allowed: true`;
+3. require an exact `ingest_resources` identifier;
+4. enforce the expected licence pack;
+5. sync manifest metadata into SQLite;
+6. validate upstream format/identity;
+7. record exact resource/revision/URL/checksum/retrieval provenance;
+8. make repeat imports idempotent;
+9. supersede, rather than silently coexist with, an older current snapshot;
+10. run `PRAGMA integrity_check` before success.
