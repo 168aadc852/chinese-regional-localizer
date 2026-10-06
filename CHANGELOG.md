@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-10-07
+
+- Refactored `AGENTS.md` from a preload checklist into a minimal task/context router.
+- Added task-specific on-demand guides under `.ai/` for coding, data review, importers, database, engine, testing, docs and releases.
+- Reduced `PROJECT_STATE.md` to current status only; moved compact historical context to `docs/history/PROJECT_HISTORY.md` while full detail remains in Git/closed Issues.
+- Split architecture decisions into individual ADR files under `docs/adr/`; `docs/DECISIONS.md` is now a compatibility pointer.
+- Added D-010 requiring on-demand AI context loading to reduce repeated token cost.
+- Minimized Gemini, Claude and Copilot repository instructions so they defer to `AGENTS.md` without preloading additional files.
+
 ## 2026-10-06
 
 - Created the initial governance-first repository structure.
