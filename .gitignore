@@ -12,6 +12,7 @@ Thumbs.db
 /data/cache/
 
 # Build outputs
+/build/
 /target/
 /dist/
 /node_modules/
