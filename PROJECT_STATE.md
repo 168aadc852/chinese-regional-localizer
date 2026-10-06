@@ -8,7 +8,9 @@ Last updated: 2026-10-06
 
 **Phase 0.5 proof of concept is complete and CI-validated.**
 
-**Phase 1A first real source importer is implemented and CI-validated.**
+**Phase 1A LSHK pronunciation importer is complete and CI-validated.**
+
+**Phase 1B OpenCC regional phrase importer is complete and CI-validated.**
 
 ## Objective
 
@@ -22,23 +24,36 @@ Build a legally and technically traceable offline CN / HK / TW localization data
 - Machine-readable ingestion policy added at `data-registry/sources.yaml`.
 - Licence packaging classes defined: core, attribution, ShareAlike, reference-only and pending.
 - SQLite schema v0.1 implemented with source/version provenance.
-- Manifest-enforced Phase 0.5 PoC implemented and CI-validated.
-- Issue #2 closed as completed.
-- First real importer selected: **LSHK Jyutping Table** under CC BY 4.0.
-- LSHK upstream baseline pinned to commit `dad2dd6d6f02fc51138ecc6818f7b38eba5c2ad3`, `list.tsv` Git blob `522f41701dd10c4da08d82923ef7ae40d14b9ffb`.
+- Manifest-enforced Phase 0.5 PoC implemented and CI-validated; Issue #2 closed.
+
+### Phase 1A — LSHK Jyutping Table
+
+- Pinned upstream commit `dad2dd6d6f02fc51138ecc6818f7b38eba5c2ad3`.
 - Added `schema/migrations/0002_pronunciations.sql` supporting multiple pronunciations per character.
-- Added `scripts/import_lshk_jyutping.py` with:
-  - explicit manifest permission check;
-  - local-file mode and explicit commit-pinned download mode;
-  - strict eight-column TSV validation;
-  - character/Unicode consistency validation;
-  - computed SHA-256;
-  - source version/revision/URL/checksum provenance;
-  - multiple Jyutping readings per character;
-  - SQLite integrity checking.
-- Added LSHK sample fixture and importer tests, including malformed-header and Unicode-mismatch rejection.
-- CI passed the LSHK importer test suite on 2026-10-06.
-- Added `docs/PRONUNCIATION_SCHEMA.md` and recorded the pinned baseline in `data-registry/lshk-jyutping-table.md`.
+- Added `scripts/import_lshk_jyutping.py` with manifest enforcement, local/pinned-download modes, strict TSV validation, Unicode checks, SHA-256 and full source-version provenance.
+- Added fixtures/tests and `docs/PRONUNCIATION_SCHEMA.md`.
+- CI passed and Issue #3 closed.
+
+### Phase 1B — OpenCC regional phrase dictionaries
+
+- Pinned upstream OpenCC commit `3ac34aa439a9908dd49fa92b5174b46314787ac2`.
+- Added `scripts/import_opencc_dictionaries.py`.
+- Initial real dictionary scope:
+  - `STPhrases.txt` — `zh-CN -> zh-Hant` script stage;
+  - `HKPhrases.txt` — `zh-Hant -> zh-HK` regional stage;
+  - `TWPhrases.txt` — `zh-Hant -> zh-TW` regional stage.
+- Preserved OpenCC's staged model rather than flattening regional conversion into one global replacement table.
+- Preserved multiple target candidates in source order using rule priority plus `candidate_rank`/`candidate_count` metadata.
+- Added a separate `source_versions` record per imported dictionary with pinned revision, upstream URL and SHA-256.
+- Added strict header/line validation, comments/blank-line handling and identity-mapping support.
+- Added real-format fixtures and tests covering:
+  - `布拉德·皮特 -> 畢·彼特` (HK);
+  - `人工智能 -> 人工智慧` (TW);
+  - `一见钟情 -> 一見鍾情` (script stage);
+  - multi-candidate preservation;
+  - malformed-header/line rejection.
+- Added `docs/OPENCC_IMPORTER.md` and recorded the importer baseline in `data-registry/opencc.md`.
+- CI passed the OpenCC importer test suite on 2026-10-06.
 
 ## Approved / approved-with-conditions sources
 
@@ -75,12 +90,12 @@ Build a legally and technically traceable offline CN / HK / TW localization data
 
 ## Next recommended work
 
-1. Close Issue #3 after recording its successful CI validation.
-2. Add a second real importer that contributes directly to CN/HK/TW terminology or entity localization.
-3. Prefer a small permissive/CC0 source before tackling full Wikidata dumps.
-4. Add an evaluation corpus covering films, people, IT terms, transport, legal terms, Cantonese/HK terms and ambiguous words.
+1. Close Issue #4 after recording Phase 1B completion.
+2. Build the first real **entity/localized-name importer**, preferably from Wikidata structured data (CC0), using a deliberately small query/snapshot first rather than a full dump.
+3. Demonstrate one person and one film/work with `zh-CN`, `zh-HK`, `zh-TW` labels/aliases plus stable Wikidata QIDs and provenance.
+4. Build a small evaluation corpus covering films, people, IT terms, transport, legal terms, Cantonese/HK terms and ambiguous words.
 5. Continue Issue #1 for the 3 remaining licensing ambiguities.
-6. After several importers are stable, implement the deterministic lookup/resolution layer.
+6. After several importers are stable, implement the deterministic lookup/resolution layer that composes script, regional term and entity rules.
 
 ## Not started
 
