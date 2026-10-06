@@ -18,8 +18,13 @@ Establish a legally and technically traceable data foundation before writing the
 - Expanded the source registry to 23 records after separating DATA.GOV.HK from the Combined DoJ Glossaries.
 - Opened GitHub Issue #1 to manage authoritative licence verification and whitelist approval.
 - Completed first-pass formal reviews with usable conclusions for **20 of 23** source records.
-- Established initial packaging classes: permissive/core, attribution-required, ShareAlike-isolated, non-commercial/reference-only and pending-rights layers.
+- Established packaging classes: permissive/core, attribution-required, ShareAlike-isolated, non-commercial/reference-only and pending-rights layers.
 - Added `docs/REVIEW_PROGRESS.md` and `docs/LICENSE_PACKAGING.md`.
+- Added machine-readable ingestion policy at `data-registry/sources.yaml`.
+- Added `docs/SOURCE_MANIFEST_SCHEMA.md` defining manifest semantics and hard safety rules.
+- Updated `AGENTS.md` so all AI/data tooling must enforce the manifest before ingestion.
+- Recorded decision D-008: the manifest is the machine-readable ingestion gate.
+- Promoted `docs/DATABASE_SCHEMA.md` to implementation draft **v0.1**, including mandatory source/version provenance and pack separation.
 
 ## Approved / approved-with-conditions sources
 
@@ -55,7 +60,7 @@ Establish a legally and technically traceable data foundation before writing the
    - explicit reuse/adaptation rights for a derived redistributable terminology database are not yet confirmed.
 2. DBnary
    - clearly ShareAlike;
-   - project surfaces reviewed show CC BY-SA version inconsistency, so snapshot-level licence confirmation is required.
+   - reviewed project surfaces show licence-version inconsistency, so snapshot-level licence confirmation is required.
 3. OpenHowNet downloadable HowNet core data
    - repository/API code is MIT;
    - data is downloaded separately and a data-specific redistribution licence has not yet been independently confirmed.
@@ -63,11 +68,12 @@ Establish a legally and technically traceable data foundation before writing the
 ## Next recommended work
 
 1. Resolve the 3 remaining licensing ambiguities if possible.
-2. Convert the source registry into a machine-readable manifest (`sources.yaml` or JSON) with licence/packaging flags.
-3. Finalise canonical database schema with mandatory provenance/licence fields.
-4. Define importer allowlists at source/file/field level.
-5. Build a small test corpus covering films, people, IT terms, transport, legal terms, Cantonese/HK terms and ambiguous words.
-6. Build the first proof-of-concept SQLite database from the safest sources only (for example Wikidata, PanLex, OpenCC-compatible data, Unicode/CLDR and other approved non-ShareAlike resources).
+2. Define source/file/field-level importer allowlists based on `data-registry/sources.yaml`.
+3. Create the first SQLite schema file matching `docs/DATABASE_SCHEMA.md` v0.1.
+4. Build a small test corpus covering films, people, IT terms, transport, legal terms, Cantonese/HK terms and ambiguous words.
+5. Build the first proof-of-concept database using only approved non-ShareAlike sources.
+6. Demonstrate provenance for every returned result and safe rejection of a pending source.
+7. Only after the proof of concept is stable, begin the localization engine/API layer.
 
 ## Not started
 
@@ -89,4 +95,4 @@ Establish a legally and technically traceable data foundation before writing the
 
 ## Important constraint
 
-Do not treat candidate sources as approved until licensing evidence is recorded in `data-registry/`. Importers must use explicit allowlists so that excluded/non-commercial/ShareAlike data cannot silently enter the wrong release pack.
+Do not treat candidate sources as approved until licensing evidence is recorded in `data-registry/`. Importers must enforce `data-registry/sources.yaml`, including `ingest_allowed`, `ingest_scope`, `excluded_scope` and pack separation.
