@@ -1,5 +1,7 @@
 # Phase 0.5 SQLite Proof of Concept
 
+Status: **completed and CI-validated on 2026-10-06**.
+
 This proof of concept validates the project architecture before production importers or application UI are built.
 
 ## What it proves
@@ -10,6 +12,7 @@ This proof of concept validates the project architecture before production impor
 - CN / HK / TW terminology and entity names can coexist in one schema.
 - Every imported name/rule can retain source/version/provenance information.
 - The database can keep permissive, attribution and ShareAlike source metadata distinct.
+- GitHub Actions successfully runs the unit tests and builds the demo database.
 
 ## Important fixture warning
 
@@ -40,7 +43,7 @@ GitHub Actions runs the same tests on pushes and pull requests to `main`.
 
 ## What comes next
 
-After this PoC passes, production importers should be implemented one source at a time. Each importer must:
+Production importers should now be implemented one source at a time. Each importer must:
 
 1. read `data-registry/sources.yaml`;
 2. refuse blocked sources;
