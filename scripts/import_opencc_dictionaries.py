@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """Import reviewed OpenCC dictionaries into the project SQLite schema.
 
-The importer preserves OpenCC's staged conversion model, dictionary-level
-short-circuit precedence, and multi-candidate ordering rather than flattening
-all resources into a naive global replacement table.
+The importer preserves staged conversion, dictionary precedence, candidate
+ordering, provenance and update history. Re-importing the same snapshot is
+idempotent; a new snapshot supersedes the previous active rules for that
+resource without deleting history.
 """
 
 from __future__ import annotations
@@ -38,18 +39,18 @@ class DictionarySpec:
     def pinned_url(self) -> str:
         return f"{BASE_RAW_URL}/{self.filename}"
 
+    @property
+    def resource_id(self) -> str:
+        return f"opencc:{self.filename}"
 
-# Base priorities encode the reviewed OpenCC short-circuit dictionary order.
-# Candidate rank is subtracted within each dictionary, preserving alternatives.
+
 DICTIONARIES = {
-    # Script stage: phrase rules before character fallback.
     "STPhrases.txt": DictionarySpec(
         "STPhrases.txt", "zh-CN", "zh-Hant", "opencc_st_phrase", "script", 300_000
     ),
     "STCharacters.txt": DictionarySpec(
         "STCharacters.txt", "zh-CN", "zh-Hant", "opencc_st_character", "script", 200_000
     ),
-    # Hong Kong regional stage: vocabulary phrases, variant phrase exceptions, chars.
     "HKPhrases.txt": DictionarySpec(
         "HKPhrases.txt", "zh-Hant", "zh-HK", "opencc_hk_phrase", "regional", 500_000
     ),
@@ -59,7 +60,6 @@ DICTIONARIES = {
     "HKVariants.txt": DictionarySpec(
         "HKVariants.txt", "zh-Hant", "zh-HK", "opencc_hk_variant_character", "regional", 300_000
     ),
-    # Taiwan regional stage: vocabulary phrases, variant phrase exceptions, chars.
     "TWPhrases.txt": DictionarySpec(
         "TWPhrases.txt", "zh-Hant", "zh-TW", "opencc_tw_phrase", "regional", 500_000
     ),
@@ -88,7 +88,7 @@ def download_pinned(spec: DictionarySpec, destination: Path) -> Path:
     destination.parent.mkdir(parents=True, exist_ok=True)
     request = urllib.request.Request(
         spec.pinned_url,
-        headers={"User-Agent": "chinese-regional-localizer/phase-2b"},
+        headers={"User-Agent": "chinese-regional-localizer/phase-2c"},
     )
     with urllib.request.urlopen(request, timeout=60) as response, destination.open("wb") as output:
         while True:
@@ -155,8 +155,49 @@ def open_or_create_database(
     conn.execute("PRAGMA foreign_keys = ON")
     if new_db:
         conn.executescript(schema_path.read_text(encoding="utf-8"))
-        poc_builder.load_manifest_sources(conn, manifest)
+    poc_builder.ensure_hardening_schema(conn, schema_path)
+    poc_builder.load_manifest_sources(conn, manifest)
     return conn
+
+
+def _current_version_ids_for_resource(
+    conn: sqlite3.Connection, spec: DictionarySpec
+) -> list[int]:
+    rows = conn.execute(
+        """
+        SELECT source_version_id
+        FROM source_versions
+        WHERE source_id = ? AND is_current = 1
+          AND (
+              resource_key = ?
+              OR (
+                  resource_key = ''
+                  AND (upstream_url LIKE ? OR notes LIKE ?)
+              )
+          )
+        """,
+        (
+            SOURCE_ID,
+            spec.resource_id,
+            f"%/{spec.filename}",
+            f"%{spec.filename}%",
+        ),
+    ).fetchall()
+    return [int(row[0]) for row in rows]
+
+
+def _deactivate_versions(conn: sqlite3.Connection, version_ids: list[int]) -> None:
+    if not version_ids:
+        return
+    placeholders = ",".join("?" for _ in version_ids)
+    conn.execute(
+        f"UPDATE term_rules SET active = 0 WHERE source_version_id IN ({placeholders})",
+        version_ids,
+    )
+    conn.execute(
+        f"UPDATE source_versions SET is_current = 0 WHERE source_version_id IN ({placeholders})",
+        version_ids,
+    )
 
 
 def add_source_version(
@@ -165,29 +206,34 @@ def add_source_version(
     checksum: str,
     retrieved_at: str,
     upstream_url: str,
-) -> int:
-    cursor = conn.execute(
-        """
-        INSERT INTO source_versions (
-            source_id, version_label, revision_id, retrieved_at,
-            upstream_url, checksum_sha256, notes
-        ) VALUES (?, ?, ?, ?, ?, ?, ?)
-        """,
-        (
-            SOURCE_ID,
-            f"{PINNED_COMMIT[:12]}:{spec.filename}",
-            PINNED_COMMIT,
-            retrieved_at,
-            upstream_url,
-            checksum,
-            (
-                f"OpenCC {spec.filename}; stage={spec.stage}; "
-                f"locales={spec.source_locale}->{spec.target_locale}; "
-                f"dictionary_base_priority={spec.base_priority}"
-            ),
+) -> tuple[int, bool]:
+    existing = poc_builder.find_current_source_version(
+        conn,
+        source_id=SOURCE_ID,
+        resource_key=spec.resource_id,
+        revision_id=PINNED_COMMIT,
+        checksum_sha256=checksum,
+    )
+    if existing is not None:
+        return existing, False
+
+    _deactivate_versions(conn, _current_version_ids_for_resource(conn, spec))
+    return poc_builder.register_source_version(
+        conn,
+        source_id=SOURCE_ID,
+        resource_key=spec.resource_id,
+        version_label=f"{PINNED_COMMIT[:12]}:{spec.filename}",
+        revision_id=PINNED_COMMIT,
+        published_at=None,
+        retrieved_at=retrieved_at,
+        upstream_url=upstream_url,
+        checksum_sha256=checksum,
+        notes=(
+            f"OpenCC {spec.filename}; stage={spec.stage}; "
+            f"locales={spec.source_locale}->{spec.target_locale}; "
+            f"dictionary_base_priority={spec.base_priority}"
         ),
     )
-    return int(cursor.lastrowid)
 
 
 def import_dictionary(
@@ -198,19 +244,39 @@ def import_dictionary(
     retrieved_at: str,
     upstream_url: str,
 ) -> dict[str, Any]:
+    entries = list(iter_entries(input_path, spec.filename))
     checksum = sha256_file(input_path)
-    source_version_id = add_source_version(
+    source_version_id, created = add_source_version(
         conn, spec, checksum=checksum, retrieved_at=retrieved_at, upstream_url=upstream_url
     )
-    keys = 0
-    candidates = 0
+    keys = len(entries)
+    candidates = sum(len(targets) for _, _, targets in entries)
 
-    for line_number, source_text, targets in iter_entries(input_path, spec.filename):
-        keys += 1
+    if not created:
+        active_count = int(
+            conn.execute(
+                "SELECT COUNT(*) FROM term_rules WHERE source_version_id = ? AND active = 1",
+                (source_version_id,),
+            ).fetchone()[0]
+        )
+        if active_count != candidates:
+            raise RuntimeError(
+                f"Current {spec.filename} snapshot is incomplete: expected {candidates} active rules, found {active_count}"
+            )
+        return {
+            "filename": spec.filename,
+            "source_version_id": source_version_id,
+            "sha256": checksum,
+            "base_priority": spec.base_priority,
+            "keys": keys,
+            "candidates": candidates,
+            "changed": False,
+        }
+
+    for line_number, source_text, targets in entries:
         for rank, target_text in enumerate(targets, start=1):
-            candidates += 1
             priority = spec.base_priority - rank
-            context = json.dumps(
+            metadata = json.dumps(
                 {
                     "dictionary": spec.filename,
                     "stage": spec.stage,
@@ -237,7 +303,7 @@ def import_dictionary(
                     target_text,
                     spec.rule_type,
                     priority,
-                    context,
+                    metadata,
                     SOURCE_ID,
                     source_version_id,
                     f"{spec.filename}:{line_number}",
@@ -252,6 +318,7 @@ def import_dictionary(
         "base_priority": spec.base_priority,
         "keys": keys,
         "candidates": candidates,
+        "changed": True,
     }
 
 
@@ -275,15 +342,18 @@ def import_many(
     unknown = sorted(set(inputs) - set(DICTIONARIES))
     if unknown:
         raise ValueError(f"Unsupported OpenCC dictionaries: {unknown}")
+    for filename in inputs:
+        poc_builder.assert_source_resource_allowed(
+            manifest, SOURCE_ID, DICTIONARIES[filename].resource_id
+        )
 
     conn = open_or_create_database(db_path, schema_path, manifest, reset=reset)
     results: list[dict[str, Any]] = []
     try:
+        poc_builder.assert_database_pack_compatible(conn, source["pack"])
         for filename, input_path in inputs.items():
             spec = DICTIONARIES[filename]
-            upstream_url = (
-                f"fixture://opencc/{filename}" if fixture_mode else spec.pinned_url
-            )
+            upstream_url = f"fixture://opencc/{filename}" if fixture_mode else spec.pinned_url
             results.append(
                 import_dictionary(
                     conn,
@@ -296,6 +366,9 @@ def import_many(
         conn.execute(
             "INSERT OR REPLACE INTO build_metadata (key, value) VALUES ('opencc_revision', ?)",
             (PINNED_COMMIT,),
+        )
+        conn.execute(
+            "INSERT OR REPLACE INTO build_metadata (key, value) VALUES ('schema_version', '0.2')"
         )
         conn.commit()
         integrity = conn.execute("PRAGMA integrity_check").fetchone()[0]
@@ -331,7 +404,7 @@ def main() -> int:
     )
     parser.add_argument("--db", type=Path, default=repo_root / "build" / "opencc.sqlite")
     parser.add_argument("--reset", action="store_true")
-    parser.add_argument("--retrieved-at", default="2026-10-06T00:00:00Z")
+    parser.add_argument("--retrieved-at", default=None)
     args = parser.parse_args()
 
     if args.download:
@@ -350,8 +423,8 @@ def main() -> int:
         inputs=inputs,
         db_path=args.db,
         manifest_path=repo_root / "data-registry" / "sources.yaml",
-        schema_path=repo_root / "schema" / "sqlite-v0.1.sql",
-        retrieved_at=args.retrieved_at,
+        schema_path=repo_root / "schema" / "sqlite-v0.2.sql",
+        retrieved_at=args.retrieved_at or poc_builder.utc_now_iso(),
         reset=args.reset,
         fixture_mode=fixture_mode,
     )
