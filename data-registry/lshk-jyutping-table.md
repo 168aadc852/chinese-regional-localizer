@@ -1,20 +1,34 @@
 # LSHK Jyutping Table
 
-Status: `pending_review`
+Status: **approved_with_conditions**
 
-## Preliminary evidence
+## Intended use
+Cantonese character readings, Jyutping display/search, pronunciation validation and HKSCS-related character support.
 
-- Public repository: https://github.com/lshk-org/jyutping-table
-- Maintained by the Jyutping Workgroup of the Linguistic Society of Hong Kong.
-- The repository states that the list is released under CC BY 4.0.
+## Official source
+Repository: https://github.com/lshk-org/jyutping-table
+Maintainer: Jyutping Workgroup, Linguistic Society of Hong Kong
 
-## Potential project use
+## Licence review
+The official repository explicitly states that the Cantonese Pronunciation List of the Characters for Computers is released under **Creative Commons Attribution 4.0 International (CC BY 4.0)**.
 
-- Cantonese readings for Chinese characters
-- Hong Kong character pronunciation validation
-- Jyutping display and search
-- Support for HKSCS-related characters
+The current machine-friendly TSV (`list.tsv`) is maintained by the LSHK Jyutping Workgroup; historical JSON/PDF versions are also present.
 
-## Review required
+- Commercial use: **Yes**
+- Modification/adaptation: **Yes**
+- Redistribution: **Yes**
+- Attribution: **Required**
+- Indicate changes: **Required under CC BY 4.0 when sharing adapted material**
+- ShareAlike: **No**
 
-Confirm attribution requirements, the exact coverage of current TSV/JSON files and whether any historical source files have different terms.
+## Packaging decision
+Approved for an attribution-required Cantonese pronunciation layer.
+
+Prefer the maintained `list.tsv` as the canonical import source.
+
+Historical PDFs/JSON files may have additional provenance considerations; ingest the current maintained TSV first and review historical files only if needed.
+
+## Update method
+Track the official GitHub repository/versions directory. Record commit/date and retain LSHK/Jyutping Workgroup attribution.
+
+Last reviewed: 2026-10-06
