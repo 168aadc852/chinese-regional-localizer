@@ -12,12 +12,12 @@ TODO
 
 ## Official source
 
-URL:
+URL:  
 Publisher:
 
 ## Licence review
 
-Licence name:
+Licence name:  
 Licence evidence URL:
 
 - Commercial use:
@@ -37,6 +37,16 @@ Core / separate attributed pack / share-alike pack / reference only / rejected /
 API / dump / file download / manual / other
 
 ## Intended fields to import
+
+- ...
+
+## Exact machine-readable resources
+
+List stable resource IDs that may be added to `sources.yaml.ingest_resources` after approval. Do not use a broad website/project label when only a subset/file has been reviewed.
+
+- ...
+
+## Excluded scope
 
 - ...
 
