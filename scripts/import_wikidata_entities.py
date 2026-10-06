@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """Import selected Wikidata EntityData JSON into the local SQLite schema.
 
-Normal tests/builds can use local JSON. Network access occurs only when
---download-qid is explicitly supplied. The importer keeps only a small locale
-allowlist and never fabricates missing regional labels.
+The importer keeps a conservative locale allow-list, never synthesizes missing
+regional labels, and records update history per QID. Re-importing the same
+revision is idempotent; a new revision supersedes the old evidence for runtime
+resolution without deleting historical provenance.
 """
 
 from __future__ import annotations
@@ -21,6 +22,7 @@ from typing import Any, Iterable
 import poc_builder
 
 SOURCE_ID = "wikidata"
+RESOURCE_SCOPE_ID = "wikidata:entity-json:item"
 QID_RE = re.compile(r"^Q[1-9][0-9]*$")
 ENTITY_URL = "https://www.wikidata.org/wiki/Special:EntityData/{qid}.json"
 
@@ -60,7 +62,7 @@ def download_latest(qid: str, destination: Path) -> Path:
     destination.parent.mkdir(parents=True, exist_ok=True)
     request = urllib.request.Request(
         ENTITY_URL.format(qid=qid),
-        headers={"User-Agent": "chinese-regional-localizer/phase-1c"},
+        headers={"User-Agent": "chinese-regional-localizer/phase-2c"},
     )
     with urllib.request.urlopen(request, timeout=60) as response, destination.open("wb") as output:
         while True:
@@ -147,7 +149,8 @@ def open_or_create_database(
     conn.execute("PRAGMA foreign_keys = ON")
     if new_db:
         conn.executescript(schema_path.read_text(encoding="utf-8"))
-        poc_builder.load_manifest_sources(conn, manifest)
+    poc_builder.ensure_hardening_schema(conn, schema_path)
+    poc_builder.load_manifest_sources(conn, manifest)
     return conn
 
 
@@ -196,31 +199,49 @@ def add_source_version(
     checksum: str,
     retrieved_at: str,
     fixture_mode: bool,
-) -> tuple[int, str]:
+) -> tuple[int, str, bool]:
     revision = str(entity["lastrevid"])
+    resource_key = f"wikidata:{qid}"
     if fixture_mode:
         upstream_url = f"fixture://wikidata/{qid}.json"
     else:
         upstream_url = f"{ENTITY_URL.format(qid=qid)}?revision={revision}"
-    cursor = conn.execute(
-        """
-        INSERT INTO source_versions (
-            source_id, version_label, revision_id, published_at, retrieved_at,
-            upstream_url, checksum_sha256, notes
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        """,
-        (
-            SOURCE_ID,
-            f"{qid}:rev-{revision}",
-            revision,
-            entity.get("modified"),
-            retrieved_at,
-            upstream_url,
-            checksum,
-            f"Wikidata structured entity JSON for {qid}; CC0 scope.",
-        ),
+
+    existing = poc_builder.find_current_source_version(
+        conn,
+        source_id=SOURCE_ID,
+        resource_key=resource_key,
+        revision_id=revision,
+        checksum_sha256=checksum,
     )
-    return int(cursor.lastrowid), upstream_url
+    if existing is not None:
+        return existing, upstream_url, False
+
+    conn.execute(
+        """
+        UPDATE source_versions
+        SET is_current = 0
+        WHERE source_id = ? AND is_current = 1
+          AND (
+              resource_key = ?
+              OR (resource_key = '' AND version_label LIKE ?)
+          )
+        """,
+        (SOURCE_ID, resource_key, f"{qid}:%"),
+    )
+    source_version_id, created = poc_builder.register_source_version(
+        conn,
+        source_id=SOURCE_ID,
+        resource_key=resource_key,
+        version_label=f"{qid}:rev-{revision}",
+        revision_id=revision,
+        published_at=entity.get("modified"),
+        retrieved_at=retrieved_at,
+        upstream_url=upstream_url,
+        checksum_sha256=checksum,
+        notes=f"Wikidata structured entity JSON for {qid}; CC0 scope.",
+    )
+    return source_version_id, upstream_url, created
 
 
 def add_name_and_evidence(
@@ -247,6 +268,11 @@ def add_name_and_evidence(
     ).fetchone()
     if row:
         localized_name_id = int(row[0])
+        if is_preferred:
+            conn.execute(
+                "UPDATE localized_names SET is_preferred = 1, confidence = MAX(COALESCE(confidence, 0), ?) WHERE localized_name_id = ?",
+                (confidence, localized_name_id),
+            )
     else:
         cursor = conn.execute(
             """
@@ -258,6 +284,8 @@ def add_name_and_evidence(
         )
         localized_name_id = int(cursor.lastrowid)
 
+    evidence_type = "direct_label" if name_type == "preferred" else "alias"
+    upstream_record_id = f"{qid}:{locale}:{name_type}:{text}"
     existing = conn.execute(
         """
         SELECT 1 FROM name_evidence
@@ -268,8 +296,8 @@ def add_name_and_evidence(
             localized_name_id,
             SOURCE_ID,
             source_version_id,
-            f"{qid}:{locale}:{name_type}:{text}",
-            "direct_label" if name_type == "preferred" else "alias",
+            upstream_record_id,
+            evidence_type,
         ),
     ).fetchone()
     if not existing:
@@ -285,10 +313,10 @@ def add_name_and_evidence(
                 localized_name_id,
                 SOURCE_ID,
                 source_version_id,
-                f"{qid}:{locale}:{name_type}:{text}",
+                upstream_record_id,
                 upstream_url,
                 revision,
-                "direct_label" if name_type == "preferred" else "alias",
+                evidence_type,
                 confidence,
                 "Locale code normalized only; no name translation or fallback was synthesized.",
                 retrieved_at,
@@ -308,7 +336,9 @@ def import_document(
     fixture_mode: bool = False,
 ) -> dict[str, Any]:
     manifest = poc_builder.load_manifest(manifest_path)
-    source = poc_builder.assert_source_ingest_allowed(manifest, SOURCE_ID)
+    source = poc_builder.assert_source_resource_allowed(
+        manifest, SOURCE_ID, RESOURCE_SCOPE_ID
+    )
     if source["pack"] != "core":
         raise poc_builder.IngestPolicyError(
             f"Unexpected pack for {SOURCE_ID}: expected core, got {source['pack']}"
@@ -327,10 +357,12 @@ def import_document(
     conn = open_or_create_database(db_path, schema_path, manifest, reset=reset)
     imported_entities = 0
     imported_names = 0
+    changed_entities = 0
     try:
+        poc_builder.assert_database_pack_compatible(conn, source["pack"])
         for qid, entity in parsed_entities:
             checksum = canonical_sha256(entity)
-            source_version_id, upstream_url = add_source_version(
+            source_version_id, upstream_url, created = add_source_version(
                 conn,
                 qid=qid,
                 entity=entity,
@@ -360,10 +392,15 @@ def import_document(
                 )
                 imported_names += 1
             imported_entities += 1
+            if created:
+                changed_entities += 1
 
         conn.execute(
             "INSERT OR REPLACE INTO build_metadata (key, value) VALUES ('wikidata_entity_import_count', ?)",
             (str(imported_entities),),
+        )
+        conn.execute(
+            "INSERT OR REPLACE INTO build_metadata (key, value) VALUES ('schema_version', '0.2')"
         )
         conn.commit()
         integrity = conn.execute("PRAGMA integrity_check").fetchone()[0]
@@ -379,6 +416,7 @@ def import_document(
         "source_id": SOURCE_ID,
         "entities": imported_entities,
         "names": imported_names,
+        "changed_entities": changed_entities,
         "db_path": str(db_path),
     }
 
@@ -408,7 +446,7 @@ def main() -> int:
     parser.add_argument("--type-map", type=Path, required=True)
     parser.add_argument("--db", type=Path, default=repo_root / "build" / "wikidata.sqlite")
     parser.add_argument("--reset", action="store_true")
-    parser.add_argument("--retrieved-at", default="2026-10-06T00:00:00Z")
+    parser.add_argument("--retrieved-at", default=None)
     parser.add_argument("--fixture-mode", action="store_true", help="Mark provenance URLs as fixture:// (tests only)")
     args = parser.parse_args()
 
@@ -432,8 +470,8 @@ def main() -> int:
         type_map_path=args.type_map,
         db_path=args.db,
         manifest_path=repo_root / "data-registry" / "sources.yaml",
-        schema_path=repo_root / "schema" / "sqlite-v0.1.sql",
-        retrieved_at=args.retrieved_at,
+        schema_path=repo_root / "schema" / "sqlite-v0.2.sql",
+        retrieved_at=args.retrieved_at or poc_builder.utc_now_iso(),
         reset=args.reset,
         fixture_mode=fixture_mode,
     )
