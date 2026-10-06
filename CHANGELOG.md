@@ -23,3 +23,9 @@
 - Added stable QID identity, explicit entity types, locale-specific CN/HK/TW names, aliases, revision-aware provenance, retrieval timestamps and canonical per-entity SHA-256.
 - Added a hard no-fabrication rule: generic Chinese labels are not silently promoted to missing regional labels.
 - Added offline Wikidata fixtures and tests for a person and a film; CI passed after final provenance updates.
+- Added Phase 2A deterministic localization/reference engine in `src/localizer_engine.py` and CLI in `scripts/localize_text.py`.
+- Added entity-first longest-match resolution, entity-span protection, staged OpenCC-compatible term processing and no-guess conflict handling.
+- Added structured provenance/explanation output for entity and term-rule decisions.
+- Added `data/fixtures/evaluation_cases.json`, one-command fixture DB builder and integrated engine tests.
+- Verified person CN→HK/TW localization, Taiwan terminology conversion, script-stage conversion, mixed entity+term conversion, entity protection, longest-match precedence, and ambiguous entity/rule review behavior in CI.
+- Added `docs/LOCALIZER_ENGINE.md` and decision D-009 defining deterministic localization precedence and no-guess policy.
