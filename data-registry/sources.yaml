@@ -1,5 +1,5 @@
-manifest_version: 1
-last_updated: 2026-10-06
+manifest_version: 2
+last_updated: 2026-10-07
 project: chinese-regional-localizer
 
 status_values:
@@ -30,6 +30,15 @@ sources:
     ingest_allowed: true
     ingest_scope: "OpenCC project and dictionary files covered by Apache-2.0."
     excluded_scope: "None assumed beyond files whose licence cannot be verified."
+    ingest_resources:
+      - opencc:STPhrases.txt
+      - opencc:STCharacters.txt
+      - opencc:HKPhrases.txt
+      - opencc:HKVariantsPhrases.txt
+      - opencc:HKVariants.txt
+      - opencc:TWPhrases.txt
+      - opencc:TWVariantsPhrases.txt
+      - opencc:TWVariants.txt
     review_record: data-registry/opencc.md
 
   - id: wikidata
@@ -45,6 +54,8 @@ sources:
     ingest_allowed: true
     ingest_scope: "Structured data in main, Property, Lexeme and EntitySchema namespaces, plus official dumps covered by CC0."
     excluded_scope: "Non-structured textual content outside the approved CC0 scope."
+    ingest_resources:
+      - wikidata:entity-json:item
     review_record: data-registry/wikidata.md
 
   - id: chinese-wikipedia
@@ -87,8 +98,8 @@ sources:
     redistribution_allowed: true
     attribution_required: true
     share_alike: false
-    ingest_allowed: true
-    ingest_scope: "Qualifying portal datasets within rights explicitly granted by DATA.GOV.HK terms."
+    ingest_allowed: false
+    ingest_scope: "No automated derived-database ingestion until a dataset-specific machine-readable scope confirms modification/adaptation rights."
     excluded_scope: "Do not assume adaptation/derivative rights not expressly granted; dataset-specific terms may override."
     review_record: data-registry/hk-government.md
 
@@ -330,6 +341,8 @@ sources:
     ingest_allowed: true
     ingest_scope: "Current Jyutping table files explicitly released under CC BY 4.0."
     excluded_scope: "Historical or third-party source material with different terms, if any."
+    ingest_resources:
+      - lshk:list.tsv
     review_record: data-registry/lshk-jyutping-table.md
 
   - id: kaifangcidian-hyzd
