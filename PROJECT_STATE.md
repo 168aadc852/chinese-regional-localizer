@@ -19,25 +19,31 @@ Establish a legally and technically traceable data foundation before writing the
 - Created candidate source registry records for 22 sources.
 - Expanded the source pool beyond Wikipedia/OpenCC to include multilingual lexicons, Cantonese resources, semantic networks, WordNet-style resources and official terminology datasets.
 - Opened GitHub Issue #1 to manage authoritative licence verification and whitelist approval.
+- Completed first-pass formal reviews for 4 sources:
+  - OpenCC — `approved_with_conditions`
+  - Wikidata structured data — `approved`
+  - Chinese Wikipedia — `approved_with_conditions`, isolated CC BY-SA data pack
+  - Taiwan Government / NAER terminology open data — `approved_with_conditions` for individually verified OGL-Taiwan v1 datasets
 
 ## In progress
 
-- Review candidate open datasets and licences.
+- Review the remaining candidate open datasets and licences.
 - Build an authoritative data-source whitelist.
 - Refine the terminology/entity database schema.
 - Classify candidate sources into permissive core, attribution-required packs, ShareAlike packs and reference-only sources.
 
 ## Next recommended work
 
-1. Verify OpenCC source/data licensing and intended use.
-2. Verify Wikidata licensing and useful fields for regional aliases.
-3. Review high-value new candidates: PanLex, THUOCL, CC-Canto and Chinese Wiktionary.
-4. Define how Wikipedia/Wiktionary/DBnary/ConceptNet ShareAlike-derived data must be isolated and attributed.
-5. Review Taiwan government terminology datasets individually.
-6. Review Hong Kong government / Department of Justice terminology datasets individually.
-7. Review HKCanCor and LSHK Jyutping Table for Hong Kong lexical/pronunciation support.
-8. Review semantic resources (Chinese Open WordNet and OpenHowNet) for ambiguity handling.
-9. Produce a small test corpus covering films, people, IT terms, transport, legal terms, Cantonese/HK terms and ambiguous words.
+1. Review Hong Kong Government / Department of Justice terminology, separating DATA.GOV.HK terms from any DoJ-site-specific terms.
+2. Review CC-CEDICT.
+3. Review Words.hk licensing boundaries.
+4. Review Rime Cantonese.
+5. Review Unicode / Unihan / CLDR.
+6. Review MusicBrainz.
+7. Review high-value new candidates: PanLex, THUOCL, CC-Canto and Chinese Wiktionary.
+8. Review HKCanCor and LSHK Jyutping Table for Hong Kong lexical/pronunciation support.
+9. Review semantic resources (Chinese Open WordNet, ConceptNet and OpenHowNet) for ambiguity handling.
+10. Produce a small test corpus covering films, people, IT terms, transport, legal terms, Cantonese/HK terms and ambiguous words.
 
 ## Not started
 
