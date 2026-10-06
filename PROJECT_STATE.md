@@ -6,6 +6,8 @@ Last updated: 2026-10-06
 
 **Phase 0 — Data governance and source research**
 
+A parallel **Phase 0.5 proof-of-concept track** is now ready to begin using only manifest-approved sources.
+
 ## Objective of this phase
 
 Establish a legally and technically traceable data foundation before writing the main localization application.
@@ -25,6 +27,8 @@ Establish a legally and technically traceable data foundation before writing the
 - Updated `AGENTS.md` so all AI/data tooling must enforce the manifest before ingestion.
 - Recorded decision D-008: the manifest is the machine-readable ingestion gate.
 - Promoted `docs/DATABASE_SCHEMA.md` to implementation draft **v0.1**, including mandatory source/version provenance and pack separation.
+- Added executable, syntax-validated SQLite schema at `schema/sqlite-v0.1.sql`.
+- Opened GitHub Issue #2: **Phase 0.5 — Build manifest-enforced SQLite proof of concept**.
 
 ## Approved / approved-with-conditions sources
 
@@ -67,11 +71,11 @@ Establish a legally and technically traceable data foundation before writing the
 
 ## Next recommended work
 
-1. Resolve the 3 remaining licensing ambiguities if possible.
-2. Define source/file/field-level importer allowlists based on `data-registry/sources.yaml`.
-3. Create the first SQLite schema file matching `docs/DATABASE_SCHEMA.md` v0.1.
+1. Resolve the 3 remaining licensing ambiguities if possible under Issue #1.
+2. Begin Issue #2 with source/file/field-level importer allowlists based on `data-registry/sources.yaml`.
+3. Create the first SQLite database from `schema/sqlite-v0.1.sql`.
 4. Build a small test corpus covering films, people, IT terms, transport, legal terms, Cantonese/HK terms and ambiguous words.
-5. Build the first proof-of-concept database using only approved non-ShareAlike sources.
+5. Build the first proof-of-concept dataset using only approved non-ShareAlike sources.
 6. Demonstrate provenance for every returned result and safe rejection of a pending source.
 7. Only after the proof of concept is stable, begin the localization engine/API layer.
 
