@@ -9,9 +9,9 @@ No source listed here should be assumed redistributable unless its status says `
 | Source | Main use | Status | Record |
 |---|---|---|---|
 | OpenCC | Script and regional terminology conversion | approved_with_conditions | `data-registry/opencc.md` |
-| Wikidata | Structured entities, labels and aliases | pending_review | `data-registry/wikidata.md` |
-| Chinese Wikipedia | Regional names, conversion rules, article context | pending_review | `data-registry/wikipedia.md` |
-| Taiwan Government / terminology open data | TW/CN professional terminology | pending_review | `data-registry/taiwan-government.md` |
+| Wikidata | Structured entities, labels and aliases | approved | `data-registry/wikidata.md` |
+| Chinese Wikipedia | Regional names, conversion rules, article context | approved_with_conditions | `data-registry/wikipedia.md` |
+| Taiwan Government / terminology open data | TW/CN professional terminology | approved_with_conditions | `data-registry/taiwan-government.md` |
 | Hong Kong Government / DOJ terminology | HK official/legal terminology | pending_review | `data-registry/hk-government.md` |
 | CC-CEDICT | General lexical support | pending_review | `data-registry/cc-cedict.md` |
 | Words.hk | Hong Kong/Cantonese lexical signals | pending_review | `data-registry/words-hk.md` |
