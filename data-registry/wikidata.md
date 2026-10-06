@@ -3,99 +3,46 @@
 Status: **approved**
 
 ## Intended use
-Structured entities, identifiers, labels and aliases for people, works, organisations, places and other named concepts.
 
-## Region coverage
-Global; Chinese locale labels and aliases where available, including locale-specific Chinese labels when present.
+Structured entity identifiers, locale-specific labels/aliases and selected structured metadata.
 
 ## Official source
-URL: https://www.wikidata.org/
+
+https://www.wikidata.org/  
 Publisher: Wikimedia Foundation / Wikidata community
 
 ## Licence review
-Licence name: Creative Commons CC0 1.0 for structured data
-Licence evidence URLs:
-- https://www.wikidata.org/wiki/Wikidata:Licensing
-- https://www.wikidata.org/wiki/Wikidata:Database_download
-- https://www.wikidata.org/wiki/Wikidata:Copyright
 
-Scope verified:
-- Structured data in the main, Property, Lexeme and EntitySchema namespaces is released under CC0.
-- Text in other namespaces is not part of this approval and may instead be CC BY-SA.
+Approved scope: structured data in CC0-covered namespaces/interfaces. Arbitrary project/help/talk prose is not covered by this importer approval.
 
-- Commercial use: **Yes**
-- Modification: **Yes**
-- Redistribution: **Yes**
-- Attribution: **Not legally required by CC0 for the approved structured-data scope**, though this project should still preserve provenance (`source_id`, QID, dump date / revision where practical) for auditability and quality control.
-- Share-alike / copyleft: **No** for the approved structured-data scope.
-- Database-specific obligations: **No CC0 share-alike or attribution obligation.** CC0 does not waive third-party trademark, privacy, publicity or similar rights; these remain outside the database licence.
-- API/download/scraping restrictions: For bulk ingestion, use official dumps or documented data-access interfaces rather than scraping rendered pages. This approval is for the data licence; API operational limits and usage etiquette must still be respected separately.
+Licence: **CC0-1.0** for the reviewed structured-data scope.
 
-## Packaging decision
-**Approved for the core data layer, limited to CC0 structured data.**
+- Commercial use: yes.
+- Modification: yes.
+- Redistribution: yes.
+- Legal attribution requirement under CC0: no, while project provenance is still mandatory for quality/auditability.
+- Share-alike: no.
 
-Recommended uses:
-- QIDs and entity types
-- labels and aliases
-- locale-specific Chinese labels / aliases when present
-- cross-database identifiers
-- structured statements useful for entity disambiguation
+## Machine-readable ingest scope
 
-Do **not** automatically ingest arbitrary prose from project/help/talk/other non-structured namespaces into the CC0 core database.
+Current selected-entity importer requires:
 
-## Phase 1C importer baseline
+`wikidata:entity-json:item`
 
-The first entity importer uses Wikidata's documented stable Linked Data interface:
+It accepts item EntityData JSON only. Missing regional labels are not synthesized.
 
-`https://www.wikidata.org/wiki/Special:EntityData/<QID>.json`
+## Update behavior
 
-Implementation:
+Each QID is a separate resource key (`wikidata:<QID>`). `lastrevid`, modified/retrieval time, URL and canonical entity SHA-256 are recorded. A new revision marks the previous QID source version non-current; runtime entity resolution uses current evidence only.
 
-- `scripts/import_wikidata_entities.py`
-- `tests/test_wikidata_importer.py`
-- `data/fixtures/wikidata/entities.json`
-- `data/fixtures/wikidata/entity_types.json`
-- `docs/WIKIDATA_ENTITY_IMPORTER.md`
+This prevents historical preferred labels/removed aliases from remaining active after refresh.
 
-Initial locale scope:
+## Packaging
 
-- `en`
-- `mul`
-- `zh`
-- `zh-hans`
-- `zh-hant`
-- `zh-cn`
-- `zh-hk`
-- `zh-tw`
+Core pack.
 
-Regional locale codes are normalized to BCP-47-style casing in SQLite. Missing regional labels are **not synthesized** from generic Chinese labels.
+## Preferred future update methods
 
-Each entity records:
+Use official JSON dumps/incremental feeds for scale; documented EntityData/API access remains appropriate for targeted refreshes. Operational limits/usage etiquette are separate from the CC0 licence decision.
 
-- stable Wikidata QID in `external_ids`;
-- explicit project concept type;
-- labels as preferred names;
-- aliases as alias names;
-- `lastrevid` and modified timestamp where present;
-- retrieval time;
-- revision-pinned upstream URL for real source data;
-- canonical per-entity SHA-256;
-- evidence rows for each imported label/alias.
-
-The initial fixture uses Brad Pitt (`Q35332`) and Oppenheimer (2023 film, `Q108839994`) only to test the data model offline. Fixture revision numbers are deliberately non-authoritative and use `fixture://` provenance URLs.
-
-## Update method
-Preferred sources:
-1. Official JSON dumps for full rebuilds. Wikidata states that JSON dumps are produced weekly and are the recommended stable dump format.
-2. Official incremental / add-change dumps for daily changes where appropriate.
-3. Documented Linked Data/API access for targeted entity enrichment, subject to operational limits.
-
-For selected-entity refreshes, record `lastrevid` and use revision-specific EntityData URLs where practical. Record the dump date or extraction timestamp in build metadata so a released local database can be reproduced.
-
-## Review evidence / rationale
-Wikidata's official licensing page states that structured data in the main, Property, Lexeme and EntitySchema namespaces is released under CC0. Its official database-download page explicitly states that the databases may be used for personal or commercial use, backups or offline use, and documents both weekly full JSON dumps and incremental dumps.
-
-Because the planned use is structured entities, labels, aliases and identifiers, it fits directly within the CC0 scope. This makes Wikidata suitable for the project's permissive/core entity layer.
-
-Last reviewed: 2026-10-06
-Review status: formal first-pass review complete; Phase 1C selected-entity importer implemented and CI-tested; re-check scope before first public data release.
+Last reviewed: 2026-10-07
