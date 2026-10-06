@@ -1,9 +1,16 @@
-# Proof-of-concept fixtures
+# Test fixtures
 
-The files in this directory are **hand-authored test fixtures** used only to validate database structure, manifest enforcement, regional-name lookup and provenance plumbing.
+Fixtures in this directory exist only for automated tests and development builds. They must not be shipped as authoritative terminology/data releases.
 
-They are **not authoritative extracts** from the named upstream datasets and must not be shipped as production terminology data.
+Fixture provenance must be classified per file/subdirectory:
 
-Where a fixture references an approved `source_id`, it means "exercise the code path for data intended to come from this source class". Every inserted fixture evidence row is explicitly marked `poc_fixture` and uses a `fixture://` upstream URL.
+- **synthetic** — hand-authored solely to exercise a format/behavior;
+- **derived-format sample** — small values/records based on an approved upstream format or reviewed open-source data and therefore retaining that source/licence context.
 
-Production importers must replace these fixtures with actual downloaded records and preserve real upstream identifiers, versions, URLs, checksums and retrieval timestamps.
+Current classification:
+
+- `poc_records.json`, `evaluation_cases.json`, `wikidata/` — synthetic/non-authoritative behavior fixtures;
+- `lshk_sample.tsv` — synthetic rows in the reviewed LSHK TSV format;
+- `opencc/*.txt` — small OpenCC-format/reference rows carrying the upstream Apache-2.0 header and used only for regression behavior.
+
+Fixture URLs use `fixture://` where evidence rows are created. Production importers replace fixtures with validated upstream resources and record real revision/resource/checksum/retrieval provenance.
