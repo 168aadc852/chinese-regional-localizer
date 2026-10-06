@@ -236,6 +236,7 @@ def add_name_and_evidence(
     source_version_id: int,
     upstream_url: str,
     revision: str,
+    retrieved_at: str,
 ) -> None:
     row = conn.execute(
         """
@@ -278,7 +279,7 @@ def add_name_and_evidence(
                 localized_name_id, source_id, source_version_id,
                 upstream_record_id, upstream_url, upstream_revision,
                 evidence_type, confidence, transformation_note, retrieved_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NULL)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 localized_name_id,
@@ -290,6 +291,7 @@ def add_name_and_evidence(
                 "direct_label" if name_type == "preferred" else "alias",
                 confidence,
                 "Locale code normalized only; no name translation or fallback was synthesized.",
+                retrieved_at,
             ),
         )
 
@@ -354,6 +356,7 @@ def import_document(
                     source_version_id=source_version_id,
                     upstream_url=upstream_url,
                     revision=str(entity["lastrevid"]),
+                    retrieved_at=retrieved_at,
                 )
                 imported_names += 1
             imported_entities += 1
