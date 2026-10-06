@@ -6,7 +6,7 @@ Last updated: 2026-10-06
 
 **Phase 0 — Data governance and source research**
 
-A parallel **Phase 0.5 proof-of-concept track** is now implemented and under automated validation using only manifest-approved source classes.
+**Phase 0.5 proof of concept is complete and CI-validated.** The next engineering step is to replace synthetic fixtures with real source-specific importers, one source at a time.
 
 ## Objective of this phase
 
@@ -28,22 +28,12 @@ Establish a legally and technically traceable data foundation before writing the
 - Recorded decision D-008: the manifest is the machine-readable ingestion gate.
 - Promoted `docs/DATABASE_SCHEMA.md` to implementation draft **v0.1**, including mandatory source/version provenance and pack separation.
 - Added executable, syntax-validated SQLite schema at `schema/sqlite-v0.1.sql`.
-- Opened GitHub Issue #2: **Phase 0.5 — Build manifest-enforced SQLite proof of concept**.
-- Added `scripts/poc_builder.py`, which:
-  - validates `sources.yaml`;
-  - loads all source metadata into SQLite;
-  - rejects data ingestion from blocked/pending sources;
-  - enforces source IDs before inserting source versions, term rules and entity names;
-  - preserves fixture provenance in `source_versions` and `name_evidence`;
-  - runs SQLite `integrity_check` after building.
-- Added clearly marked non-authoritative PoC fixtures under `data/fixtures/` covering:
-  - CN→HK/TW technology terminology;
-  - a film with CN/HK/TW regional titles;
-  - a person with CN/HK/TW regional names;
-  - a Hong Kong lexical signal.
-- Added `tests/test_poc_builder.py` covering policy rejection, database build/integrity, regional lookup and provenance.
-- Added GitHub Actions workflow `.github/workflows/poc-tests.yml` to run tests and build the demo database on push/PR.
-- Added `docs/POC.md` documenting the PoC safety boundary and local test workflow.
+- Implemented Phase 0.5 PoC in `scripts/poc_builder.py` with manifest enforcement, source/version provenance and SQLite integrity checking.
+- Added non-authoritative fixtures under `data/fixtures/` for general terminology, a film, a person and a Hong Kong lexical signal.
+- Added automated tests in `tests/test_poc_builder.py`.
+- Added GitHub Actions workflow `.github/workflows/poc-tests.yml`.
+- Added `docs/POC.md` documenting PoC scope and safety boundaries.
+- GitHub Actions successfully completed all PoC unit-test and demo-build steps on 2026-10-06.
 
 ## Approved / approved-with-conditions sources
 
@@ -86,18 +76,17 @@ Establish a legally and technically traceable data foundation before writing the
 
 ## Next recommended work
 
-1. Confirm the Phase 0.5 GitHub Actions run passes; fix any test/build issue before extending the PoC.
-2. Resolve the 3 remaining licensing ambiguities if possible under Issue #1.
-3. Replace hand-authored PoC fixtures one source at a time with real source-specific importers, starting with a small permissive source.
-4. Pin real upstream versions/snapshots and record checksums/retrieval timestamps.
-5. Add source-specific tests for `ingest_scope` / `excluded_scope` enforcement.
-6. Build a small evaluation corpus covering films, people, IT terms, transport, legal terms, Cantonese/HK terms and ambiguous words.
-7. Only after real importer/provenance tests are stable, begin the localization engine/API layer.
+1. Build the first real source importer from a small, well-scoped approved dataset.
+2. Pin the upstream version/commit and record checksum/retrieval metadata.
+3. Add source-specific parser tests and malformed-input tests.
+4. Prove that real imported rows retain licence pack and provenance.
+5. Continue resolving the 3 remaining licensing ambiguities under Issue #1.
+6. Build an evaluation corpus covering films, people, IT terms, transport, legal terms, Cantonese/HK terms and ambiguous words.
+7. After several real importers are stable, begin the deterministic localization lookup/engine layer.
 
 ## Not started
 
-- Production source importers
-- Translation/localization engine
+- Production localization engine
 - Desktop application
 - Mobile application
 - Database auto-updater
@@ -110,7 +99,7 @@ Establish a legally and technically traceable data foundation before writing the
 - Local database direction: SQLite
 - Deterministic conversion layer: OpenCC and/or compatible regional conversion engine
 - Entity/terminology layer: multi-source knowledge base
-- Phase 0.5 tooling: Python + PyYAML for fast validation only, not a commitment to the production runtime
+- Phase 0.5/ingestion tooling: Python may be used for data-build tooling where practical; this does not require the production runtime to be Python
 - Optional future ambiguity layer: local LLM, only if needed
 
 ## Important constraint
