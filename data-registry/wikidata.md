@@ -1,36 +1,60 @@
 # Wikidata
 
-Status: **pending_review**
+Status: **approved**
 
 ## Intended use
 Structured entities, identifiers, labels and aliases for people, works, organisations, places and other named concepts.
 
 ## Region coverage
-Global; Chinese locale labels where available
+Global; Chinese locale labels and aliases where available, including locale-specific Chinese labels when present.
 
 ## Official source
-URL: TODO — verify authoritative URL
-Publisher: TODO
+URL: https://www.wikidata.org/
+Publisher: Wikimedia Foundation / Wikidata community
 
 ## Licence review
-Licence name: TODO — verify
-Licence evidence URL: TODO — verify
+Licence name: Creative Commons CC0 1.0 for structured data
+Licence evidence URLs:
+- https://www.wikidata.org/wiki/Wikidata:Licensing
+- https://www.wikidata.org/wiki/Wikidata:Database_download
+- https://www.wikidata.org/wiki/Wikidata:Copyright
 
-- Commercial use: TODO
-- Modification: TODO
-- Redistribution: TODO
-- Attribution: TODO
-- Share-alike/copyleft: TODO
-- Database-specific obligations: TODO
-- API/download/scraping restrictions: TODO
+Scope verified:
+- Structured data in the main, Property, Lexeme and EntitySchema namespaces is released under CC0.
+- Text in other namespaces is not part of this approval and may instead be CC BY-SA.
+
+- Commercial use: **Yes**
+- Modification: **Yes**
+- Redistribution: **Yes**
+- Attribution: **Not legally required by CC0 for the approved structured-data scope**, though this project should still preserve provenance (`source_id`, QID, dump date / revision where practical) for auditability and quality control.
+- Share-alike / copyleft: **No** for the approved structured-data scope.
+- Database-specific obligations: **No CC0 share-alike or attribution obligation.** CC0 does not waive third-party trademark, privacy, publicity or similar rights; these remain outside the database licence.
+- API/download/scraping restrictions: For bulk ingestion, use official dumps or documented data-access interfaces rather than scraping rendered pages. This approval is for the data licence; API operational limits and usage etiquette must still be respected separately.
 
 ## Packaging decision
-Not approved for redistribution until verified.
+**Approved for the core data layer, limited to CC0 structured data.**
+
+Recommended uses:
+- QIDs and entity types
+- labels and aliases
+- locale-specific Chinese labels / aliases when present
+- cross-database identifiers
+- structured statements useful for entity disambiguation
+
+Do **not** automatically ingest arbitrary prose from project/help/talk/other non-structured namespaces into the CC0 core database.
 
 ## Update method
-TODO
+Preferred sources:
+1. Official JSON dumps for full rebuilds. Wikidata states that JSON dumps are produced weekly and are the recommended stable dump format.
+2. Official incremental / add-change dumps for daily changes where appropriate.
+3. Documented API / SPARQL access for targeted enrichment, subject to operational limits.
 
-## Notes
-Do not infer rights from public accessibility alone.
+Record the dump date or extraction timestamp in build metadata so a released local database can be reproduced.
 
-Last reviewed: not yet formally reviewed
+## Review evidence / rationale
+Wikidata's official licensing page states that structured data in the main, Property, Lexeme and EntitySchema namespaces is released under CC0. Its official database-download page explicitly states that the databases may be used for personal or commercial use, backups or offline use, and documents both weekly full JSON dumps and incremental dumps.
+
+Because the planned use is structured entities, labels, aliases and identifiers, it fits directly within the CC0 scope. This makes Wikidata suitable for the project's permissive/core entity layer.
+
+Last reviewed: 2026-10-06
+Review status: formal first-pass review complete; re-check scope before first public data release.
