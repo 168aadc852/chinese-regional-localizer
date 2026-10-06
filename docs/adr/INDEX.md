@@ -11,3 +11,4 @@ Read only decisions relevant to the current task.
 - [D-007](D-007-cross-platform-direction.md) — Tauri/Rust/SQLite is the leading, not fully locked, direction.
 - [D-008](D-008-source-manifest-gate.md) — `sources.yaml` controls automated ingestion.
 - [D-009](D-009-localization-precedence.md) — Deterministic localization precedence and no-guess policy.
+- [D-010](D-010-on-demand-ai-context.md) — AI context is loaded on demand to reduce repeated token cost.
