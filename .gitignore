@@ -4,6 +4,15 @@ Thumbs.db
 .vscode/
 .idea/
 
+# Python caches / local tooling
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
 # Local databases / downloaded source data
 *.sqlite
 *.sqlite3
