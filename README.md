@@ -1,59 +1,74 @@
 # Chinese Regional Localizer
 
-An open-source, offline-first Chinese regional localization project for converting and reviewing Chinese text across Mainland China (`zh-CN`), Hong Kong (`zh-HK`) and Taiwan (`zh-TW`).
+Offline-first, open-source Chinese regional localization project for converting and localizing Chinese text across Mainland China (`zh-CN`), Hong Kong (`zh-HK`) and Taiwan (`zh-TW`).
 
-> Project status: **Phase 0 — Data governance and source research**
+The project is intended to go beyond Simplified/Traditional character conversion by combining deterministic conversion, regional terminology, named-entity localization, provenance, confidence/review workflows and an updateable local knowledge base.
 
-## Goal
+## Current phase
 
-Build a local tool that goes beyond Traditional/Simplified Chinese character conversion and can handle regional terminology and proper names such as films, people, organisations, technology terms and other locale-specific names.
+**Phase 0 — Data governance and source research.**
 
-The project is intended to support desktop and mobile applications later, while keeping the translation/localization core and knowledge base reusable across platforms.
+Before building the application, this repository is defining:
 
-## Core principles
+- which external data sources may be used;
+- what their licences permit;
+- how sources must be attributed and separated;
+- how terminology/entity records retain provenance;
+- how future AI agents and developers continue the project safely.
 
-- Offline-first: user text should not need to leave the device.
-- Explainable: important changes should have a reason and provenance.
-- Region-aware: distinguish `zh-CN`, `zh-HK` and `zh-TW` instead of treating Chinese as only Simplified vs Traditional.
-- Data provenance: every imported data source must have a recorded origin and licence status.
-- Open development: GitHub is the project source of truth.
-- AI-tool independent: ChatGPT, Codex, Gemini, Claude, OpenCode and other agents should be able to continue work from repository documentation.
+See `PROJECT_STATE.md` for current progress.
 
-## Current priority
+## Planned product direction
 
-The project is **not yet implementing the application UI**.
+The target product is an offline-first Chinese Regional Localization Assistant with:
 
-Current work:
+- automatic source-locale detection;
+- output to Mainland Chinese, Hong Kong Chinese or Taiwan Chinese;
+- character/script conversion;
+- regional terminology localization;
+- film, person, organisation, place and other named-entity localization;
+- explainable changes with source information;
+- confidence/review for ambiguous changes;
+- user dictionaries and protected terms;
+- independently updateable terminology/entity databases;
+- future desktop and mobile clients.
 
-1. Build a whitelist of candidate open data sources.
-2. Verify licence and redistribution terms for each source.
-3. Define the canonical terminology/entity data schema.
-4. Define rules for separating permissive, attribution-required and share-alike data packs.
-5. Build a small proof-of-concept dataset before application development.
+Current technical direction is Tauri 2 + Rust + SQLite, but implementation choices are not locked until the data proof of concept is complete.
 
-## Repository map
+## Repository workflow
 
-- `AGENTS.md` — canonical instructions for AI coding/research agents.
-- `PROJECT_STATE.md` — current project status and immediate next work.
-- `docs/PROJECT_OVERVIEW.md` — product and problem definition.
-- `docs/PRODUCT_REQUIREMENTS.md` — initial product requirements.
-- `docs/DATA_POLICY.md` — rules governing what data can enter the project.
-- `docs/DATA_SOURCES.md` — source registry index.
-- `docs/DATABASE_SCHEMA.md` — draft data model.
-- `docs/DECISIONS.md` — architectural and governance decisions.
-- `docs/ROADMAP.md` — phased project plan.
-- `data-registry/` — one review record per external source.
+GitHub is the project's single source of truth.
 
-## For AI agents
+AI tools and human contributors should start with:
 
-Read `AGENTS.md` first, then `PROJECT_STATE.md`.
+1. `AGENTS.md`
+2. `PROJECT_STATE.md`
+3. the relevant documents under `docs/`
 
-Important findings must not exist only inside chat history. Update the relevant repository document.
+Important findings must be written back to the repository rather than left only in chat history.
 
-## Licensing
+## Data-source policy
 
-No single licence is currently asserted for all repository data.
+No external dataset should be assumed reusable because it is publicly visible.
 
-Source code licensing and third-party data licensing will be handled separately. Each external source must be reviewed before its data is imported or redistributed.
+Every external source must be reviewed under `data-registry/` before ingestion or redistribution. Allowed statuses include:
 
-See `docs/DATA_POLICY.md` and `docs/DATA_SOURCES.md`.
+- `approved`
+- `approved_with_conditions`
+- `reference_only`
+- `pending_review`
+- `rejected`
+
+See:
+
+- `docs/DATA_POLICY.md`
+- `docs/DATA_SOURCES.md`
+- `data-registry/TEMPLATE.md`
+
+## Development state
+
+No production application has been implemented yet. Source data, schema and licensing are being defined first so later desktop/mobile development does not need to undo unsafe assumptions.
+
+## Important note
+
+This repository will contain materials under different licences. Do not assume a single repository-wide software licence applies to third-party data. Each data source must retain its own licensing and attribution requirements.
