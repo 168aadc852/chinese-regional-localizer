@@ -8,7 +8,7 @@ No source listed here should be assumed redistributable unless its status says `
 
 | Source | Main use | Status | Record |
 |---|---|---|---|
-| OpenCC | Script and regional terminology conversion | pending_review | `data-registry/opencc.md` |
+| OpenCC | Script and regional terminology conversion | approved_with_conditions | `data-registry/opencc.md` |
 | Wikidata | Structured entities, labels and aliases | pending_review | `data-registry/wikidata.md` |
 | Chinese Wikipedia | Regional names, conversion rules, article context | pending_review | `data-registry/wikipedia.md` |
 | Taiwan Government / terminology open data | TW/CN professional terminology | pending_review | `data-registry/taiwan-government.md` |
