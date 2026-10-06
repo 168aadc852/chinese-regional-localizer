@@ -9,6 +9,7 @@ Read only decisions relevant to the current task.
 - [D-005](D-005-separate-code-data-licences.md) — Keep code and data licences separate.
 - [D-006](D-006-ai-writeback.md) — AI agents write material context back to the repo.
 - [D-007](D-007-cross-platform-direction.md) — Tauri/Rust/SQLite is the leading, not fully locked, direction.
-- [D-008](D-008-source-manifest-gate.md) — `sources.yaml` controls automated ingestion.
-- [D-009](D-009-localization-precedence.md) — Deterministic localization precedence and no-guess policy.
+- [D-008](D-008-source-manifest-gate.md) — Manifest + exact resource IDs control automated ingestion and pack boundaries.
+- [D-009](D-009-localization-precedence.md) — Deterministic localization precedence, conservative entity matching and no-guess policy.
 - [D-010](D-010-on-demand-ai-context.md) — AI context is loaded on demand to reduce repeated token cost.
+- [D-011](D-011-update-safe-source-versions.md) — Resource refreshes are idempotent, versioned and current/superseded aware.
