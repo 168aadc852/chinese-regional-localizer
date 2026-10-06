@@ -13,3 +13,9 @@
 - Implemented manifest-enforced Phase 0.5 SQLite PoC builder.
 - Added non-authoritative CN/HK/TW test fixtures and automated tests.
 - Added GitHub Actions CI; PoC unit tests and demo database build passed.
+- Added Phase 1A real importer for the LSHK Jyutping Table with pinned revision, SHA-256 provenance, strict TSV validation, multi-reading support and CI tests.
+- Added pronunciation schema migration and documentation.
+- Added Phase 1B real OpenCC phrase importer pinned to commit `3ac34aa439a9908dd49fa92b5174b46314787ac2`.
+- Imported-model support for staged `STPhrases`, `HKPhrases` and `TWPhrases` rules without flattening CN/HK/TW conversion semantics.
+- Preserved OpenCC multi-candidate mappings, identity mappings, dictionary/line provenance and per-file SHA-256 source versions.
+- Added OpenCC parser/importer tests covering HK/TW proper-name and terminology examples; CI passed.
