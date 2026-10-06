@@ -1,74 +1,77 @@
 # Chinese Regional Localizer
 
-Offline-first, open-source Chinese regional localization project for converting and localizing Chinese text across Mainland China (`zh-CN`), Hong Kong (`zh-HK`) and Taiwan (`zh-TW`).
+Offline-first, open-source Chinese regional localization project for converting and localizing text across Mainland China (`zh-CN`), Hong Kong (`zh-HK`) and Taiwan (`zh-TW`).
 
-The project is intended to go beyond Simplified/Traditional character conversion by combining deterministic conversion, regional terminology, named-entity localization, provenance, confidence/review workflows and an updateable local knowledge base.
+The project goes beyond Simplified/Traditional character conversion by combining deterministic script conversion, regional terminology, named-entity localization, provenance, conflict review and updateable SQLite data packs.
 
-## Current phase
+## Current state
 
-**Phase 0 — Data governance and source research.**
+**Phase 2C — Core hardening.**
 
-Before building the application, this repository is defining:
+Implemented foundations:
 
-- which external data sources may be used;
-- what their licences permit;
-- how sources must be attributed and separated;
-- how terminology/entity records retain provenance;
-- how future AI agents and developers continue the project safely.
+- machine-readable data-source policy and licence-pack separation;
+- SQLite schema v0.2 with current/superseded source-version tracking;
+- LSHK Jyutping importer with pinned Git-blob verification;
+- OpenCC forward CN → Hant → HK/TW phrase/character/variant import;
+- Wikidata regional entity-name importer with revision-aware refresh;
+- deterministic reference localization engine with conservative entity matching, longest-match rules, protected spans and no-guess ambiguity handling;
+- original-to-final span alignment for future diff/review UI;
+- offline fixtures, regression tests and GitHub Actions CI.
 
-See `PROJECT_STATE.md` for current progress.
+Production Rust/Tauri clients have not started. The Python code is the reference implementation used to stabilize behavior first.
 
-## Planned product direction
+See `PROJECT_STATE.md` for the concise current status.
 
-The target product is an offline-first Chinese Regional Localization Assistant with:
+## Supported reference routes
 
-- automatic source-locale detection;
-- output to Mainland Chinese, Hong Kong Chinese or Taiwan Chinese;
-- character/script conversion;
-- regional terminology localization;
-- film, person, organisation, place and other named-entity localization;
-- explainable changes with source information;
-- confidence/review for ambiguous changes;
-- user dictionaries and protected terms;
-- independently updateable terminology/entity databases;
-- future desktop and mobile clients.
+- `zh-CN -> zh-HK`
+- `zh-CN -> zh-TW`
+- `zh-Hant -> zh-HK`
+- `zh-Hant -> zh-TW`
 
-Current technical direction is Tauri 2 + Rust + SQLite, but implementation choices are not locked until the data proof of concept is complete.
+Reverse routes are not yet implemented.
+
+## Quick development demo
+
+```bash
+python -m pip install -r requirements-dev.txt
+python scripts/build_demo_database.py
+python scripts/localize_text.py \
+  --db build/regional-demo.sqlite \
+  --from zh-CN \
+  --to zh-TW \
+  --text "布拉德·皮特研究人工智能"
+```
+
+The fixture database is for tests/development only and is not an authoritative terminology release.
 
 ## Repository workflow
 
-GitHub is the project's single source of truth.
+GitHub is the project source of truth. AI tools and human contributors should begin with `AGENTS.md`, then load only the task-specific context it routes to under `.ai/` and `docs/`.
 
-AI tools and human contributors should start with:
+Behavior changes require tests. Importers must preserve provenance, obey exact machine-readable ingest resources and keep incompatible licence packs separate.
 
-1. `AGENTS.md`
-2. `PROJECT_STATE.md`
-3. the relevant documents under `docs/`
+## Data governance
 
-Important findings must be written back to the repository rather than left only in chat history.
+Public visibility is not permission to ingest or redistribute data. Every external source is reviewed under `data-registry/` and represented in `data-registry/sources.yaml`.
 
-## Data-source policy
+Production importers require all of the following:
 
-No external dataset should be assumed reusable because it is publicly visible.
+- `ingest_allowed: true`;
+- an exact resource listed in `ingest_resources`;
+- the expected licence pack;
+- revision/version, URL and checksum provenance;
+- input-format validation.
 
-Every external source must be reviewed under `data-registry/` before ingestion or redistribution. Allowed statuses include:
+Pending, reference-only, rejected, or out-of-scope material is blocked.
 
-- `approved`
-- `approved_with_conditions`
-- `reference_only`
-- `pending_review`
-- `rejected`
+## Licensing
 
-See:
+Project-authored software is licensed under Apache License 2.0; see `LICENSE` and `LICENSE_SCOPE.md`.
 
-- `docs/DATA_POLICY.md`
-- `docs/DATA_SOURCES.md`
-- `data-registry/TEMPLATE.md`
+Third-party data is **not** relicensed under the software licence. Each source keeps its own licence and attribution/share-alike obligations. See `docs/LICENSE_PACKAGING.md` and the corresponding `data-registry/*.md` review.
 
-## Development state
+## Production direction
 
-No production application has been implemented yet. Source data, schema and licensing are being defined first so later desktop/mobile development does not need to undo unsafe assumptions.
-
-## Important note
-
-This repository will contain materials under different licences. Do not assume a single repository-wide software licence applies to third-party data. Each data source must retain its own licensing and attribution requirements.
+The planned application direction remains Rust + Tauri 2 + SQLite after reference behavior, update semantics and regression coverage are stable. User dictionaries/protected terms come before the Rust port; UI work follows the stable core rather than defining core behavior implicitly.
