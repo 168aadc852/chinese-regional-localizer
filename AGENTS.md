@@ -1,101 +1,32 @@
-# Canonical AI Agent Instructions
+# AI Instructions
 
-This file is the canonical entry point for AI tools working on this repository.
+This repository is the project source of truth.
 
-## Before doing any work
+## Context budget
 
-Read, in this order:
+Do **not** preload project documentation. Start from the current task or GitHub Issue, then read only the files needed to complete it safely.
 
-1. `README.md`
-2. `PROJECT_STATE.md`
-3. `docs/PROJECT_OVERVIEW.md`
-4. `docs/PRODUCT_REQUIREMENTS.md`
-5. `docs/DECISIONS.md`
+Prefer: specific file/section > task guide > index > broad project documentation.
 
-For any data, terminology, licensing, ingestion, scraping, API, database or knowledge-base work, also read:
+## Task router
 
-6. `docs/DATA_POLICY.md`
-7. `docs/DATA_SOURCES.md`
-8. `docs/DATABASE_SCHEMA.md`
-9. `data-registry/sources.yaml`
-10. `docs/SOURCE_MANIFEST_SCHEMA.md`
+- Current status only: `PROJECT_STATE.md`
+- Code changes: `.ai/coding.md`
+- Data-source / licence review: `.ai/data-review.md`
+- Importer work: `.ai/importer.md`
+- SQLite / schema work: `.ai/database.md`
+- Localization behavior: `.ai/engine.md`
+- Tests / CI: `.ai/testing.md`
+- Documentation changes: `.ai/docs.md`
+- Release / packaging: `.ai/release.md`
 
-## Source-of-truth rule
+Read `README.md`, project overview, product requirements, history or unrelated technical docs only when the task actually requires them.
 
-GitHub repository files are the project memory.
+## Global rules
 
-Do not leave an important decision, research result, licensing conclusion, schema change or implementation status only in chat history.
-
-Write it back to the appropriate repository file.
-
-## Data safety rules
-
-- Never invent or guess licence terms.
-- Publicly viewable does **not** automatically mean redistributable.
-- Do not mark a source `approved` without verifiable licensing evidence.
-- If rights are unclear, mark the source `pending_review` or `reference_only`.
-- Keep source code licensing separate from third-party data licensing.
-- Preserve provenance fields when transforming external data.
-- Do not copy proprietary or restricted datasets into the repository.
-- Do not bulk scrape a source until its terms and technical access method have been reviewed.
-- Automated importers must treat `data-registry/sources.yaml` as the machine-readable ingestion policy.
-- Only entries with `ingest_allowed: true` may be imported automatically.
-- `null` permission fields mean unresolved, never permitted.
-- Importers must obey both `ingest_scope` and `excluded_scope`; source-level approval does not imply every file or namespace is approved.
-
-## Architecture rules
-
-- Preserve the offline-first goal.
-- Treat `zh-CN`, `zh-HK` and `zh-TW` as distinct localization targets.
-- Do not reduce the product to only Simplified/Traditional character conversion.
-- Keep deterministic conversion and terminology/entity lookup separate from optional future LLM assistance.
-- Do not begin major UI implementation during Phase 0 unless `PROJECT_STATE.md` explicitly changes the current phase.
-- Important architectural changes must be recorded in `docs/DECISIONS.md`.
-
-## Working with external sources
-
-Each source must have a record under `data-registry/` containing, where available:
-
-- official name
-- official URL
-- data type
-- region coverage
-- licence name
-- licence URL/evidence
-- commercial-use status
-- modification status
-- redistribution status
-- attribution requirement
-- share-alike requirement
-- packaging/republication implications
-- update method
-- intended use
-- restrictions
-- review date
-- review status
-
-Allowed statuses:
-
-- `approved`
-- `approved_with_conditions`
-- `reference_only`
-- `pending_review`
-- `rejected`
-
-When a source reaches a usable conclusion, keep its detailed review record and `data-registry/sources.yaml` consistent.
-
-## Definition of done
-
-A task is not complete until, where applicable:
-
-- the requested work exists in the repository;
-- relevant tests/checks have been run;
-- documentation reflects material changes;
-- `PROJECT_STATE.md` reflects meaningful progress;
-- important decisions are recorded in `docs/DECISIONS.md`;
-- source-review changes are reflected in `data-registry/sources.yaml`;
-- unresolved licensing uncertainty is explicitly documented rather than guessed.
-
-## Handoff rule
-
-Before ending substantial work, leave enough information in the repository for a different AI tool with no chat history to continue safely.
+- Do not guess licensing facts or ingest unapproved data.
+- Do not silently change established architecture or localization behavior.
+- Preserve offline-first and distinct `zh-CN` / `zh-HK` / `zh-TW` goals.
+- Run the smallest relevant tests first; run the full relevant suite before declaring implementation complete.
+- Write material decisions, source-review results and meaningful progress back to the repository.
+- If context is missing, load the next relevant file on demand instead of preloading the documentation tree.
