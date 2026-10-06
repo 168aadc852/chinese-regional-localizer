@@ -1,21 +1,51 @@
 # THUOCL (THU Open Chinese Lexicon)
 
-Status: `pending_review`
+Status: **approved_with_conditions**
 
-## Preliminary evidence
+## Intended use
+Mainland Chinese vocabulary coverage, domain lexicons, word-frequency signals, segmentation support and candidate detection for regional terminology.
 
-- Publisher: Tsinghua University NLP / Social Computing group (THUNLP)
-- Public repository: https://github.com/thunlp/THUOCL
-- The project describes itself as an open Chinese lexicon and states that it is available for research and commercial use.
-- The repository is presented under an MIT licence, but the exact scope covering all bundled lexical data should still be confirmed before redistribution.
+## Official source
+Repository: https://github.com/thunlp/THUOCL
+Publisher: THUNLP / Tsinghua University NLP and Social Computing Lab
 
-## Potential project use
+## Evidence reviewed
+- Repository root contains an MIT License file (copyright THUNLP).
+- README describes THUOCL as an open Chinese lexicon.
+- README explicitly states that THUOCL is freely open to universities, research institutes, enterprises, institutions and individuals and may be used for research and commercial purposes.
+- README requests citation when research papers or scientific outputs are based on THUOCL.
+- README explains that the word lists were curated from social tags, search hot terms, input-method lexicons and frequency corpora including CSDN, Sina News and Sogou corpora.
 
-- Mainland Chinese vocabulary coverage
-- Domain lexicons and word-frequency signals
-- Segmentation support
-- Candidate detection for regional terminology
+## Rights review
+For the repository distribution itself:
+- Commercial use: **Yes**
+- Use: **Yes**
+- Copy/modify/distribute: **MIT repository licence indicates yes for the repository distribution, subject to preservation of the MIT notice**
+- Attribution/licence notice: **Preserve MIT copyright/licence notice**
+- Research citation: **Requested by the project README for research/scientific outputs**
+- Share-alike/copyleft: **No**
 
-## Review required
+## Important provenance limitation
+The word lists were produced from third-party websites/corpora/input-method resources. The project’s open-source/commercial-use statement and root MIT licence support reuse of the published THUOCL package, but they do not transfer rights in the underlying raw third-party corpora.
 
-Confirm whether the MIT licence applies to the complete lexical datasets and record any attribution/citation requirements before changing status.
+Therefore:
+- use only the published THUOCL word-list/frequency files;
+- do not redistribute or reconstruct source corpora such as CSDN/Sina/Sogou from THUOCL provenance statements;
+- retain source-category/provenance metadata where practical;
+- treat the DF values as THUOCL-derived frequency signals, not as rights to the original corpus content.
+
+## Packaging decision
+Approved for the attribution/permissive candidate layer with MIT notice preservation and clear provenance.
+
+Suitable uses:
+- Chinese word detection;
+- domain classification hints;
+- Mainland vocabulary candidates;
+- frequency ranking.
+
+Not suitable as a sole authority for HK/TW localisation or as proof that a term is officially preferred in Mainland China.
+
+## Update method
+Track the official GitHub repository. Record commit/release used because the project is updated by repository changes rather than a formal versioned release process.
+
+Last reviewed: 2026-10-06
