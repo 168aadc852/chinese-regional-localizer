@@ -16,6 +16,10 @@
 - Added Phase 1A real importer for the LSHK Jyutping Table with pinned revision, SHA-256 provenance, strict TSV validation, multi-reading support and CI tests.
 - Added pronunciation schema migration and documentation.
 - Added Phase 1B real OpenCC phrase importer pinned to commit `3ac34aa439a9908dd49fa92b5174b46314787ac2`.
-- Imported-model support for staged `STPhrases`, `HKPhrases` and `TWPhrases` rules without flattening CN/HK/TW conversion semantics.
+- Added staged `STPhrases`, `HKPhrases` and `TWPhrases` support without flattening CN/HK/TW conversion semantics.
 - Preserved OpenCC multi-candidate mappings, identity mappings, dictionary/line provenance and per-file SHA-256 source versions.
 - Added OpenCC parser/importer tests covering HK/TW proper-name and terminology examples; CI passed.
+- Added Phase 1C Wikidata EntityData importer for CC0 structured entity labels and aliases.
+- Added stable QID identity, explicit entity types, locale-specific CN/HK/TW names, aliases, revision-aware provenance, retrieval timestamps and canonical per-entity SHA-256.
+- Added a hard no-fabrication rule: generic Chinese labels are not silently promoted to missing regional labels.
+- Added offline Wikidata fixtures and tests for a person and a film; CI passed after final provenance updates.
