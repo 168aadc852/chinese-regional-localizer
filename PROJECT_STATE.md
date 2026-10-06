@@ -13,48 +13,61 @@ Establish a legally and technically traceable data foundation before writing the
 ## Completed
 
 - Defined the project as an offline-first CN / HK / TW Chinese regional localization tool.
-- Agreed that GitHub should be the single source of truth for humans and AI tools.
-- Agreed to separate data-source research from application implementation.
-- Created the initial repository documentation structure.
-- Expanded the source registry to 23 records after splitting DATA.GOV.HK from the Combined DoJ Glossaries.
+- Agreed that GitHub is the single source of truth for humans and AI tools.
+- Created the initial repository documentation and source registry structure.
+- Expanded the source registry to 23 records after separating DATA.GOV.HK from the Combined DoJ Glossaries.
 - Opened GitHub Issue #1 to manage authoritative licence verification and whitelist approval.
-- Completed first-pass formal reviews for 14 source records:
-  - OpenCC — `approved_with_conditions`
-  - Wikidata structured data — `approved`
-  - Chinese Wikipedia — `approved_with_conditions`, isolated CC BY-SA data pack
-  - Taiwan Government / NAER terminology open data — `approved_with_conditions` for individually verified OGL-Taiwan v1 datasets
-  - DATA.GOV.HK — `approved_with_conditions`; portal terms allow commercial/non-commercial download, distribution and reproduction, but adaptation rights are not assumed
-  - CC-CEDICT — `approved_with_conditions`, isolated CC BY-SA 4.0 pack
-  - Words.hk — `approved_with_conditions`; public-domain word-list/pronunciation subset approved, full dictionary excluded from commercial-capable pack
-  - Rime Cantonese — `approved_with_conditions`; CC BY 4.0 main content separated from ODbL map data
-  - Unicode / Unihan / CLDR — `approved_with_conditions` for clearly identified Unicode-3.0 Data Files only
-  - MusicBrainz — `approved_with_conditions`; Core Data CC0 only, Supplementary Data excluded
-  - THUOCL — `approved_with_conditions`; published repo word lists/frequency signals only, with MIT/provenance safeguards
-  - PanLex — `approved` under CC0 official snapshots
-  - CC-Canto — `approved_with_conditions`, isolated CC BY-SA 3.0 pack
-  - Chinese Wiktionary — `approved_with_conditions`, isolated CC BY-SA 4.0 text-derived pack
-- Split the Combined DoJ Glossaries into a separate `pending_review` record because explicit reuse/adaptation rights have not yet been confirmed.
+- Completed first-pass formal reviews with usable conclusions for **20 of 23** source records.
+- Established initial packaging classes: permissive/core, attribution-required, ShareAlike-isolated, non-commercial/reference-only and pending-rights layers.
+- Added `docs/REVIEW_PROGRESS.md` and `docs/LICENSE_PACKAGING.md`.
 
-## In progress
+## Approved / approved-with-conditions sources
 
-- Review remaining candidate open datasets and licences.
-- Build an authoritative data-source whitelist.
-- Refine the terminology/entity database schema.
-- Classify sources into permissive core, attribution-required packs, ShareAlike packs and reference-only sources.
+### Core/permissive or attribution-capable
+- OpenCC
+- Wikidata
+- Taiwan Government / verified NAER open terminology datasets
+- DATA.GOV.HK qualifying portal data
+- Words.hk public-domain word-list/pronunciation subset
+- Rime Cantonese (file-level split licensing)
+- Unicode / Unihan / CLDR machine-readable Data Files
+- MusicBrainz Core Data
+- THUOCL published word-list/frequency package
+- PanLex
+- Chinese Open WordNet
+- HKCanCor
+- LSHK Jyutping Table
+- individually reviewed Kaifangcidian datasets such as `kfcd/hyzd`
+
+### ShareAlike-isolated sources
+- Chinese Wikipedia
+- Chinese Wiktionary
+- CC-CEDICT
+- CC-Canto
+- ConceptNet
+- CFDICT
+- Rime `jyut6ping3.maps` under ODbL
+
+## Pending rights/version clarification
+
+1. Combined DoJ Glossaries of Legal Terms
+   - official XML downloads and Open Data label confirmed;
+   - explicit reuse/adaptation rights for a derived redistributable terminology database are not yet confirmed.
+2. DBnary
+   - clearly ShareAlike;
+   - project surfaces reviewed show CC BY-SA version inconsistency, so snapshot-level licence confirmation is required.
+3. OpenHowNet downloadable HowNet core data
+   - repository/API code is MIT;
+   - data is downloaded separately and a data-specific redistribution licence has not yet been independently confirmed.
 
 ## Next recommended work
 
-1. Review DBnary.
-2. Review ConceptNet.
-3. Review Chinese Open WordNet.
-4. Review HKCanCor.
-5. Review LSHK Jyutping Table.
-6. Review Kaifangcidian / Open Chinese Dictionary datasets individually.
-7. Review CFDICT.
-8. Review OpenHowNet.
-9. Continue looking for an explicit reuse/adaptation licence for the Combined DoJ Glossaries.
-10. Define a machine-readable source manifest/schema reflecting the licence classes now emerging.
-11. Produce a small test corpus covering films, people, IT terms, transport, legal terms, Cantonese/HK terms and ambiguous words.
+1. Resolve the 3 remaining licensing ambiguities if possible.
+2. Convert the source registry into a machine-readable manifest (`sources.yaml` or JSON) with licence/packaging flags.
+3. Finalise canonical database schema with mandatory provenance/licence fields.
+4. Define importer allowlists at source/file/field level.
+5. Build a small test corpus covering films, people, IT terms, transport, legal terms, Cantonese/HK terms and ambiguous words.
+6. Build the first proof-of-concept SQLite database from the safest sources only (for example Wikidata, PanLex, OpenCC-compatible data, Unicode/CLDR and other approved non-ShareAlike resources).
 
 ## Not started
 
@@ -76,4 +89,4 @@ Establish a legally and technically traceable data foundation before writing the
 
 ## Important constraint
 
-Do not treat candidate sources as approved until licensing evidence is recorded in `data-registry/`.
+Do not treat candidate sources as approved until licensing evidence is recorded in `data-registry/`. Importers must use explicit allowlists so that excluded/non-commercial/ShareAlike data cannot silently enter the wrong release pack.
