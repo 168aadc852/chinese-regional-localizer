@@ -1,20 +1,40 @@
 # Hong Kong Cantonese Corpus (HKCanCor)
 
-Status: `pending_review`
+Status: **approved_with_conditions**
 
-## Preliminary evidence
+## Intended use
+Hong Kong Cantonese vocabulary extraction, word-frequency evidence, segmentation, Jyutping and part-of-speech support.
 
-- Public source: https://github.com/fcbond/hkcancor
-- HKCanCor is a word-segmented Hong Kong Cantonese corpus with Jyutping and part-of-speech annotation.
-- The project states that the corpus is released under CC BY 4.0.
+## Official source
+Repository: https://github.com/fcbond/hkcancor
+Publisher/authors: Hong Kong Cantonese Corpus project; K. K. Luke and May L. Y. Wong, repository maintained/distributed by project contributors
 
-## Potential project use
+## Licence review
+The official repository states that the corpus is released under **Creative Commons Attribution 4.0 International (CC BY 4.0)**.
 
-- Hong Kong Cantonese vocabulary extraction
-- Word frequency and segmentation evidence
-- Jyutping and part-of-speech information
-- Distinguishing written Chinese from Cantonese lexical items
+The corpus is word-segmented and annotated with pronunciation and POS. Full transcriptions are downloadable; complete audio is not released (only samples are available).
 
-## Review required
+- Commercial use: **Yes**
+- Modification/adaptation: **Yes**
+- Redistribution: **Yes**
+- Attribution: **Required**
+- Indicate changes: **Required under CC BY 4.0 when sharing adapted material**
+- ShareAlike: **No**
 
-This is a corpus rather than a conventional dictionary. Define whether derived word-frequency lists can be included in the core/extended database and how attribution must be preserved.
+## Packaging decision
+Approved for an attribution-required Hong Kong/Cantonese evidence layer.
+
+Recommended project use:
+- derive HK Cantonese word-frequency/statistical signals;
+- validate tokenisation and POS;
+- extract candidate Cantonese lexical items;
+- compare candidate terms against other HK resources.
+
+If distributing derived frequency lists or lexical extracts, retain corpus attribution and document the derivation method.
+
+Do not bundle audio unless separately reviewed; the project does not need audio for the initial localisation tool.
+
+## Update method
+Use official repository corpus files and record commit/version. Preserve citation recommended by the project.
+
+Last reviewed: 2026-10-06
