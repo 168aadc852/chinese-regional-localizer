@@ -1,0 +1,42 @@
+[
+  {
+    "id": "person-cn-hk",
+    "source_locale": "zh-CN",
+    "target_locale": "zh-HK",
+    "input": "布拉德·皮特",
+    "expected": "畢·彼特",
+    "focus": "entity"
+  },
+  {
+    "id": "person-cn-tw",
+    "source_locale": "zh-CN",
+    "target_locale": "zh-TW",
+    "input": "布拉德·皮特",
+    "expected": "布萊德·彼特",
+    "focus": "entity"
+  },
+  {
+    "id": "tw-ai-term",
+    "source_locale": "zh-CN",
+    "target_locale": "zh-TW",
+    "input": "人工智能",
+    "expected": "人工智慧",
+    "focus": "regional_term"
+  },
+  {
+    "id": "script-stage",
+    "source_locale": "zh-CN",
+    "target_locale": "zh-HK",
+    "input": "一见钟情",
+    "expected": "一見鍾情",
+    "focus": "script"
+  },
+  {
+    "id": "mixed-entity-term",
+    "source_locale": "zh-CN",
+    "target_locale": "zh-TW",
+    "input": "布拉德·皮特研究人工智能",
+    "expected": "布萊德·彼特研究人工智慧",
+    "focus": "composition"
+  }
+]
