@@ -17,6 +17,8 @@ For any data, terminology, licensing, ingestion, scraping, API, database or know
 6. `docs/DATA_POLICY.md`
 7. `docs/DATA_SOURCES.md`
 8. `docs/DATABASE_SCHEMA.md`
+9. `data-registry/sources.yaml`
+10. `docs/SOURCE_MANIFEST_SCHEMA.md`
 
 ## Source-of-truth rule
 
@@ -36,6 +38,10 @@ Write it back to the appropriate repository file.
 - Preserve provenance fields when transforming external data.
 - Do not copy proprietary or restricted datasets into the repository.
 - Do not bulk scrape a source until its terms and technical access method have been reviewed.
+- Automated importers must treat `data-registry/sources.yaml` as the machine-readable ingestion policy.
+- Only entries with `ingest_allowed: true` may be imported automatically.
+- `null` permission fields mean unresolved, never permitted.
+- Importers must obey both `ingest_scope` and `excluded_scope`; source-level approval does not imply every file or namespace is approved.
 
 ## Architecture rules
 
@@ -76,6 +82,8 @@ Allowed statuses:
 - `pending_review`
 - `rejected`
 
+When a source reaches a usable conclusion, keep its detailed review record and `data-registry/sources.yaml` consistent.
+
 ## Definition of done
 
 A task is not complete until, where applicable:
@@ -85,6 +93,7 @@ A task is not complete until, where applicable:
 - documentation reflects material changes;
 - `PROJECT_STATE.md` reflects meaningful progress;
 - important decisions are recorded in `docs/DECISIONS.md`;
+- source-review changes are reflected in `data-registry/sources.yaml`;
 - unresolved licensing uncertainty is explicitly documented rather than guessed.
 
 ## Handoff rule
