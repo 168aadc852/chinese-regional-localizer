@@ -1,21 +1,39 @@
 # Kaifangcidian / Open Chinese Dictionary
 
-Status: `pending_review`
+Status: **approved_with_conditions**
 
-## Preliminary evidence
+## Intended use
+Open Chinese pronunciation/dictionary data where individual repositories carry compatible licences.
 
-- Public project family: https://github.com/kfcd/
-- Example dataset: https://github.com/kfcd/hyzd
-- The Open Chinese Dictionary pronunciation database states that its data is released under Creative Commons Attribution 3.0 Unported.
+## Project family
+Organisation: https://github.com/kfcd/
+Reviewed dataset example: https://github.com/kfcd/hyzd
 
-## Potential project use
+## Licence review
+The reviewed `kfcd/hyzd` repository (開放漢語字典 / 現代漢語字音數據庫) explicitly states that the data in that repository is released under **Creative Commons Attribution 3.0 Unported (CC BY 3.0)**.
 
-- Mandarin character readings
-- Traditional/Simplified character forms
-- Pronunciation mappings
-- Cross-checking regional character forms and readings
-- Additional open Chinese dictionary data where individual repositories carry compatible licences
+For the reviewed `hyzd` dataset:
+- Commercial use: **Yes**
+- Modification/adaptation: **Yes**
+- Redistribution: **Yes**
+- Attribution: **Required**
+- ShareAlike: **No**
 
-## Review required
+## Packaging decision
+Approved **only on a per-repository/per-dataset basis**.
 
-Kaifangcidian contains multiple repositories/datasets. Review each dataset individually rather than assuming the entire project family has one licence.
+Current approved subset:
+- `kfcd/hyzd` → attribution-required data layer under CC BY 3.0.
+
+Do not infer that every repository under the `kfcd` organisation carries the same licence. Any additional Kaifangcidian dataset must have its own source record or a verified per-dataset licence entry before ingestion.
+
+## Potential use of `hyzd`
+- Mandarin character readings;
+- pronunciation mappings;
+- Traditional/Simplified character support where present;
+- cross-checking character readings/forms.
+
+## Update method
+Track exact repository/commit for each imported dataset and retain the specific repository’s licence/attribution metadata.
+
+Last reviewed: 2026-10-06
