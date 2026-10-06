@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -17,12 +20,22 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+          cache: pip
 
       - name: Install test dependencies
         run: python -m pip install -r requirements-dev.txt
 
+      - name: Compile Python
+        run: python -m compileall -q scripts src tests
+
+      - name: Lint Python
+        run: ruff check scripts src tests
+
+      - name: Validate manifest
+        run: PYTHONPATH=scripts python -c "from pathlib import Path; import poc_builder; poc_builder.load_manifest(Path('data-registry/sources.yaml'))"
+
       - name: Run unit tests
         run: python -m unittest discover -s tests -v
 
-      - name: Build demo database
-        run: python scripts/poc_builder.py --demo
+      - name: Build Phase 2C demo database
+        run: python scripts/build_demo_database.py
