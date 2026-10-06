@@ -16,24 +16,28 @@ Establish a legally and technically traceable data foundation before writing the
 - Agreed that GitHub should be the single source of truth for humans and AI tools.
 - Agreed to separate data-source research from application implementation.
 - Created the initial repository documentation structure.
-- Created the first candidate source registry placeholders.
+- Created candidate source registry records for 22 sources.
+- Expanded the source pool beyond Wikipedia/OpenCC to include multilingual lexicons, Cantonese resources, semantic networks, WordNet-style resources and official terminology datasets.
+- Opened GitHub Issue #1 to manage authoritative licence verification and whitelist approval.
 
 ## In progress
 
 - Review candidate open datasets and licences.
 - Build an authoritative data-source whitelist.
 - Refine the terminology/entity database schema.
+- Classify candidate sources into permissive core, attribution-required packs, ShareAlike packs and reference-only sources.
 
 ## Next recommended work
 
 1. Verify OpenCC source/data licensing and intended use.
 2. Verify Wikidata licensing and useful fields for regional aliases.
-3. Define how Wikipedia-derived data must be isolated and attributed.
-4. Review Taiwan government terminology datasets individually.
-5. Review Hong Kong government / Department of Justice terminology datasets individually.
-6. Review CC-CEDICT, Words.hk and Rime Cantonese licensing boundaries.
-7. Add Unicode/Unihan/CLDR as candidate sources and review their licensing/use cases.
-8. Produce a small test corpus covering films, people, IT terms, transport, legal terms and ambiguous words.
+3. Review high-value new candidates: PanLex, THUOCL, CC-Canto and Chinese Wiktionary.
+4. Define how Wikipedia/Wiktionary/DBnary/ConceptNet ShareAlike-derived data must be isolated and attributed.
+5. Review Taiwan government terminology datasets individually.
+6. Review Hong Kong government / Department of Justice terminology datasets individually.
+7. Review HKCanCor and LSHK Jyutping Table for Hong Kong lexical/pronunciation support.
+8. Review semantic resources (Chinese Open WordNet and OpenHowNet) for ambiguity handling.
+9. Produce a small test corpus covering films, people, IT terms, transport, legal terms, Cantonese/HK terms and ambiguous words.
 
 ## Not started
 
