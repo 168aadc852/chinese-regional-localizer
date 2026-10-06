@@ -6,7 +6,7 @@ Last updated: 2026-10-06
 
 **Phase 0 — Data governance and source research**
 
-A parallel **Phase 0.5 proof-of-concept track** is now ready to begin using only manifest-approved sources.
+A parallel **Phase 0.5 proof-of-concept track** is now implemented and under automated validation using only manifest-approved source classes.
 
 ## Objective of this phase
 
@@ -29,6 +29,21 @@ Establish a legally and technically traceable data foundation before writing the
 - Promoted `docs/DATABASE_SCHEMA.md` to implementation draft **v0.1**, including mandatory source/version provenance and pack separation.
 - Added executable, syntax-validated SQLite schema at `schema/sqlite-v0.1.sql`.
 - Opened GitHub Issue #2: **Phase 0.5 — Build manifest-enforced SQLite proof of concept**.
+- Added `scripts/poc_builder.py`, which:
+  - validates `sources.yaml`;
+  - loads all source metadata into SQLite;
+  - rejects data ingestion from blocked/pending sources;
+  - enforces source IDs before inserting source versions, term rules and entity names;
+  - preserves fixture provenance in `source_versions` and `name_evidence`;
+  - runs SQLite `integrity_check` after building.
+- Added clearly marked non-authoritative PoC fixtures under `data/fixtures/` covering:
+  - CN→HK/TW technology terminology;
+  - a film with CN/HK/TW regional titles;
+  - a person with CN/HK/TW regional names;
+  - a Hong Kong lexical signal.
+- Added `tests/test_poc_builder.py` covering policy rejection, database build/integrity, regional lookup and provenance.
+- Added GitHub Actions workflow `.github/workflows/poc-tests.yml` to run tests and build the demo database on push/PR.
+- Added `docs/POC.md` documenting the PoC safety boundary and local test workflow.
 
 ## Approved / approved-with-conditions sources
 
@@ -71,17 +86,17 @@ Establish a legally and technically traceable data foundation before writing the
 
 ## Next recommended work
 
-1. Resolve the 3 remaining licensing ambiguities if possible under Issue #1.
-2. Begin Issue #2 with source/file/field-level importer allowlists based on `data-registry/sources.yaml`.
-3. Create the first SQLite database from `schema/sqlite-v0.1.sql`.
-4. Build a small test corpus covering films, people, IT terms, transport, legal terms, Cantonese/HK terms and ambiguous words.
-5. Build the first proof-of-concept dataset using only approved non-ShareAlike sources.
-6. Demonstrate provenance for every returned result and safe rejection of a pending source.
-7. Only after the proof of concept is stable, begin the localization engine/API layer.
+1. Confirm the Phase 0.5 GitHub Actions run passes; fix any test/build issue before extending the PoC.
+2. Resolve the 3 remaining licensing ambiguities if possible under Issue #1.
+3. Replace hand-authored PoC fixtures one source at a time with real source-specific importers, starting with a small permissive source.
+4. Pin real upstream versions/snapshots and record checksums/retrieval timestamps.
+5. Add source-specific tests for `ingest_scope` / `excluded_scope` enforcement.
+6. Build a small evaluation corpus covering films, people, IT terms, transport, legal terms, Cantonese/HK terms and ambiguous words.
+7. Only after real importer/provenance tests are stable, begin the localization engine/API layer.
 
 ## Not started
 
-- Production database importer
+- Production source importers
 - Translation/localization engine
 - Desktop application
 - Mobile application
@@ -95,8 +110,9 @@ Establish a legally and technically traceable data foundation before writing the
 - Local database direction: SQLite
 - Deterministic conversion layer: OpenCC and/or compatible regional conversion engine
 - Entity/terminology layer: multi-source knowledge base
+- Phase 0.5 tooling: Python + PyYAML for fast validation only, not a commitment to the production runtime
 - Optional future ambiguity layer: local LLM, only if needed
 
 ## Important constraint
 
-Do not treat candidate sources as approved until licensing evidence is recorded in `data-registry/`. Importers must enforce `data-registry/sources.yaml`, including `ingest_allowed`, `ingest_scope`, `excluded_scope` and pack separation.
+Do not treat candidate sources as approved until licensing evidence is recorded in `data-registry/`. Importers must enforce `data-registry/sources.yaml`, including `ingest_allowed`, `ingest_scope`, `excluded_scope` and pack separation. PoC fixture data is never authoritative upstream evidence.
