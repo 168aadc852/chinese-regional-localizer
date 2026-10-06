@@ -1,0 +1,10 @@
+# Open Chinese Convert (OpenCC) Dictionary
+# File: HKPhrases.txt
+# Format: key	value(s) (values separated by spaces)
+# License: Apache-2.0 (see LICENSE)
+# Source: https://github.com/ByVoid/OpenCC
+# Used in configs: s2hkp.json (via HKPhrases.ocd2)
+
+布拉德·皮特	畢·彼特
+服務器	伺服器
+幾率	機率 概率
