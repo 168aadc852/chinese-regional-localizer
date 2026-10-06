@@ -1,0 +1,53 @@
+{
+  "entities": {
+    "Q35332": {
+      "pageid": 19599,
+      "ns": 0,
+      "title": "Q35332",
+      "lastrevid": 1000001,
+      "modified": "2026-10-01T00:00:00Z",
+      "type": "item",
+      "id": "Q35332",
+      "labels": {
+        "en": {"language": "en", "value": "Brad Pitt"},
+        "zh-cn": {"language": "zh-cn", "value": "布拉德·皮特"},
+        "zh-hk": {"language": "zh-hk", "value": "畢·彼特"},
+        "zh-tw": {"language": "zh-tw", "value": "布萊德·彼特"}
+      },
+      "descriptions": {
+        "en": {"language": "en", "value": "fixture person"}
+      },
+      "aliases": {
+        "en": [
+          {"language": "en", "value": "William Bradley Pitt"}
+        ],
+        "zh-hk": [
+          {"language": "zh-hk", "value": "畢彼特"}
+        ]
+      }
+    },
+    "Q108839994": {
+      "pageid": 999999,
+      "ns": 0,
+      "title": "Q108839994",
+      "lastrevid": 1000002,
+      "modified": "2026-10-01T00:00:00Z",
+      "type": "item",
+      "id": "Q108839994",
+      "labels": {
+        "en": {"language": "en", "value": "Oppenheimer"},
+        "zh-cn": {"language": "zh-cn", "value": "奥本海默"},
+        "zh-hk": {"language": "zh-hk", "value": "奧本海默"},
+        "zh-tw": {"language": "zh-tw", "value": "奧本海默"}
+      },
+      "descriptions": {
+        "en": {"language": "en", "value": "fixture film"}
+      },
+      "aliases": {
+        "en": [
+          {"language": "en", "value": "Oppenheimer (2023 film)"}
+        ]
+      }
+    }
+  }
+}
