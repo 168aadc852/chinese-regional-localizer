@@ -1,0 +1,22 @@
+# OS/editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Local databases / downloaded source data
+*.sqlite
+*.sqlite3
+*.db
+/data/downloads/
+/data/cache/
+
+# Build outputs
+/target/
+/dist/
+/node_modules/
+
+# Local environment/secrets
+.env
+.env.*
+!.env.example
