@@ -1,0 +1,92 @@
+{
+  "source_versions": [
+    {
+      "source_id": "opencc",
+      "version_label": "poc-fixture-v1",
+      "retrieved_at": "2026-10-06T00:00:00Z",
+      "upstream_url": "fixture://opencc"
+    },
+    {
+      "source_id": "wikidata",
+      "version_label": "poc-fixture-v1",
+      "retrieved_at": "2026-10-06T00:00:00Z",
+      "upstream_url": "fixture://wikidata"
+    },
+    {
+      "source_id": "words-hk-public-domain",
+      "version_label": "poc-fixture-v1",
+      "retrieved_at": "2026-10-06T00:00:00Z",
+      "upstream_url": "fixture://words-hk-public-domain"
+    }
+  ],
+  "term_rules": [
+    {
+      "source_id": "opencc",
+      "source_locale": "zh-CN",
+      "target_locale": "zh-HK",
+      "source_text": "软件",
+      "target_text": "軟件",
+      "domain": "technology",
+      "rule_type": "poc_fixture",
+      "priority": 100,
+      "confidence": 1.0
+    },
+    {
+      "source_id": "opencc",
+      "source_locale": "zh-CN",
+      "target_locale": "zh-TW",
+      "source_text": "软件",
+      "target_text": "軟體",
+      "domain": "technology",
+      "rule_type": "poc_fixture",
+      "priority": 100,
+      "confidence": 1.0
+    }
+  ],
+  "concepts": [
+    {
+      "concept_type": "film",
+      "canonical_key": "poc:inside-out",
+      "domain": "film",
+      "external_ids": [
+        {
+          "namespace": "fixture",
+          "value": "film-inside-out",
+          "source_id": "wikidata"
+        }
+      ],
+      "names": [
+        {"locale": "en", "text": "Inside Out", "name_type": "original", "is_preferred": true, "source_id": "wikidata"},
+        {"locale": "zh-CN", "text": "头脑特工队", "name_type": "regional_title", "is_preferred": true, "source_id": "wikidata"},
+        {"locale": "zh-HK", "text": "玩轉腦朋友", "name_type": "regional_title", "is_preferred": true, "source_id": "wikidata"},
+        {"locale": "zh-TW", "text": "腦筋急轉彎", "name_type": "regional_title", "is_preferred": true, "source_id": "wikidata"}
+      ]
+    },
+    {
+      "concept_type": "person",
+      "canonical_key": "poc:brad-pitt",
+      "domain": "person",
+      "external_ids": [
+        {
+          "namespace": "fixture",
+          "value": "person-brad-pitt",
+          "source_id": "wikidata"
+        }
+      ],
+      "names": [
+        {"locale": "en", "text": "Brad Pitt", "name_type": "original", "is_preferred": true, "source_id": "wikidata"},
+        {"locale": "zh-CN", "text": "布拉德·皮特", "name_type": "regional_name", "is_preferred": true, "source_id": "wikidata"},
+        {"locale": "zh-HK", "text": "畢·彼特", "name_type": "regional_name", "is_preferred": true, "source_id": "wikidata"},
+        {"locale": "zh-TW", "text": "布萊德·彼特", "name_type": "regional_name", "is_preferred": true, "source_id": "wikidata"}
+      ]
+    },
+    {
+      "concept_type": "general_term",
+      "canonical_key": "poc:hk-taxi",
+      "domain": "transport",
+      "names": [
+        {"locale": "zh-HK", "text": "的士", "name_type": "lexical_signal", "is_preferred": true, "source_id": "words-hk-public-domain"}
+      ]
+    }
+  ]
+}
