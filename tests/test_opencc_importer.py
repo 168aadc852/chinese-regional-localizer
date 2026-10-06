@@ -20,7 +20,7 @@ class OpenCCImporterTests(unittest.TestCase):
         self.schema = REPO_ROOT / "schema" / "sqlite-v0.1.sql"
         self.fixture_dir = REPO_ROOT / "data" / "fixtures" / "opencc"
 
-    def test_fixture_import_preserves_stages_candidates_and_provenance(self):
+    def test_fixture_import_preserves_layers_candidates_and_provenance(self):
         with tempfile.TemporaryDirectory() as tmp:
             db_path = Path(tmp) / "opencc.sqlite"
             inputs = {
@@ -39,8 +39,17 @@ class OpenCCImporterTests(unittest.TestCase):
 
             self.assertEqual(result["source_id"], "opencc")
             self.assertEqual(result["revision_id"], opencc_importer.PINNED_COMMIT)
-            self.assertEqual(len(result["dictionaries"]), 3)
+            self.assertEqual(len(result["dictionaries"]), 8)
             self.assertTrue(all(len(item["sha256"]) == 64 for item in result["dictionaries"]))
+
+            priorities = {
+                item["filename"]: item["base_priority"] for item in result["dictionaries"]
+            }
+            self.assertGreater(priorities["STPhrases.txt"], priorities["STCharacters.txt"])
+            self.assertGreater(priorities["HKPhrases.txt"], priorities["HKVariantsPhrases.txt"])
+            self.assertGreater(priorities["HKVariantsPhrases.txt"], priorities["HKVariants.txt"])
+            self.assertGreater(priorities["TWPhrases.txt"], priorities["TWVariantsPhrases.txt"])
+            self.assertGreater(priorities["TWVariantsPhrases.txt"], priorities["TWVariants.txt"])
 
             conn = sqlite3.connect(db_path)
             conn.row_factory = sqlite3.Row
@@ -69,14 +78,49 @@ class OpenCCImporterTests(unittest.TestCase):
                 ).fetchone()
                 self.assertEqual(tuple(ai), ("zh-Hant", "zh-TW", "人工智慧"))
 
-                st = conn.execute(
+                st_phrase = conn.execute(
                     """
                     SELECT source_locale, target_locale, target_text
                     FROM term_rules
                     WHERE source_text = '一见钟情'
                     """
                 ).fetchone()
-                self.assertEqual(tuple(st), ("zh-CN", "zh-Hant", "一見鍾情"))
+                self.assertEqual(tuple(st_phrase), ("zh-CN", "zh-Hant", "一見鍾情"))
+
+                st_char = conn.execute(
+                    """
+                    SELECT target_text, rule_type, context_constraint
+                    FROM term_rules
+                    WHERE source_text = '见' AND target_locale = 'zh-Hant'
+                    ORDER BY priority DESC
+                    """
+                ).fetchone()
+                self.assertEqual(st_char["target_text"], "見")
+                self.assertEqual(st_char["rule_type"], "opencc_st_character")
+                self.assertEqual(
+                    json.loads(st_char["context_constraint"])["dictionary"],
+                    "STCharacters.txt",
+                )
+
+                hk_variant = conn.execute(
+                    """
+                    SELECT target_text, rule_type
+                    FROM term_rules
+                    WHERE source_text = '檯' AND target_locale = 'zh-HK'
+                    ORDER BY priority DESC
+                    """
+                ).fetchone()
+                self.assertEqual(tuple(hk_variant), ("枱", "opencc_hk_variant_character"))
+
+                tw_variant = conn.execute(
+                    """
+                    SELECT target_text, rule_type
+                    FROM term_rules
+                    WHERE source_text = '爲' AND target_locale = 'zh-TW'
+                    ORDER BY priority DESC
+                    """
+                ).fetchone()
+                self.assertEqual(tuple(tw_variant), ("為", "opencc_tw_variant_character"))
 
                 candidates = conn.execute(
                     """
@@ -90,11 +134,12 @@ class OpenCCImporterTests(unittest.TestCase):
                 contexts = [json.loads(row["context_constraint"]) for row in candidates]
                 self.assertEqual([item["candidate_rank"] for item in contexts], [1, 2])
                 self.assertTrue(all(item["candidate_count"] == 2 for item in contexts))
+                self.assertTrue(all(item["dictionary_base_priority"] == 500000 for item in contexts))
 
                 identity = conn.execute(
                     """
                     SELECT target_text FROM term_rules
-                    WHERE source_text = '一出' AND target_text = '一出'
+                    WHERE source_text = '張棟樑' AND target_text = '張棟樑'
                     """
                 ).fetchone()
                 self.assertIsNotNone(identity)
@@ -107,7 +152,7 @@ class OpenCCImporterTests(unittest.TestCase):
                     ORDER BY source_version_id
                     """
                 ).fetchall()
-                self.assertEqual(len(versions), 3)
+                self.assertEqual(len(versions), 8)
                 self.assertTrue(all(row["revision_id"] == opencc_importer.PINNED_COMMIT for row in versions))
                 self.assertTrue(all(len(row["checksum_sha256"]) == 64 for row in versions))
                 self.assertEqual(conn.execute("PRAGMA integrity_check").fetchone()[0], "ok")
