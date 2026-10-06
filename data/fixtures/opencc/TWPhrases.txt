@@ -1,0 +1,10 @@
+# Open Chinese Convert (OpenCC) Dictionary
+# File: TWPhrases.txt
+# Format: key	value(s) (values separated by spaces)
+# License: Apache-2.0 (see LICENSE)
+# Source: https://github.com/ByVoid/OpenCC
+# Used in configs: s2twp.json (via TWPhrases.ocd2)
+
+人工智能	人工智慧
+代碼	程式碼 代碼
+內存	記憶體
