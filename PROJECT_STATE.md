@@ -4,43 +4,48 @@ Last updated: 2026-10-06
 
 ## Current phase
 
-**Phase 0 — Data governance and source research**
+**Phase 0 — Data governance and source research remains open for 3 unresolved sources.**
 
-**Phase 0.5 proof of concept is complete and CI-validated.** The next engineering step is to replace synthetic fixtures with real source-specific importers, one source at a time.
+**Phase 0.5 proof of concept is complete and CI-validated.**
 
-## Objective of this phase
+**Phase 1A first real source importer is implemented and CI-validated.**
 
-Establish a legally and technically traceable data foundation before writing the main localization application.
+## Objective
+
+Build a legally and technically traceable offline CN / HK / TW localization data foundation before the application UI and production localization engine.
 
 ## Completed
 
-- Defined the project as an offline-first CN / HK / TW Chinese regional localization tool.
-- Agreed that GitHub is the single source of truth for humans and AI tools.
-- Created the initial repository documentation and source registry structure.
-- Expanded the source registry to 23 records after separating DATA.GOV.HK from the Combined DoJ Glossaries.
-- Opened GitHub Issue #1 to manage authoritative licence verification and whitelist approval.
-- Completed first-pass formal reviews with usable conclusions for **20 of 23** source records.
-- Established packaging classes: permissive/core, attribution-required, ShareAlike-isolated, non-commercial/reference-only and pending-rights layers.
-- Added `docs/REVIEW_PROGRESS.md` and `docs/LICENSE_PACKAGING.md`.
-- Added machine-readable ingestion policy at `data-registry/sources.yaml`.
-- Added `docs/SOURCE_MANIFEST_SCHEMA.md` defining manifest semantics and hard safety rules.
-- Updated `AGENTS.md` so all AI/data tooling must enforce the manifest before ingestion.
-- Recorded decision D-008: the manifest is the machine-readable ingestion gate.
-- Promoted `docs/DATABASE_SCHEMA.md` to implementation draft **v0.1**, including mandatory source/version provenance and pack separation.
-- Added executable, syntax-validated SQLite schema at `schema/sqlite-v0.1.sql`.
-- Implemented Phase 0.5 PoC in `scripts/poc_builder.py` with manifest enforcement, source/version provenance and SQLite integrity checking.
-- Added non-authoritative fixtures under `data/fixtures/` for general terminology, a film, a person and a Hong Kong lexical signal.
-- Added automated tests in `tests/test_poc_builder.py`.
-- Added GitHub Actions workflow `.github/workflows/poc-tests.yml`.
-- Added `docs/POC.md` documenting PoC scope and safety boundaries.
-- GitHub Actions successfully completed all PoC unit-test and demo-build steps on 2026-10-06.
+- GitHub established as the single source of truth for humans and AI tools.
+- Source registry expanded to 23 records.
+- First-pass usable conclusions completed for 20 of 23 source records.
+- Machine-readable ingestion policy added at `data-registry/sources.yaml`.
+- Licence packaging classes defined: core, attribution, ShareAlike, reference-only and pending.
+- SQLite schema v0.1 implemented with source/version provenance.
+- Manifest-enforced Phase 0.5 PoC implemented and CI-validated.
+- Issue #2 closed as completed.
+- First real importer selected: **LSHK Jyutping Table** under CC BY 4.0.
+- LSHK upstream baseline pinned to commit `dad2dd6d6f02fc51138ecc6818f7b38eba5c2ad3`, `list.tsv` Git blob `522f41701dd10c4da08d82923ef7ae40d14b9ffb`.
+- Added `schema/migrations/0002_pronunciations.sql` supporting multiple pronunciations per character.
+- Added `scripts/import_lshk_jyutping.py` with:
+  - explicit manifest permission check;
+  - local-file mode and explicit commit-pinned download mode;
+  - strict eight-column TSV validation;
+  - character/Unicode consistency validation;
+  - computed SHA-256;
+  - source version/revision/URL/checksum provenance;
+  - multiple Jyutping readings per character;
+  - SQLite integrity checking.
+- Added LSHK sample fixture and importer tests, including malformed-header and Unicode-mismatch rejection.
+- CI passed the LSHK importer test suite on 2026-10-06.
+- Added `docs/PRONUNCIATION_SCHEMA.md` and recorded the pinned baseline in `data-registry/lshk-jyutping-table.md`.
 
 ## Approved / approved-with-conditions sources
 
 ### Core/permissive or attribution-capable
 - OpenCC
 - Wikidata
-- Taiwan Government / verified NAER open terminology datasets
+- Taiwan Government / verified NAER terminology datasets
 - DATA.GOV.HK qualifying portal data
 - Words.hk public-domain word-list/pronunciation subset
 - Rime Cantonese (file-level split licensing)
@@ -64,44 +69,36 @@ Establish a legally and technically traceable data foundation before writing the
 
 ## Pending rights/version clarification
 
-1. Combined DoJ Glossaries of Legal Terms
-   - official XML downloads and Open Data label confirmed;
-   - explicit reuse/adaptation rights for a derived redistributable terminology database are not yet confirmed.
-2. DBnary
-   - clearly ShareAlike;
-   - reviewed project surfaces show licence-version inconsistency, so snapshot-level licence confirmation is required.
-3. OpenHowNet downloadable HowNet core data
-   - repository/API code is MIT;
-   - data is downloaded separately and a data-specific redistribution licence has not yet been independently confirmed.
+1. Combined DoJ Glossaries of Legal Terms — adaptation rights for a redistributable derived terminology database remain unclear.
+2. DBnary — snapshot-level CC BY-SA version must be pinned because reviewed surfaces show version inconsistency.
+3. OpenHowNet downloadable core data — repository/API MIT licence is clear, but data-specific redistribution rights remain unconfirmed.
 
 ## Next recommended work
 
-1. Build the first real source importer from a small, well-scoped approved dataset.
-2. Pin the upstream version/commit and record checksum/retrieval metadata.
-3. Add source-specific parser tests and malformed-input tests.
-4. Prove that real imported rows retain licence pack and provenance.
-5. Continue resolving the 3 remaining licensing ambiguities under Issue #1.
-6. Build an evaluation corpus covering films, people, IT terms, transport, legal terms, Cantonese/HK terms and ambiguous words.
-7. After several real importers are stable, begin the deterministic localization lookup/engine layer.
+1. Close Issue #3 after recording its successful CI validation.
+2. Add a second real importer that contributes directly to CN/HK/TW terminology or entity localization.
+3. Prefer a small permissive/CC0 source before tackling full Wikidata dumps.
+4. Add an evaluation corpus covering films, people, IT terms, transport, legal terms, Cantonese/HK terms and ambiguous words.
+5. Continue Issue #1 for the 3 remaining licensing ambiguities.
+6. After several importers are stable, implement the deterministic lookup/resolution layer.
 
 ## Not started
 
 - Production localization engine
 - Desktop application
 - Mobile application
-- Database auto-updater
-- Release pipeline
+- Database auto-updater/release pipeline
 
-## Current technical direction (not yet final implementation)
+## Current technical direction
 
-- Cross-platform application direction: Tauri 2
-- Core direction: Rust
-- Local database direction: SQLite
-- Deterministic conversion layer: OpenCC and/or compatible regional conversion engine
+- Cross-platform app: Tauri 2
+- Core runtime: Rust
+- Local database: SQLite
+- Data-build/import tooling: Python is acceptable where practical
+- Deterministic conversion: OpenCC and/or compatible regional conversion engine
 - Entity/terminology layer: multi-source knowledge base
-- Phase 0.5/ingestion tooling: Python may be used for data-build tooling where practical; this does not require the production runtime to be Python
-- Optional future ambiguity layer: local LLM, only if needed
+- Optional future ambiguity layer: local LLM only if deterministic/context rules are insufficient
 
 ## Important constraint
 
-Do not treat candidate sources as approved until licensing evidence is recorded in `data-registry/`. Importers must enforce `data-registry/sources.yaml`, including `ingest_allowed`, `ingest_scope`, `excluded_scope` and pack separation. PoC fixture data is never authoritative upstream evidence.
+Importers must enforce `data-registry/sources.yaml`, including `ingest_allowed`, `ingest_scope`, `excluded_scope` and pack separation. Pending/reference-only/rejected sources must not enter redistributable data builds.
