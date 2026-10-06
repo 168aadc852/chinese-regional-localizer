@@ -24,12 +24,44 @@
     "focus": "regional_term"
   },
   {
-    "id": "script-stage",
+    "id": "script-stage-phrase",
     "source_locale": "zh-CN",
     "target_locale": "zh-HK",
     "input": "一见钟情",
     "expected": "一見鍾情",
-    "focus": "script"
+    "focus": "script_phrase"
+  },
+  {
+    "id": "script-stage-character",
+    "source_locale": "zh-CN",
+    "target_locale": "zh-HK",
+    "input": "见",
+    "expected": "見",
+    "focus": "script_character"
+  },
+  {
+    "id": "hk-character-variant",
+    "source_locale": "zh-Hant",
+    "target_locale": "zh-HK",
+    "input": "檯",
+    "expected": "枱",
+    "focus": "hk_variant"
+  },
+  {
+    "id": "tw-character-variant",
+    "source_locale": "zh-Hant",
+    "target_locale": "zh-TW",
+    "input": "爲",
+    "expected": "為",
+    "focus": "tw_variant"
+  },
+  {
+    "id": "tw-phrase-exception-protects-character",
+    "source_locale": "zh-Hant",
+    "target_locale": "zh-TW",
+    "input": "張棟樑",
+    "expected": "張棟樑",
+    "focus": "variant_phrase_exception"
   },
   {
     "id": "mixed-entity-term",
