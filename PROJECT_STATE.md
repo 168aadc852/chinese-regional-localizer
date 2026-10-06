@@ -6,6 +6,8 @@ Updated: 2026-10-07
 
 Development is paused after **Phase 2B**.
 
+AI context loading is now **on demand**: `AGENTS.md` is a small router, task guides live under `.ai/`, architecture decisions are split under `docs/adr/`, and history is not preloaded.
+
 Completed core foundations:
 - data governance + machine-readable source policy;
 - SQLite provenance schema;
