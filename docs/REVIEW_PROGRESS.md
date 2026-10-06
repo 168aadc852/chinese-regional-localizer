@@ -2,7 +2,7 @@
 
 Last updated: 2026-10-06
 
-Formal first-pass reviews completed: **14 source records**.
+Formal first-pass reviews with usable conclusions completed: **20 of 23 source records**.
 
 ## Approved
 - Wikidata structured data — CC0
@@ -11,7 +11,7 @@ Formal first-pass reviews completed: **14 source records**.
 ## Approved with conditions
 - OpenCC — Apache-2.0
 - Chinese Wikipedia — CC BY-SA 4.0 isolated pack
-- Taiwan Government / NAER verified terminology datasets — OGL-Taiwan v1 only
+- Taiwan Government / verified NAER terminology datasets — OGL-Taiwan v1 only
 - DATA.GOV.HK qualifying portal data — attribution; no unproven adaptation rights
 - CC-CEDICT — CC BY-SA 4.0 isolated pack
 - Words.hk — public-domain word-list/pronunciation subset only for core use
@@ -21,16 +21,16 @@ Formal first-pass reviews completed: **14 source records**.
 - THUOCL — repository word-list/frequency package only, with MIT/provenance safeguards
 - CC-Canto — CC BY-SA 3.0 isolated pack
 - Chinese Wiktionary — CC BY-SA 4.0 text-derived isolated pack
+- ConceptNet — CC BY-SA 4.0 semantic pack
+- Chinese Open WordNet — permissive custom licence with notice/disclaimer preservation
+- HKCanCor — CC BY 4.0
+- LSHK Jyutping Table — CC BY 4.0
+- Kaifangcidian `kfcd/hyzd` — CC BY 3.0; other datasets require individual review
+- CFDICT — CC BY-SA 3.0, static/abandoned upstream snapshot
 
-## Still pending / split out
+## Still pending
 - Combined DoJ Glossaries of Legal Terms — explicit reuse/adaptation rights not yet confirmed
-- DBnary
-- ConceptNet
-- Chinese Open WordNet
-- HKCanCor
-- LSHK Jyutping Table
-- Kaifangcidian / Open Chinese Dictionary datasets
-- CFDICT
-- OpenHowNet
+- DBnary — ShareAlike confirmed in principle, but licence-version inconsistency needs exact snapshot verification
+- OpenHowNet downloadable HowNet core data — repo/API MIT is clear; data-specific redistribution rights remain unclear
 
 See `docs/DATA_SOURCES.md` and individual files under `data-registry/` for authoritative notes and packaging decisions.
