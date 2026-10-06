@@ -3,69 +3,53 @@
 Status: **approved_with_conditions**
 
 ## Intended use
-Character/script conversion and regional terminology rules, including CN / HK / TW variant conversion and selected regional phrase mappings.
 
-## Region coverage
-CN / HK / TW and related Chinese variants
+Character/script conversion and regional terminology rules for the reviewed CN → Hant → HK/TW forward pipeline.
 
 ## Official source
-URL: https://github.com/BYVoid/OpenCC
-Publisher / maintainer: OpenCC project (BYVoid/OpenCC)
+
+Repository: https://github.com/BYVoid/OpenCC  
+Publisher/maintainer: OpenCC project
 
 ## Licence review
-Licence name: Apache License 2.0
-Licence evidence URLs:
-- https://github.com/BYVoid/OpenCC/blob/master/LICENSE
-- https://github.com/BYVoid/OpenCC/blob/master/README.md
-- Example dictionary licence declaration: https://github.com/BYVoid/OpenCC/blob/master/data/dictionary/STCharacters.txt
 
-- Commercial use: **Yes**
-- Modification: **Yes**
-- Redistribution: **Yes**
-- Attribution / notices: **Required when redistributing**. Include a copy of Apache-2.0, retain applicable copyright / patent / trademark / attribution notices, and mark modified files prominently. If an upstream distribution includes a NOTICE file, preserve the relevant NOTICE contents as required by Apache-2.0 section 4(d).
-- Share-alike / copyleft: **No**
-- Database-specific obligations: **None identified beyond the Apache-2.0 terms applying to the distributed OpenCC dictionary/configuration files.** Current dictionary files explicitly identify themselves as Apache-2.0.
-- API/download/scraping restrictions: **None identified for using the published open-source repository and releases.** Prefer release/download artifacts or a pinned upstream revision rather than scraping rendered GitHub pages.
+Licence: **Apache-2.0** for reviewed project/dictionary files.
 
-## Packaging decision
-**Approved with conditions.**
+- Commercial use: yes.
+- Modification: yes.
+- Redistribution: yes, subject to Apache-2.0 conditions/notices.
+- Attribution/notices: required where applicable.
+- Share-alike: no.
 
-OpenCC code, configuration files and dictionary files that explicitly fall under Apache-2.0 may be bundled in the application or in the permissive/core data layer, provided the Apache-2.0 redistribution requirements are met.
-
-Recommended packaging rules:
-1. Record the exact OpenCC version or commit used.
-2. Bundle or otherwise provide the Apache-2.0 licence text with redistributed OpenCC material.
-3. Preserve relevant upstream notices and file headers.
-4. Clearly mark any modified OpenCC dictionary/configuration files as modified.
-5. Re-check third-party components separately if they are bundled directly rather than merely used as build/runtime dependencies.
-
-## Phase 1B importer baseline
-
-The first real OpenCC importer is pinned to commit:
+Exact reviewed production commit:
 
 `3ac34aa439a9908dd49fa92b5174b46314787ac2`
 
-Initial reviewed/imported phrase files:
+## Machine-readable ingest scope
 
-- `STPhrases.txt` — script-stage `zh-CN -> zh-Hant`
-- `HKPhrases.txt` — regional-stage `zh-Hant -> zh-HK`
-- `TWPhrases.txt` — regional-stage `zh-Hant -> zh-TW`
+The importer does not treat broad project approval as permission for every file. `sources.yaml` explicitly allows these resources:
 
-The importer intentionally preserves OpenCC's staged model and multiple target candidates. It does not claim to reproduce the full OpenCC runtime segmentation/match-policy behaviour yet. See `docs/OPENCC_IMPORTER.md`.
+- `opencc:STPhrases.txt`
+- `opencc:STCharacters.txt`
+- `opencc:HKPhrases.txt`
+- `opencc:HKVariantsPhrases.txt`
+- `opencc:HKVariants.txt`
+- `opencc:TWPhrases.txt`
+- `opencc:TWVariantsPhrases.txt`
+- `opencc:TWVariants.txt`
 
-Implementation:
+Anything else requires a manifest/review update first.
 
-- `scripts/import_opencc_dictionaries.py`
-- `tests/test_opencc_importer.py`
-- `data/fixtures/opencc/`
+## Update behavior
 
-Each imported dictionary records its own SHA-256 and `source_versions` provenance.
+Each dictionary is an independent resource snapshot with commit, raw URL and SHA-256 provenance. Repeat import of identical bytes/revision is idempotent. A new snapshot supersedes/deactivates the older runtime rules while retaining history.
 
-## Update method
-Prefer pinned OpenCC releases / tags or a recorded upstream commit. A database-builder job may periodically check the official BYVoid/OpenCC repository for a newer release and rebuild the local conversion resources after tests pass.
+## Packaging
 
-## Review evidence / rationale
-The official OpenCC README identifies the project licence as Apache License 2.0. The repository's Apache-2.0 LICENSE grants reproduction, modification and redistribution rights subject to section 4 conditions. OpenCC dictionary files such as `STCharacters.txt`, `HKVariants.txt`, `TWVariants.txt` and `TSPhrases.txt` explicitly state `License: Apache-2.0 (see LICENSE)`, which is important because this project intends to redistribute dictionary data, not only link to the conversion library.
+Core/permissive pack, while retaining Apache-2.0 obligations/notices. Re-check notices before the first public binary/data release.
 
-Last reviewed: 2026-10-06
-Review status: formal first-pass review complete; Phase 1B phrase importer implemented and CI-tested; re-check before first public binary/data release.
+## Runtime limitation
+
+The project preserves reviewed staged dictionary/candidate semantics but does not claim full OpenCC runtime parity. Generated phrase resources, complete mmseg behavior, reverse routes and all configs/plugins remain outside current scope.
+
+Last reviewed: 2026-10-07
