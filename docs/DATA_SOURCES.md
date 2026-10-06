@@ -24,12 +24,12 @@ No source listed here should be assumed redistributable unless its status says `
 | CC-Canto | Cantonese vocabulary, Jyutping and meanings | approved_with_conditions | `data-registry/cc-canto.md` |
 | Chinese Wiktionary | Definitions, senses, usage labels and translations | approved_with_conditions | `data-registry/chinese-wiktionary.md` |
 | DBnary | Structured Wiktionary lexical data / OntoLex RDF | pending_review | `data-registry/dbnary.md` |
-| ConceptNet | Semantic relations and ambiguity/context support | pending_review | `data-registry/conceptnet.md` |
-| Chinese Open WordNet | Chinese synsets and sense disambiguation | pending_review | `data-registry/chinese-open-wordnet.md` |
-| HKCanCor | Hong Kong Cantonese words, Jyutping, POS and frequency evidence | pending_review | `data-registry/hkcancor.md` |
-| LSHK Jyutping Table | Cantonese character readings and HKSCS support | pending_review | `data-registry/lshk-jyutping-table.md` |
-| Kaifangcidian / Open Chinese Dictionary | Open Chinese dictionary/pronunciation datasets | pending_review | `data-registry/kaifangcidian.md` |
-| CFDICT | Traditional/Simplified lexical pairs, Pinyin, Chinese-French meanings | pending_review | `data-registry/cfdict.md` |
+| ConceptNet | Semantic relations and ambiguity/context support | approved_with_conditions | `data-registry/conceptnet.md` |
+| Chinese Open WordNet | Chinese synsets and sense disambiguation | approved_with_conditions | `data-registry/chinese-open-wordnet.md` |
+| HKCanCor | Hong Kong Cantonese words, Jyutping, POS and frequency evidence | approved_with_conditions | `data-registry/hkcancor.md` |
+| LSHK Jyutping Table | Cantonese character readings and HKSCS support | approved_with_conditions | `data-registry/lshk-jyutping-table.md` |
+| Kaifangcidian / Open Chinese Dictionary | Individually reviewed open dictionary/pronunciation datasets | approved_with_conditions | `data-registry/kaifangcidian.md` |
+| CFDICT | Traditional/Simplified lexical pairs, Pinyin, Chinese-French meanings | approved_with_conditions | `data-registry/cfdict.md` |
 | OpenHowNet | Sememes, word senses and semantic similarity | pending_review | `data-registry/openhownet.md` |
 
 ## Current packaging classes emerging from review
@@ -42,27 +42,40 @@ No source listed here should be assumed redistributable unless its status says `
 - Words.hk explicitly public-domain word-list/pronunciation dataset
 - MusicBrainz Core Data — CC0 only
 - THUOCL published repository word lists/frequency signals — MIT/open-use conditions recorded in its review
+- Chinese Open WordNet — permissive custom licence with notice/disclaimer preservation
 
 ### Attribution-required / non-ShareAlike packs
 - Verified Taiwan Government OGL-Taiwan v1 terminology datasets
 - Qualifying DATA.GOV.HK data within portal terms
 - Rime Cantonese CC BY 4.0 main content
+- HKCanCor — CC BY 4.0
+- LSHK Jyutping Table — CC BY 4.0
+- Individually reviewed Kaifangcidian datasets such as `kfcd/hyzd` — CC BY 3.0
 
 ### ShareAlike-isolated packs
 - Chinese Wikipedia — CC BY-SA 4.0-derived data
 - Chinese Wiktionary — CC BY-SA 4.0 text-derived data
 - CC-CEDICT — CC BY-SA 4.0
 - CC-Canto — CC BY-SA 3.0
+- ConceptNet — CC BY-SA 4.0
+- CFDICT — CC BY-SA 3.0
 - Rime `jyut6ping3.maps` — ODbL 1.0 database layer
+- DBnary — clearly ShareAlike, but exact current licence version still requires snapshot-level verification
 
 ### Reference-only / excluded portions within otherwise useful sources
 - Full Words.hk dictionary under Non-Commercial Open Data License — exclude from commercial-capable standard pack
 - MusicBrainz Supplementary Data under CC BY-NC-SA 3.0 — exclude from standard pack
-- Combined DoJ Glossaries — remain pending until explicit reuse/adaptation rights are confirmed
 
-## Candidate sources not yet accepted for redistribution
+### Pending rights clarification
+- Combined DoJ Glossaries — explicit reuse/adaptation rights not yet confirmed
+- DBnary — current project surfaces show a CC BY-SA version inconsistency; verify exact snapshot licence before ingestion
+- OpenHowNet downloadable HowNet core data — MIT clearly covers repository/API code, but data-specific redistribution rights are not yet independently confirmed
 
-Commercial databases, websites with unclear terms, no-derivatives datasets, and sources that merely state copyright ownership should remain `reference_only` or `pending_review` until proven compatible.
+## Review status summary
+
+- Total source records: **23**
+- Formal first-pass reviews completed with usable conclusions: **20**
+- Still pending rights/version clarification: **3**
 
 ## Review principle
 
