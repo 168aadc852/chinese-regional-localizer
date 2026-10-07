@@ -203,6 +203,15 @@ impl AuthenticatedCatalog {
             .iter()
             .find(|item| item.package_id == package_id && item.version == version)
     }
+
+    #[cfg(feature = "test-support")]
+    #[doc(hidden)]
+    pub fn from_test_parts(catalog: ReleaseCatalog, signer_key_id: String) -> Self {
+        Self {
+            catalog,
+            signer_key_id,
+        }
+    }
 }
 
 pub struct UpdateClient<T: UpdateTransport> {
