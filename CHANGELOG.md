@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-10-07 — Phase 3C Rust runtime API and explanations
+
+- Added versioned Rust Runtime API v1 as the application-facing localization boundary.
+- Unified shared-only and optional private `user_dictionary.sqlite` execution behind one request/response contract.
+- Refactored the Rust CLI to delegate to Runtime API v1 instead of calling lower-level engines directly.
+- Added shared entity explanation enrichment with concept metadata, Wikidata QID, confidence and current evidence records.
+- Added shared term-rule enrichment with stage, rule/source/version/upstream provenance and confidence.
+- Added UI-oriented original-input/final-output character spans where the lower-level event did not already provide them.
+- Added Runtime API regression tests for versioning, entity evidence, term provenance and user-dictionary mode.
+- Added a reproducible Rust benchmark binary using the existing realistic corpus and reporting determinism, throughput and latency.
+- Added `docs/RUST_RUNTIME_API.md` and ADR D-014 requiring future Tauri/application code to use the Runtime API rather than duplicate localization logic.
+
 ## 2026-10-07 — Phase 3B Rust user-local control parity
 
 - Added a Rust user-local control layer reading the existing separate `user_dictionary.sqlite` v0.1 database directly.
