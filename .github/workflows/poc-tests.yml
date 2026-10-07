@@ -50,6 +50,15 @@ jobs:
           --version ci
           --created-at 2026-10-07T00:00:00Z
 
+      - name: Build unsigned release catalog smoke
+        run: >-
+          python scripts/build_release_catalog.py
+          --package-dir build/package-smoke
+          --output build/release-catalog.json
+          --sequence 1
+          --generated-at-unix 1000
+          --expires-at-unix 2000
+
       - name: Run realistic corpus evaluation
         run: python scripts/evaluate_corpus.py
 

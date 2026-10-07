@@ -19,3 +19,4 @@ Read only decisions relevant to the current task.
 - [D-015](D-015-tauri-thin-frontend-managed-db-state.md) — Tauri keeps the frontend thin and database paths in managed Rust state.
 - [D-016](D-016-native-db-chooser-rust-validation.md) — Native database selection and compatibility validation stay inside Rust; frontend receives only safe status metadata.
 - [D-017](D-017-versioned-data-packages-rollback.md) — Shared data releases use immutable versioned packages, staged validation/activation and rollback instead of in-place replacement.
+- [D-018](D-018-pinned-ed25519-release-authenticity.md) — Release metadata must be authenticated by pinned Ed25519 public keys, with domain separation, expiry and rollback protection before network updates.
