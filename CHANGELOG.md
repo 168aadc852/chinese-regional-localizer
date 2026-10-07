@@ -1,5 +1,23 @@
 # Changelog
 
+## 2026-10-07 — Phase 2E evaluation and performance baselines
+
+- Added a project-authored synthetic realistic corpus covering CN→HK, CN→TW and Hant→HK/TW behavior.
+- Added exact-output corpus evaluation with category summaries and detailed failure diagnostics.
+- Added throughput, p50/p95 latency, determinism and tracked-memory benchmark tooling.
+- Added a short/common entity false-positive regression case.
+- Added CI corpus evaluation and deliberately generous catastrophic-performance smoke limits.
+- Added benchmark methodology and comparison guidance for the future Rust port.
+
+## 2026-10-07 — Phase 2D user-local control
+
+- Added separate private `user_dictionary.sqlite` storage.
+- Added protected terms and locale-scoped fixed user overrides.
+- Added deterministic precedence: protected term > user override > shared entity > regional terminology > generic/script conversion.
+- Added user-dictionary management CLI and optional user DB integration in the localization CLI.
+- Added persistence, overlap/longest-match, locale-scope and precedence regression tests.
+- Added ADR D-012 and user-local-control documentation.
+
 ## 2026-10-07 — Phase 2C core hardening
 
 - Added SQLite schema v0.2 and migration `0003_core_hardening.sql` while preserving v0.1 as the historical baseline.
