@@ -311,7 +311,7 @@ fn validate_single_filename(value: &str) -> PackageResult<()> {
 fn validate_sqlite(path: &Path, expected_pack: &str) -> PackageResult<()> {
     let conn = Connection::open_with_flags(path, OpenFlags::SQLITE_OPEN_READ_ONLY)?;
     let integrity: String = conn.query_row("PRAGMA integrity_check", [], |row| row.get(0))?;
-    if integrity.to_ascii_lowercase() != "ok" {
+    if !integrity.eq_ignore_ascii_case("ok") {
         return Err(PackageError::Invalid(
             "SQLite integrity_check failed".into(),
         ));
