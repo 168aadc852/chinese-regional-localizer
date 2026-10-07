@@ -9,8 +9,8 @@ pub mod runtime_api;
 pub use runtime_api::{Runtime, RuntimeRequest, RuntimeResponse, RUNTIME_API_VERSION};
 pub mod data_package;
 pub use data_package::{
-    validate_package_dir, DataPackageManifest, InstalledPackageRef, PackageError, PackageStore,
-    PackageStoreState, ValidatedPackage, PACKAGE_MANIFEST_VERSION,
+    validate_package_dir, DataPackageManifest, InstalledPackageRef, PackageDatabase, PackageError,
+    PackageSource, PackageStore, PackageStoreState, ValidatedPackage, PACKAGE_MANIFEST_VERSION,
 };
 pub mod release_auth;
 pub use release_auth::{
