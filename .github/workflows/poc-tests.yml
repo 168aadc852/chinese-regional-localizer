@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   test:
@@ -15,6 +15,8 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -25,6 +27,21 @@ jobs:
 
       - name: Install test dependencies
         run: python -m pip install -r requirements-dev.txt
+
+      - name: Generate Phase 3F Rust lockfile
+        if: github.event_name == 'pull_request' && github.head_ref == 'phase-3f-db-packages-rollback'
+        run: cargo generate-lockfile --manifest-path rust/Cargo.toml
+
+      - name: Persist Phase 3F Rust lockfile
+        if: github.event_name == 'pull_request' && github.head_ref == 'phase-3f-db-packages-rollback'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add rust/Cargo.lock
+          if ! git diff --cached --quiet; then
+            git commit -m "chore(rust): refresh Cargo lock for package checksums"
+            git push origin HEAD:${{ github.head_ref }}
+          fi
 
       - name: Compile Python
         run: python -m compileall -q scripts src tests
@@ -40,6 +57,15 @@ jobs:
 
       - name: Build demo database
         run: python scripts/build_demo_database.py
+
+      - name: Build governed data package smoke
+        run: >-
+          python scripts/build_data_package.py
+          --db build/regional-demo.sqlite
+          --output-dir build/package-smoke
+          --package-id regional-core
+          --version ci
+          --created-at 2026-10-07T00:00:00Z
 
       - name: Run realistic corpus evaluation
         run: python scripts/evaluate_corpus.py
