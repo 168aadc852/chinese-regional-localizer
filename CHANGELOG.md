@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-10-07 — Phase 3A Rust shared-core parity
+
+- Added the first Rust reference runtime under `rust/`, reading the existing SQLite v0.2 database directly.
+- Added the current forward CN/HK/TW routes with conservative entity matching, current-version filtering, staged longest-match terminology rules and no-guess ambiguity behavior.
+- Added a Rust CLI that returns structured JSON for demo/local testing.
+- Added Rust parity tests against the same 9 short evaluation cases and 8 Phase 2E realistic synthetic cases used by the Python reference implementation.
+- Added Rust regressions for ambiguous entities, equal-priority conflicting rules and short/common entity false positives.
+- Added `Cargo.lock` and strict CI checks for `cargo fmt --check`, Clippy with warnings denied, and Cargo tests.
+- Added `docs/RUST_REFERENCE_ENGINE.md` and ADR D-013 requiring behavioral parity before optimization or Tauri UI integration.
+- Phase 3A deliberately leaves private user-dictionary parity and the full Python explanation/alignment payload for a later Rust phase.
+
 ## 2026-10-07 — Phase 2E evaluation and performance baselines
 
 - Added a project-authored synthetic realistic corpus covering CN→HK, CN→TW and Hant→HK/TW behavior.
