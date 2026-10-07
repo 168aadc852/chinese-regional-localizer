@@ -3,8 +3,8 @@
 Last updated: 2026-10-07
 
 Machine manifest source IDs: **24**.  
-Source IDs with usable first-pass conclusions: **22**.  
-Still pending: **2**.
+Source IDs with usable first-pass conclusions: **24**.  
+Still pending: **0**.
 
 ## Approved
 
@@ -19,9 +19,11 @@ DATA.GOV.HK remains a valid conditional review conclusion, but automated derived
 
 OpenHowNet core data is approved only for the official OpenHowNet-provided download covered by the official MIT licence statement. Automated ingestion remains disabled until the exact downloadable resource is pinned and importer validation is defined.
 
-## Still pending
+## Reference only
 
-- Combined DoJ Glossaries of Legal Terms — reuse/adaptation rights not confirmed.
-- DBnary — exact Chinese snapshot licence version must be pinned.
+- Combined DoJ Glossaries of Legal Terms — public XML access is verified, but the reuse/adaptation and redistribution rights needed for a derived terminology database were not established.
+- DBnary — ShareAlike reuse is clear in principle, but the exact licence version for a specific Chinese snapshot was not pinned; packaging remains blocked until snapshot-specific verification.
+
+Reference-only records remain useful for research/manual verification but have `ingest_allowed: false` and are excluded from redistributable builds.
 
 `data-registry/sources.yaml` is the machine policy; individual `data-registry/*.md` files contain the detailed evidence.
