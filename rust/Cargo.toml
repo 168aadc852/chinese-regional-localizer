@@ -8,6 +8,10 @@ description = "Rust reference runtime for deterministic Chinese regional localiz
 [lib]
 path = "src/lib_v2.rs"
 
+[features]
+default = []
+test-support = []
+
 [dependencies]
 base64 = "0.22"
 ed25519-dalek = "3.0.0"

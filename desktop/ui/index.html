@@ -47,6 +47,27 @@
       <p id="databaseMessage" class="settings-message hidden" role="status"></p>
     </section>
 
+    <section class="card settings-panel" aria-label="Data updates">
+      <div class="panel-heading">
+        <div>
+          <h2>共享資料更新</h2>
+          <p class="muted">只接受 Rust 內已設定並通過簽章、hash、SQLite 及 package 驗證的更新。</p>
+        </div>
+        <span id="updateBadge" class="badge">檢查中…</span>
+      </div>
+      <div class="database-item update-item">
+        <div>
+          <strong>Regional data package</strong>
+          <p id="updateStatusText" class="muted">正在讀取更新狀態…</p>
+        </div>
+        <div class="button-row">
+          <button id="checkDataUpdate" class="secondary-button" type="button">檢查更新</button>
+          <button id="installDataUpdate" type="button" disabled>安裝更新</button>
+        </div>
+      </div>
+      <p id="updateMessage" class="settings-message hidden" role="status"></p>
+    </section>
+
     <section class="controls card" aria-label="Localization settings">
       <label>
         <span>來源</span>
