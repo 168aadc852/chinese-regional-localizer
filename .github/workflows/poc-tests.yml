@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   test:
@@ -15,8 +15,6 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
-        with:
-          ref: ${{ github.head_ref || github.ref_name }}
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -73,19 +71,6 @@ jobs:
           --min-chars-per-sec 100
           --max-p95-ms 10000
           --max-peak-kib 524288
-
-      - name: Normalize Phase 3H Rust sources and lockfile
-        if: github.event_name == 'pull_request' && github.head_ref == 'phase-3h-authenticated-network-updates'
-        run: |
-          cargo fmt --manifest-path rust/Cargo.toml
-          cargo update --manifest-path rust/Cargo.toml
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add rust/src/network_update.rs rust/tests/network_update.rs rust/Cargo.lock
-          if ! git diff --cached --quiet; then
-            git commit -m "style(update): apply rustfmt and refresh lockfile"
-            git push origin HEAD:${{ github.head_ref }}
-          fi
 
       - name: Rust format check
         run: cargo fmt --manifest-path rust/Cargo.toml -- --check
