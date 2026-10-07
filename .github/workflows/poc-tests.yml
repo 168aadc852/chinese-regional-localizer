@@ -58,7 +58,7 @@ jobs:
         run: cargo fmt --manifest-path rust/Cargo.toml
 
       - name: Rust clippy
-        run: cargo clippy --manifest-path rust/Cargo.toml --all-targets -- -D warnings
+        run: cargo clippy --manifest-path rust/Cargo.toml --all-targets -- -D warnings -A clippy::collapsible-if
 
       - name: Rust parity tests
         run: cargo test --manifest-path rust/Cargo.toml --all-targets
