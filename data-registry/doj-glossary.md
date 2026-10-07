@@ -1,6 +1,6 @@
 # Combined DoJ Glossaries of Legal Terms
 
-Status: **pending_review**
+Status: **reference_only**
 
 ## Intended use
 Hong Kong official legal terminology and cross-jurisdiction terminology comparisons.
@@ -16,32 +16,29 @@ Publisher: Department of Justice, Government of the Hong Kong Special Administra
 - The official glossary site labels the downloadable XML section as “Open Data”.
 - The site provides downloadable XML for combined and division-specific English-Chinese and Chinese-English glossaries.
 - The Department of Justice lists the English-Chinese and Chinese-English Glossaries of Legal Terms as information available to the public for download.
+- Follow-up review did not establish an explicit glossary-specific licence granting the modification/adaptation and redistribution rights needed for a derived terminology database.
+- DATA.GOV.HK terms are not assumed to cover files distributed from the separate DoJ glossary site merely because the site uses the phrase “Open Data”.
 
 ## Rights review
 - Public access/download: **Yes**
 - Machine-readable XML download: **Yes**
-- Commercial reuse: **Not yet established by a glossary-specific licence found in this review**
-- Modification / adaptation: **Not yet established**
-- Redistribution: **Not yet established by an explicit glossary-specific reuse licence**
-- Attribution: **Likely prudent/required if reused, but exact glossary-specific obligation still needs authoritative confirmation**
+- Commercial reuse for a derived database: **Not established**
+- Modification / adaptation: **Not established**
+- Redistribution of derived data: **Not established**
+- Attribution: **No glossary-specific obligation established because reuse rights themselves remain unresolved**
 - Share-alike/copyleft: **No explicit clause identified**
 
 ## Packaging decision
-Do not ingest the Combined DoJ Glossaries into a redistributable derived terminology database yet.
+**Reference only. Do not ingest or redistribute the Combined DoJ Glossaries in project data packs under the evidence currently available.**
 
 Allowed project use for now:
 - reference / manual verification;
 - link to and identify the official glossary as a source;
-- design an importer only after rights are clarified.
+- compare terminology manually where permitted.
 
-Do not assume that DATA.GOV.HK Terms automatically apply merely because the glossary page describes files as Open Data; those terms expressly define their scope around Data provided on DATA.GOV.HK.
+A future review may promote this source only if authoritative terms explicitly cover the intended transformation and redistribution, or if the exact glossary resource is distributed through another official channel under sufficiently clear terms.
 
 ## Update method
 If later approved, prefer the official downloadable XML and preserve source division / statutory citation metadata.
 
-## Next verification task
-Find either:
-1. a DATA.GOV.HK dataset record that clearly distributes these glossary XML files under portal terms; or
-2. a DoJ / Government terms page explicitly granting reuse, redistribution and adaptation rights for these glossary files.
-
-Last reviewed: 2026-10-06
+Last reviewed: 2026-10-07
