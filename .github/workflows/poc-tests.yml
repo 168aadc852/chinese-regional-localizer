@@ -90,3 +90,6 @@ jobs:
 
       - name: Tauri clippy
         run: cargo clippy --manifest-path desktop/src-tauri/Cargo.toml --all-targets -- -D warnings
+
+      - name: Tauri unit tests
+        run: cargo test --manifest-path desktop/src-tauri/Cargo.toml --lib
