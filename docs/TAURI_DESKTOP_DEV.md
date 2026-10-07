@@ -22,6 +22,10 @@ cargo run --manifest-path desktop/src-tauri/Cargo.toml
 
 The development shell defaults to `build/regional-demo.sqlite` in this repository.
 
+The checked-in `desktop/src-tauri/icons/icon.ico` embeds the existing 128×128
+`icon.png` unchanged. Tauri requires this Windows resource icon during builds,
+even when installer bundling is disabled; keep both assets in the repository.
+
 ## Optional private user dictionary
 
 The frontend is not allowed to choose arbitrary database paths. For development, configure the private dictionary before starting the app:
