@@ -1,5 +1,18 @@
 # Changelog
 
+## 2026-10-07 — Phase 3I desktop authenticated data-update UI
+
+- Added narrow Tauri commands for update status, explicit authenticated catalog checks and explicit package installation.
+- Kept update origin, trusted-key file, package-store path and package identity in Rust-side startup configuration only; frontend JavaScript cannot submit arbitrary URLs or trust roots.
+- Reused the Phase 3H authenticated catalog, signature, sequence rollback, signed manifest binding, bounded download, hash/size, SQLite/package validation and immutable PackageStore activation pipeline.
+- Added structured frontend update status containing only configured/current/offered/availability/message fields, without exposing full local paths or generic network access.
+- Added a Settings UI section for **Check for updates** and **Install update**.
+- Made successful installs switch the desktop runtime to the newly activated shared database only after full package validation.
+- Kept the existing active database unchanged when update discovery or installation fails.
+- Added a gated Rust `test-support` feature used only by desktop tests to construct authenticated catalog fixtures; the production binary does not expose the test constructor.
+- Added `docs/DESKTOP_DATA_UPDATES.md` and ADR D-020 documenting the Rust-only update trust boundary.
+- Background scheduling, retry/resume, production hosting/CDN layout, application-binary updates and remote trust-root rotation remain out of scope.
+
 ## 2026-10-07 — Phase 3H authenticated network update discovery/download
 
 - Added a Rust-side update transport boundary using HTTPS with redirects disabled and one configured release origin.
