@@ -4,7 +4,7 @@ Updated: 2026-10-07
 
 ## Status
 
-**Phase 3F versioned shared-database packages and offline rollback core is implemented pending final PR validation/merge.**
+**Phase 3G signed release metadata authenticity is implemented pending final PR validation/merge.**
 
 Current foundations:
 - data governance + machine-readable exact-resource ingestion policy;
@@ -24,7 +24,13 @@ Current foundations:
 - Rust package validation for safe paths, SHA-256, SQLite integrity, required tables and pack agreement;
 - immutable versioned local package store with staged validation, `current`/`previous` activation state and rollback;
 - failed package installation leaves the currently active database unchanged;
-- CI package-builder smoke test against the fixture-built demo database plus Python/Rust/Tauri test suites;
+- Ed25519 detached signature envelope v1 for exact package-manifest and release-catalog bytes;
+- pinned trusted public-key set with key IDs derived from public-key SHA-256 fingerprints and support for multiple pinned keys;
+- domain-separated package/catalog signatures using strict Ed25519 verification;
+- release catalog v1 with monotonic sequence rollback protection, signed expiry and exact package-manifest SHA-256/identity binding;
+- deterministic unsigned release-catalog builder and offline signing CLI that reads production secret material only from an explicitly supplied external file;
+- production private release keys are not stored in the repository or application bundle;
+- CI includes package/catalog smoke plus Python/Rust/Tauri suites;
 - Apache-2.0 licence for project-authored software, with third-party data kept separately licensed;
 - `main` protected by an active GitHub ruleset requiring PRs and the `test` status check, with force pushes and deletion blocked.
 
@@ -33,17 +39,18 @@ Current foundations:
 - Issue #1: 3 unresolved licensing reviews (DoJ Glossaries, DBnary snapshot licence, OpenHowNet core data).
 - OpenCC behavior remains a documented partial/reference implementation rather than full upstream runtime parity.
 - Runtime API v1 explanation enrichment is designed for the current fixture-backed sources; future source/importer additions may add fields without changing existing v1 meanings.
-- Phase 3F is offline package/install/rollback infrastructure only: Internet update discovery/download and publisher signing are not implemented.
+- Phase 3G authenticates offline release metadata only: Internet update discovery/download is not implemented.
+- Remote trust-root rotation/delegation, HSM/key-vault integration and installer signing are not implemented.
 - Desktop database chooser selections are session-only; persistent user preferences across app restarts are not implemented.
 - Production installers/signing and mobile packaging are not started.
 - Performance numbers from GitHub-hosted runners are smoke signals only, not product targets.
 
 ## Likely next work
 
-1. Add authenticated release/update design: signed package/catalog metadata before enabling network downloads.
-2. Add safe update discovery/download that stages into the Phase 3F package store and never bypasses validation/rollback.
-3. Decide and implement safe persistence for desktop database preferences and active package selection.
-4. Add Windows/macOS installer packaging and signing after update behavior is stable.
+1. Add a safe network update discovery/download layer that requires Phase 3G catalog/package authenticity before invoking the Phase 3F package store.
+2. Persist the highest trusted catalog sequence and active package preference safely across app restarts.
+3. Design release-key operational procedures/rotation without placing private keys in the repository.
+4. Add Windows/macOS installer packaging and platform signing after database-update behavior is stable.
 5. Expand fixture-backed domains/source coverage while preserving Runtime API v1 compatibility.
 
 Historical detail: `docs/history/PROJECT_HISTORY.md`, `CHANGELOG.md`, ADRs under `docs/adr/`, and closed GitHub Issues.
