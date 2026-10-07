@@ -1,4 +1,4 @@
-use chinese_regional_localizer::LocalizerEngine;
+use chinese_regional_localizer::{LocalizerEngine, UserControlledLocalizer};
 use serde_json::to_string_pretty;
 use std::env;
 use std::process::ExitCode;
@@ -27,6 +27,25 @@ fn main() -> ExitCode {
         eprintln!("missing --text");
         return ExitCode::from(2);
     };
+
+    if let Some(user_db) = value_after(&args, "--user-db") {
+        let engine = match UserControlledLocalizer::open(&db, &user_db) {
+            Ok(engine) => engine,
+            Err(error) => {
+                eprintln!("failed to open database: {error:?}");
+                return ExitCode::from(1);
+            }
+        };
+        let result = match engine.localize(&text, &source, &target, None) {
+            Ok(result) => result,
+            Err(error) => {
+                eprintln!("localization failed: {error:?}");
+                return ExitCode::from(1);
+            }
+        };
+        println!("{}", to_string_pretty(&result).expect("serialize result"));
+        return ExitCode::SUCCESS;
+    }
 
     let engine = match LocalizerEngine::open(&db) {
         Ok(engine) => engine,
