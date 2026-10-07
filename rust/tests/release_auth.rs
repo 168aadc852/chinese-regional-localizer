@@ -1,8 +1,7 @@
 use chinese_regional_localizer::{
     key_id_for_public_key, sign_detached, verify_catalog_package_binding, verify_detached,
-    verify_package_manifest_signature, verify_release_catalog, DataPackageManifest,
-    ReleaseCatalog, ReleaseCatalogPackage, SignatureEnvelope, SignedPayloadKind, TrustedKey,
-    TrustedKeySet,
+    verify_package_manifest_signature, verify_release_catalog, DataPackageManifest, ReleaseCatalog,
+    ReleaseCatalogPackage, SignatureEnvelope, SignedPayloadKind, TrustedKey, TrustedKeySet,
 };
 use ed25519_dalek::SigningKey;
 use serde_json::json;
