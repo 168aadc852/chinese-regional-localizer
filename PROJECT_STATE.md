@@ -4,10 +4,11 @@ Updated: 2026-10-07
 
 ## Status
 
-**Phase 3I desktop authenticated data-update UI is complete and merged.**
+**Phase 3I desktop authenticated data-update UI is complete and merged. Phase 0 source whitelist review now has a usable conclusion for all 24 machine source IDs.**
 
 The project currently has:
 - governed, licence-aware source ingestion;
+- a completed first-pass source whitelist with unresolved-rights sources locked to reference-only/non-ingest status;
 - SQLite v0.2 shared data with version/provenance history;
 - Python reference localization plus Rust shared-core/runtime support for CN/HK/TW routes;
 - private user-dictionary support;
@@ -18,18 +19,17 @@ The project currently has:
 
 ## Open items
 
-- Issue #1: unresolved licence reviews for DoJ Glossaries and the DBnary snapshot licence.
 - OpenCC remains a partial/reference implementation rather than full upstream runtime parity.
 - Desktop updates are manual only; retry/resume and production hosting are not implemented.
 - Release trust-root rotation/delegation, key-vault/HSM operations and installer signing are not implemented.
-- Desktop database choice is session-only; general product preferences are not persisted.
+- Desktop database choice is session-only; general product preferences are not persisted (Issue #38).
 - Production Windows/macOS installers and mobile packaging are not started.
 
 ## Likely next work
 
-1. Production release hosting/CDN layout plus interrupted-download retry/resume.
-2. Release-key operational procedures and rotation.
-3. Persisted non-secret desktop settings.
+1. Phase 3J / Issue #38: persisted non-secret desktop settings with safe restart validation and migration.
+2. Production release hosting/CDN layout plus interrupted-download retry/resume.
+3. Release-key operational procedures and rotation.
 4. Windows/macOS packaging and signing.
 5. Expand fixture-backed source/domain coverage without breaking Runtime API v1.
 
