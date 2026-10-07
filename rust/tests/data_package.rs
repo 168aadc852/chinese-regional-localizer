@@ -127,7 +127,11 @@ fn corrupt_sqlite_is_rejected_even_with_matching_checksum() {
         },
         "sources": [{"source_id":"opencc","resource_key":"x","version_label":null,"revision_id":null,"checksum_sha256":null}]
     });
-    fs::write(package.join("package.json"), serde_json::to_vec(&manifest).unwrap()).unwrap();
+    fs::write(
+        package.join("package.json"),
+        serde_json::to_vec(&manifest).unwrap(),
+    )
+    .unwrap();
     assert!(validate_package_dir(&package).is_err());
 }
 
