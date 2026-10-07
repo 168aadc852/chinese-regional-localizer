@@ -5,6 +5,9 @@ edition = "2021"
 license = "Apache-2.0"
 description = "Rust reference runtime for deterministic Chinese regional localization"
 
+[lib]
+path = "src/lib_v2.rs"
+
 [dependencies]
 rusqlite = { version = "0.32", features = ["bundled"] }
 serde = { version = "1", features = ["derive"] }
