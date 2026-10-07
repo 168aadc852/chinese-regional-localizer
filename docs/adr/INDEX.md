@@ -15,3 +15,4 @@ Read only decisions relevant to the current task.
 - [D-011](D-011-update-safe-source-versions.md) — Resource refreshes are idempotent, versioned and current/superseded aware.
 - [D-012](D-012-user-local-precedence.md) — Private user rules stay separate and outrank shared entity/term rules.
 - [D-013](D-013-rust-parity-before-ui.md) — Rust must match the Python behavioral contract before optimization or Tauri UI integration.
+- [D-014](D-014-rust-user-local-parity-before-tauri.md) — Rust must support the private user-local contract before Tauri integration.
