@@ -105,8 +105,8 @@ sources:
 
   - id: hk-doj-glossary
     name: Combined DoJ Glossaries of Legal Terms
-    status: pending_review
-    pack: pending
+    status: reference_only
+    pack: reference_only
     licence: null
     commercial_use: null
     modification_allowed: null
@@ -114,8 +114,8 @@ sources:
     attribution_required: null
     share_alike: null
     ingest_allowed: false
-    ingest_scope: "None until explicit reuse/adaptation rights are confirmed."
-    excluded_scope: "Entire glossary for derived-database ingestion while licence remains unresolved."
+    ingest_scope: "None under currently verified evidence; manual/reference use only."
+    excluded_scope: "Entire glossary for derived-database ingestion unless authoritative reuse/adaptation and redistribution rights are later verified."
     review_record: data-registry/doj-glossary.md
 
   - id: cc-cedict
@@ -270,17 +270,17 @@ sources:
 
   - id: dbnary
     name: DBnary
-    status: pending_review
-    pack: pending
+    status: reference_only
+    pack: reference_only
     licence: null
     commercial_use: null
     modification_allowed: null
     redistribution_allowed: null
-    attribution_required: null
+    attribution_required: true
     share_alike: true
     ingest_allowed: false
-    ingest_scope: "None until the exact Chinese snapshot and its licence URI/version are pinned."
-    excluded_scope: "All DBnary exports while 3.0/4.0 licence-version evidence remains inconsistent."
+    ingest_scope: "None until an exact Chinese snapshot and authoritative licence URI/version are pinned."
+    excluded_scope: "All DBnary exports for project packaging while the exact snapshot licence version remains unresolved."
     review_record: data-registry/dbnary.md
 
   - id: conceptnet
