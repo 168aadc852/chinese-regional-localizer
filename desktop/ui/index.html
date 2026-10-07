@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chinese Regional Localizer</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="app-header">
+        <div>
+          <p class="eyebrow">Offline-first · Runtime API v1</p>
+          <h1>Chinese Regional Localizer</h1>
+          <p class="subtitle">中文地區本地化：中國大陸、香港、台灣</p>
+        </div>
+        <span id="statusBadge" class="status-badge">Ready</span>
+      </header>
+
+      <section class="toolbar" aria-label="Localization settings">
+        <label>
+          <span>來源</span>
+          <select id="sourceLocale">
+            <option value="zh-CN">中國大陸（zh-CN）</option>
+            <option value="zh-Hant">繁體中文（zh-Hant）</option>
+          </select>
+        </label>
+        <label>
+          <span>目標</span>
+          <select id="targetLocale">
+            <option value="zh-HK">香港（zh-HK）</option>
+            <option value="zh-TW">台灣（zh-TW）</option>
+          </select>
+        </label>
+        <button id="localizeButton" type="button">本地化</button>
+      </section>
+
+      <section class="workspace">
+        <article class="panel">
+          <div class="panel-heading">
+            <h2>原文</h2>
+            <span id="inputCount">0 字</span>
+          </div>
+          <textarea id="inputText" placeholder="輸入要本地化的中文，例如：布拉德·皮特研究人工智能"></textarea>
+        </article>
+
+        <article class="panel">
+          <div class="panel-heading">
+            <h2>結果</h2>
+            <button id="copyButton" class="secondary-button" type="button">複製</button>
+          </div>
+          <textarea id="outputText" readonly placeholder="結果會顯示在這裡"></textarea>
+        </article>
+      </section>
+
+      <section class="review-panel" aria-live="polite">
+        <div class="review-header">
+          <div>
+            <h2>變更與來源</h2>
+            <p id="summaryText">尚未執行本地化。</p>
+          </div>
+          <span id="reviewBadge" class="review-badge hidden">需要檢查</span>
+        </div>
+        <div id="changesList" class="changes-list"></div>
+      </section>
+
+      <p id="errorBox" class="error-box hidden" role="alert"></p>
+    </main>
+    <script src="app.js"></script>
+  </body>
+</html>
