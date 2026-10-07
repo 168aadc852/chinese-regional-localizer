@@ -62,3 +62,11 @@ jobs:
 
       - name: Rust parity tests
         run: cargo test --manifest-path rust/Cargo.toml --all-targets
+
+      - name: Rust benchmark smoke
+        run: >-
+          cargo run --release --manifest-path rust/Cargo.toml --bin benchmark --
+          --db build/regional-demo.sqlite
+          --corpus data/fixtures/realistic_corpus.json
+          --target-chars 5000
+          --iterations 3
