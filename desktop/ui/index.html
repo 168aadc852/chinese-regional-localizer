@@ -17,6 +17,36 @@
       <span id="runtimeBadge" class="badge">Rust runtime</span>
     </header>
 
+    <section class="card settings-panel" aria-label="Database settings">
+      <div class="panel-heading">
+        <div>
+          <h2>資料庫設定</h2>
+          <p class="muted">檔案選擇與 SQLite 驗證全部由 Rust 處理；前端不會取得完整檔案路徑。</p>
+        </div>
+        <button id="refreshDatabaseStatus" class="secondary-button" type="button">重新檢查</button>
+      </div>
+      <div class="database-grid">
+        <article class="database-item">
+          <div>
+            <strong>Shared regional database</strong>
+            <p id="sharedDatabaseStatus" class="muted">檢查中…</p>
+          </div>
+          <button id="chooseSharedDatabase" class="secondary-button" type="button">選擇檔案</button>
+        </article>
+        <article class="database-item">
+          <div>
+            <strong>私人 user dictionary（可選）</strong>
+            <p id="userDatabaseStatus" class="muted">檢查中…</p>
+          </div>
+          <div class="button-row">
+            <button id="chooseUserDatabase" class="secondary-button" type="button">選擇檔案</button>
+            <button id="clearUserDatabase" class="ghost-button" type="button">停用</button>
+          </div>
+        </article>
+      </div>
+      <p id="databaseMessage" class="settings-message hidden" role="status"></p>
+    </section>
+
     <section class="controls card" aria-label="Localization settings">
       <label>
         <span>來源</span>

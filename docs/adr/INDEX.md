@@ -17,3 +17,4 @@ Read only decisions relevant to the current task.
 - [D-013](D-013-rust-parity-before-ui.md) — Rust must match the Python behavioral contract before optimization or Tauri UI integration.
 - [D-014](D-014-runtime-api-boundary.md) — The versioned Rust Runtime API is the application/Tauri boundary.
 - [D-015](D-015-tauri-thin-frontend-managed-db-state.md) — Tauri keeps the frontend thin and database paths in managed Rust state.
+- [D-016](D-016-native-db-chooser-rust-validation.md) — Native database selection and compatibility validation stay inside Rust; frontend receives only safe status metadata.

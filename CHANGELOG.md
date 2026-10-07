@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026-10-07 — Phase 3E safe desktop database settings
+
+- Added Rust-managed mutable database configuration for the Tauri desktop shell.
+- Added native Rust-side file pickers for the shared regional database and optional private user dictionary.
+- Added read-only SQLite compatibility validation before a selected file can replace the active database configuration.
+- Kept full local filesystem paths inside Rust-managed state; frontend JavaScript receives only filename/status/error metadata.
+- Added a command to clear the optional private user dictionary without deleting its file.
+- Made subsequent localization calls immediately use the currently accepted database configuration.
+- Added a responsive Settings panel showing shared/user database readiness and selection controls.
+- Preserved `CRL_SHARED_DB` and `CRL_USER_DB` as development startup fallbacks.
+- Added Tauri unit tests for compatible/incompatible databases and path-privacy behavior.
+- Added `docs/DESKTOP_DATABASE_SETTINGS.md` and ADR D-016 documenting the native-chooser/Rust-validation security boundary.
+- Database chooser selections remain session-only; persistence and database download/update/rollback are deferred.
+
 ## 2026-10-07 — Phase 3D minimal Tauri desktop shell
 
 - Added a Tauri 2 desktop application under `desktop/` with a static vanilla HTML/CSS/JavaScript frontend.
