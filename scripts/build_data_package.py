@@ -21,6 +21,7 @@ import poc_builder
 PACKAGE_MANIFEST_VERSION = 1
 PACKAGE_DB_NAME = "regional.sqlite"
 SAFE_ID = re.compile(r"^[A-Za-z0-9._-]+$")
+WIKIDATA_ITEM_RESOURCE = re.compile(r"^wikidata:Q[1-9][0-9]*$")
 REDISTRIBUTABLE_PACKS = {"core", "attribution", "sharealike"}
 
 
@@ -38,13 +39,29 @@ def sha256_file(path: Path) -> str:
 
 def _safe_token(value: str, field: str) -> str:
     if not value or not SAFE_ID.fullmatch(value):
-        raise PackageBuildError(f"{field} must contain only letters, numbers, dot, underscore or dash")
+        raise PackageBuildError(
+            f"{field} must contain only letters, numbers, dot, underscore or dash"
+        )
     return value
 
 
 def _metadata(conn: sqlite3.Connection, key: str) -> str | None:
     row = conn.execute("SELECT value FROM build_metadata WHERE key = ?", (key,)).fetchone()
     return str(row[0]) if row else None
+
+
+def _policy_resource_id(source_id: str, resource_key: str) -> str:
+    """Map an instance provenance key to its machine-approved resource scope.
+
+    Most sources store the same exact resource ID that appears in sources.yaml.
+    Wikidata is intentionally different: the importer stores one source-version
+    key per concrete QID for update/provenance purposes, while the manifest
+    approves the EntityData item resource class. Only syntactically valid item
+    QIDs are allowed to inherit that approved scope.
+    """
+    if source_id == "wikidata" and WIKIDATA_ITEM_RESOURCE.fullmatch(resource_key):
+        return "wikidata:entity-json:item"
+    return resource_key
 
 
 def validate_database_for_release(
@@ -62,7 +79,9 @@ def validate_database_for_release(
 
         pack_type = _metadata(conn, "pack_type")
         if pack_type not in REDISTRIBUTABLE_PACKS:
-            raise PackageBuildError(f"Database has invalid or missing redistributable pack_type: {pack_type!r}")
+            raise PackageBuildError(
+                f"Database has invalid or missing redistributable pack_type: {pack_type!r}"
+            )
 
         policies = poc_builder.source_map(manifest)
         rows = conn.execute(
@@ -88,14 +107,18 @@ def validate_database_for_release(
                 "reference_only",
                 "rejected",
             }:
-                raise PackageBuildError(f"Database references non-redistributable source: {source_id}")
+                raise PackageBuildError(
+                    f"Database references non-redistributable source: {source_id}"
+                )
             if policy.get("pack") != pack_type:
                 raise PackageBuildError(
-                    f"Licence-pack mismatch for {source_id}: database={pack_type}, manifest={policy.get('pack')}"
+                    f"Licence-pack mismatch for {source_id}: "
+                    f"database={pack_type}, manifest={policy.get('pack')}"
                 )
             resource_key = str(row["resource_key"] or "")
             allowed_resources = policy.get("ingest_resources")
-            if allowed_resources is not None and resource_key not in allowed_resources:
+            policy_resource = _policy_resource_id(source_id, resource_key)
+            if allowed_resources is not None and policy_resource not in allowed_resources:
                 raise PackageBuildError(
                     f"Current resource {source_id}:{resource_key} is outside ingest_resources"
                 )
@@ -159,7 +182,9 @@ def build_package(
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--db", type=Path, required=True)
-    parser.add_argument("--manifest", type=Path, default=Path("data-registry/sources.yaml"))
+    parser.add_argument(
+        "--manifest", type=Path, default=Path("data-registry/sources.yaml")
+    )
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--package-id", required=True)
     parser.add_argument("--version", required=True)
