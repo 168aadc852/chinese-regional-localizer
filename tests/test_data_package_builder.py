@@ -29,7 +29,7 @@ class DataPackageBuilderTests(unittest.TestCase):
         source_id: str = "opencc",
         resource_key: str = "opencc:STCharacters.txt",
     ) -> Path:
-        path = self.root / f"{source_id}-{pack}.sqlite"
+        path = self.root / f"{source_id}-{pack}-{len(list(self.root.iterdir()))}.sqlite"
         conn = sqlite3.connect(path)
         conn.executescript(
             """
@@ -75,6 +75,21 @@ class DataPackageBuilderTests(unittest.TestCase):
         self.assertEqual(result["sources"][0]["source_id"], "opencc")
         saved = json.loads((output / "package.json").read_text(encoding="utf-8"))
         self.assertEqual(saved, result)
+
+    def test_wikidata_qid_instance_uses_approved_item_scope(self):
+        db = self.make_db(source_id="wikidata", resource_key="wikidata:Q108839994")
+        pack, sources = package_builder.validate_database_for_release(
+            db, package_builder.poc_builder.load_manifest(self.manifest)
+        )
+        self.assertEqual(pack, "core")
+        self.assertEqual(sources[0]["resource_key"], "wikidata:Q108839994")
+
+    def test_invalid_wikidata_instance_does_not_inherit_item_scope(self):
+        db = self.make_db(source_id="wikidata", resource_key="wikidata:not-a-qid")
+        with self.assertRaises(package_builder.PackageBuildError):
+            package_builder.validate_database_for_release(
+                db, package_builder.poc_builder.load_manifest(self.manifest)
+            )
 
     def test_wrong_pack_for_source_is_rejected(self):
         db = self.make_db(pack="attribution", source_id="opencc")
