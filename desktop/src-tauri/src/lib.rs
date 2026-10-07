@@ -63,9 +63,17 @@ fn validate_shared_db(path: &Path) -> Result<(), String> {
     }
     let conn = Connection::open_with_flags(path, rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY)
         .map_err(|_| "無法以 SQLite database 開啟所選檔案。".to_string())?;
-    for table in ["concepts", "localized_names", "term_rules", "source_versions"] {
-        if !has_table(&conn, table).map_err(|_| "無法檢查 shared database schema。".to_string())? {
-            return Err(format!("所選檔案不是相容的 shared database：缺少 {table} table。"));
+    for table in [
+        "concepts",
+        "localized_names",
+        "term_rules",
+        "source_versions",
+    ] {
+        if !has_table(&conn, table).map_err(|_| "無法檢查 shared database schema。".to_string())?
+        {
+            return Err(format!(
+                "所選檔案不是相容的 shared database：缺少 {table} table。"
+            ));
         }
     }
     Ok(())
@@ -77,7 +85,9 @@ fn validate_user_db(path: &Path) -> Result<(), String> {
     }
     let conn = Connection::open_with_flags(path, rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY)
         .map_err(|_| "無法以 SQLite database 開啟所選 user dictionary。".to_string())?;
-    if !has_table(&conn, "user_terms").map_err(|_| "無法檢查 user dictionary schema。".to_string())? {
+    if !has_table(&conn, "user_terms")
+        .map_err(|_| "無法檢查 user dictionary schema。".to_string())?
+    {
         return Err("所選檔案不是相容的 user dictionary：缺少 user_terms table。".into());
     }
     Ok(())
