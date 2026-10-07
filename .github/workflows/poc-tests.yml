@@ -38,5 +38,18 @@ jobs:
       - name: Run unit tests
         run: python -m unittest discover -s tests -v
 
-      - name: Build Phase 2C demo database
+      - name: Build demo database
         run: python scripts/build_demo_database.py
+
+      - name: Run realistic corpus evaluation
+        run: python scripts/evaluate_corpus.py
+
+      - name: Performance smoke check
+        run: >-
+          python scripts/benchmark_localizer.py
+          --target-chars 5000
+          --warmups 1
+          --iterations 3
+          --min-chars-per-sec 100
+          --max-p95-ms 10000
+          --max-peak-kib 524288
