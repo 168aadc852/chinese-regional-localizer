@@ -85,13 +85,8 @@ impl LocalizerEngine {
         let mut changes = entity_result.2;
 
         for (stage_source, stage_target) in &route {
-            let stage = self.apply_term_stage(
-                &current,
-                &protected,
-                stage_source,
-                stage_target,
-                context,
-            )?;
+            let stage =
+                self.apply_term_stage(&current, &protected, stage_source, stage_target, context)?;
             current = stage.0;
             protected = stage.1;
             changes.extend(stage.2);
@@ -103,10 +98,7 @@ impl LocalizerEngine {
             output: current,
             source_locale: source_locale.to_owned(),
             target_locale: target_locale.to_owned(),
-            route: route
-                .iter()
-                .map(|(a, b)| format!("{a}->{b}"))
-                .collect(),
+            route: route.iter().map(|(a, b)| format!("{a}->{b}")).collect(),
             changes,
             review_needed,
         })
@@ -340,7 +332,10 @@ impl LocalizerEngine {
             let mut selected_rows: Vec<&TermRule> = Vec::new();
             for key in &keys {
                 let end = i + key.len();
-                if end > next_protected_start || end > text.len() || !text[i..].starts_with(key.as_str()) {
+                if end > next_protected_start
+                    || end > text.len()
+                    || !text[i..].starts_with(key.as_str())
+                {
                     continue;
                 }
                 let applicable: Vec<_> = index[*key]
@@ -370,7 +365,10 @@ impl LocalizerEngine {
                 .into_iter()
                 .filter(|rule| rule.priority == max_priority)
                 .collect();
-            let targets: HashSet<&str> = winners.iter().map(|rule| rule.target_text.as_str()).collect();
+            let targets: HashSet<&str> = winners
+                .iter()
+                .map(|rule| rule.target_text.as_str())
+                .collect();
 
             if targets.len() != 1 {
                 let output_start = out.len();
@@ -448,7 +446,12 @@ fn route(source: &str, target: &str) -> Result<Vec<(String, String)>> {
         ("zh-CN", "zh-TW") => vec![("zh-CN", "zh-Hant"), ("zh-Hant", "zh-TW")],
         ("zh-Hant", "zh-HK") => vec![("zh-Hant", "zh-HK")],
         ("zh-Hant", "zh-TW") => vec![("zh-Hant", "zh-TW")],
-        _ => return Err(LocalizerError::UnsupportedRoute(source.into(), target.into())),
+        _ => {
+            return Err(LocalizerError::UnsupportedRoute(
+                source.into(),
+                target.into(),
+            ))
+        }
     };
     Ok(pairs
         .into_iter()
@@ -461,15 +464,23 @@ fn safe_entity_surface(text: &str, name_type: &str) -> bool {
         return false;
     }
     let chars: Vec<char> = text.chars().collect();
-    let has_cjk = chars.iter().any(|ch| ('\u{3400}'..='\u{9fff}').contains(ch));
-    let pure_cjk = chars.iter().all(|ch| ('\u{3400}'..='\u{9fff}').contains(ch));
+    let has_cjk = chars
+        .iter()
+        .any(|ch| ('\u{3400}'..='\u{9fff}').contains(ch));
+    let pure_cjk = chars
+        .iter()
+        .all(|ch| ('\u{3400}'..='\u{9fff}').contains(ch));
     let punctuation = chars
         .iter()
         .any(|ch| "·•・-–—()（）[]【】/\\ ".contains(*ch));
     let has_ascii = chars.iter().any(|ch| ch.is_ascii_alphanumeric());
 
     if has_cjk {
-        let mut minimum = if name_type == "alias" && pure_cjk { 4 } else { 3 };
+        let mut minimum = if name_type == "alias" && pure_cjk {
+            4
+        } else {
+            3
+        };
         if punctuation || has_ascii {
             minimum = 2;
         }

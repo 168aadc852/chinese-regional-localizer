@@ -44,15 +44,14 @@ fn short_evaluation_cases_match_python_contract() {
     let engine = LocalizerEngine::open(demo_db()).expect("open demo db");
     for case in read_cases("data/fixtures/evaluation_cases.json") {
         let result = engine
-            .localize(
-                &case.input,
-                &case.source_locale,
-                &case.target_locale,
-                None,
-            )
+            .localize(&case.input, &case.source_locale, &case.target_locale, None)
             .unwrap_or_else(|error| panic!("{} failed: {error:?}", case.id));
         assert_eq!(result.output, case.expected, "case {}", case.id);
-        assert!(!result.review_needed, "case {} unexpectedly needs review", case.id);
+        assert!(
+            !result.review_needed,
+            "case {} unexpectedly needs review",
+            case.id
+        );
     }
 }
 
@@ -61,12 +60,7 @@ fn realistic_corpus_matches_python_contract() {
     let engine = LocalizerEngine::open(demo_db()).expect("open demo db");
     for case in read_cases("data/fixtures/realistic_corpus.json") {
         let result = engine
-            .localize(
-                &case.input,
-                &case.source_locale,
-                &case.target_locale,
-                None,
-            )
+            .localize(&case.input, &case.source_locale, &case.target_locale, None)
             .unwrap_or_else(|error| panic!("{} failed: {error:?}", case.id));
         assert_eq!(result.output, case.expected, "case {}", case.id);
         assert_eq!(
