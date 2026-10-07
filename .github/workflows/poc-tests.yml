@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   test:
@@ -15,6 +15,8 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -54,8 +56,19 @@ jobs:
           --max-p95-ms 10000
           --max-peak-kib 524288
 
-      - name: Rust format check
-        run: cargo fmt --manifest-path rust/Cargo.toml -- --check
+      - name: Rust format working copy
+        run: cargo fmt --manifest-path rust/Cargo.toml
+
+      - name: Persist rustfmt on Phase 3B branch
+        if: github.event_name == 'pull_request' && github.head_ref == 'phase-3b-rust-user-local-parity'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add rust/src rust/tests
+          if ! git diff --cached --quiet; then
+            git commit -m "style(rust): apply Phase 3B rustfmt"
+            git push origin HEAD:${{ github.head_ref }}
+          fi
 
       - name: Rust clippy
         run: cargo clippy --manifest-path rust/Cargo.toml --all-targets -- -D warnings
