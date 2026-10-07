@@ -493,23 +493,21 @@ fn safe_entity_surface(text: &str, name_type: &str) -> bool {
 fn boundary_ok(text: &str, start: usize, end: usize, surface: &str) -> bool {
     let first = surface.chars().next();
     let last = surface.chars().next_back();
-    if first.is_some_and(|ch| ch.is_ascii_alphanumeric()) {
-        if text[..start]
+    if first.is_some_and(|ch| ch.is_ascii_alphanumeric())
+        && text[..start]
             .chars()
             .next_back()
             .is_some_and(|ch| ch.is_ascii_alphanumeric())
-        {
-            return false;
-        }
+    {
+        return false;
     }
-    if last.is_some_and(|ch| ch.is_ascii_alphanumeric()) {
-        if text[end..]
+    if last.is_some_and(|ch| ch.is_ascii_alphanumeric())
+        && text[end..]
             .chars()
             .next()
             .is_some_and(|ch| ch.is_ascii_alphanumeric())
-        {
-            return false;
-        }
+    {
+        return false;
     }
     true
 }
@@ -576,7 +574,7 @@ fn rule_context_allows(
         .get("word_boundary")
         .and_then(Value::as_bool)
         .unwrap_or(false)
-        && !boundary_ok(text, start, end, "x")
+        && !boundary_ok(text, start, end, &text[start..end])
     {
         return false;
     }
