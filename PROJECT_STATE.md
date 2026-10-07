@@ -4,7 +4,7 @@ Updated: 2026-10-07
 
 ## Status
 
-**Phase 3I desktop authenticated data-update UI is implemented pending final CI validation/merge.**
+**Phase 3I desktop authenticated data-update UI is complete and merged.**
 
 Current foundations:
 - data governance + machine-readable exact-resource ingestion policy;
