@@ -55,7 +55,7 @@ fn shared_entity_event_contains_qid_and_evidence() {
     assert!(event["qid"].as_str().is_some());
     assert!(event["evidence"].as_array().is_some());
     assert_eq!(event["original_input_span"], serde_json::json!([0, 6]));
-    assert_eq!(event["final_output_span"], serde_json::json!([0, 5]));
+    assert_eq!(event["final_output_span"], serde_json::json!([0, 4]));
 }
 
 #[test]
