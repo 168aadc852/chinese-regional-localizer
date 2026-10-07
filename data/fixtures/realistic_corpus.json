@@ -1,0 +1,82 @@
+[
+  {
+    "id": "tw-entertainment-ai-paragraph",
+    "source_locale": "zh-CN",
+    "target_locale": "zh-TW",
+    "input": "布拉德·皮特研究人工智能。布拉德·皮特再次研究人工智能。",
+    "expected": "布萊德·彼特研究人工智慧。布萊德·彼特再次研究人工智慧。",
+    "expected_review_needed": false,
+    "category": "mixed_entity_terminology",
+    "provenance": "project-authored synthetic text"
+  },
+  {
+    "id": "hk-entertainment-script-paragraph",
+    "source_locale": "zh-CN",
+    "target_locale": "zh-HK",
+    "input": "布拉德·皮特對一见钟情這個詞很有興趣。最後再看一個见字。",
+    "expected": "畢·彼特對一見鍾情這個詞很有興趣。最後再看一個見字。",
+    "expected_review_needed": false,
+    "category": "mixed_entity_script",
+    "provenance": "project-authored synthetic text"
+  },
+  {
+    "id": "hk-variant-repetition",
+    "source_locale": "zh-Hant",
+    "target_locale": "zh-HK",
+    "input": "檯邊有一張檯，檯面保持整潔。",
+    "expected": "枱邊有一張枱，枱面保持整潔。",
+    "expected_review_needed": false,
+    "category": "hk_variant",
+    "provenance": "project-authored synthetic text"
+  },
+  {
+    "id": "tw-name-exception-and-variant",
+    "source_locale": "zh-Hant",
+    "target_locale": "zh-TW",
+    "input": "張棟樑爲活動寫下名字，張棟樑沒有改名。",
+    "expected": "張棟樑為活動寫下名字，張棟樑沒有改名。",
+    "expected_review_needed": false,
+    "category": "phrase_exception",
+    "provenance": "project-authored synthetic text"
+  },
+  {
+    "id": "hk-repeated-script-conversion",
+    "source_locale": "zh-CN",
+    "target_locale": "zh-HK",
+    "input": "一见钟情不是一见钟情的唯一說法，见字也應處理。",
+    "expected": "一見鍾情不是一見鍾情的唯一說法，見字也應處理。",
+    "expected_review_needed": false,
+    "category": "script_repetition",
+    "provenance": "project-authored synthetic text"
+  },
+  {
+    "id": "tw-repeated-terminology-and-entity",
+    "source_locale": "zh-CN",
+    "target_locale": "zh-TW",
+    "input": "人工智能、人工智能，以及布拉德·皮特。",
+    "expected": "人工智慧、人工智慧，以及布萊德·彼特。",
+    "expected_review_needed": false,
+    "category": "repeated_terms",
+    "provenance": "project-authored synthetic text"
+  },
+  {
+    "id": "hk-no-op-name-safety",
+    "source_locale": "zh-Hant",
+    "target_locale": "zh-HK",
+    "input": "張棟樑",
+    "expected": "張棟樑",
+    "expected_review_needed": false,
+    "category": "no_op_safety",
+    "provenance": "project-authored synthetic text"
+  },
+  {
+    "id": "tw-no-op-name-safety",
+    "source_locale": "zh-Hant",
+    "target_locale": "zh-TW",
+    "input": "張棟樑",
+    "expected": "張棟樑",
+    "expected_review_needed": false,
+    "category": "no_op_safety",
+    "provenance": "project-authored synthetic text"
+  }
+]
