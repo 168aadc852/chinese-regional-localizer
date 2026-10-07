@@ -1,0 +1,1 @@
+Phase 3E implementation work is tracked in the corresponding GitHub issue and branch. This file is intentionally minimal; detailed implementation notes belong in the issue/PR and durable architectural decisions in ADRs.
