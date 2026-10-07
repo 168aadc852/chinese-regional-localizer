@@ -82,9 +82,9 @@ impl UserControlledLocalizer {
             match segment.kind {
                 SegmentKind::Shared => {
                     let source_text = &text[segment.start..segment.end];
-                    let result = self
-                        .shared
-                        .localize(source_text, source_locale, target_locale, context)?;
+                    let result =
+                        self.shared
+                            .localize(source_text, source_locale, target_locale, context)?;
                     let output_start_chars = output.chars().count();
                     let input_start_chars = text[..segment.start].chars().count();
                     for change in &result.changes {
@@ -196,7 +196,9 @@ fn segments(text: &str, surfaces: &[String]) -> Vec<Segment> {
     let mut shared_start = 0usize;
     let mut i = 0usize;
     while i < text.len() {
-        let matched = surfaces.iter().find(|surface| text[i..].starts_with(surface.as_str()));
+        let matched = surfaces
+            .iter()
+            .find(|surface| text[i..].starts_with(surface.as_str()));
         if let Some(surface) = matched {
             if shared_start < i {
                 result.push(Segment {
@@ -257,7 +259,12 @@ fn resolve_user_segment(
     input_span: [usize; 2],
     output_start: usize,
 ) -> (String, Value) {
-    let protected = rank(terms.iter().filter(|term| term.kind == "protected").collect());
+    let protected = rank(
+        terms
+            .iter()
+            .filter(|term| term.kind == "protected")
+            .collect(),
+    );
     if let Some(winner) = protected.first() {
         let output_span = [output_start, output_start + source_text.chars().count()];
         return (
@@ -280,7 +287,12 @@ fn resolve_user_segment(
         );
     }
 
-    let ranked = rank(terms.iter().filter(|term| term.kind == "override").collect());
+    let ranked = rank(
+        terms
+            .iter()
+            .filter(|term| term.kind == "override")
+            .collect(),
+    );
     if ranked.is_empty() {
         let output_span = [output_start, output_start + source_text.chars().count()];
         return (
@@ -306,10 +318,8 @@ fn resolve_user_segment(
         .into_iter()
         .take_while(|term| (specificity(term), term.priority) == top_rank)
         .collect();
-    let replacements: HashSet<Option<&str>> = top
-        .iter()
-        .map(|term| term.replacement.as_deref())
-        .collect();
+    let replacements: HashSet<Option<&str>> =
+        top.iter().map(|term| term.replacement.as_deref()).collect();
 
     if replacements.len() != 1 || replacements.contains(&None) {
         let output_span = [output_start, output_start + source_text.chars().count()];

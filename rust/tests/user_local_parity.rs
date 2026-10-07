@@ -93,7 +93,10 @@ fn override_beats_entity_and_reports_span() {
         .expect("localize");
     assert_eq!(result.output, "我指定的彼特");
     assert_eq!(result.changes[0]["user_term_id"], term_id);
-    assert_eq!(result.changes[0]["final_output_span"], serde_json::json!([0, 6]));
+    assert_eq!(
+        result.changes[0]["final_output_span"],
+        serde_json::json!([0, 6])
+    );
 }
 
 #[test]
@@ -114,7 +117,10 @@ fn protected_term_beats_opencc() {
         .localize("人工智能", "zh-CN", "zh-TW", None)
         .expect("localize");
     assert_eq!(result.output, "人工智能");
-    assert!(!result.changes.iter().any(|event| event["type"] == "term_rule"));
+    assert!(!result
+        .changes
+        .iter()
+        .any(|event| event["type"] == "term_rule"));
 }
 
 #[test]
@@ -144,7 +150,16 @@ fn locale_scoped_override_does_not_leak() {
 #[test]
 fn longest_user_surface_wins() {
     let (_temp, shared, user) = setup();
-    insert_term(&user, "override", "人工", Some("人造"), None, Some("zh-TW"), 0, true);
+    insert_term(
+        &user,
+        "override",
+        "人工",
+        Some("人造"),
+        None,
+        Some("zh-TW"),
+        0,
+        true,
+    );
     insert_term(
         &user,
         "override",
@@ -165,8 +180,26 @@ fn longest_user_surface_wins() {
 #[test]
 fn protected_beats_override_for_same_surface() {
     let (_temp, shared, user) = setup();
-    insert_term(&user, "override", "OpenAI", Some("開放人工智能"), None, Some("zh-HK"), 0, true);
-    insert_term(&user, "protected", "OpenAI", None, None, Some("zh-HK"), 0, true);
+    insert_term(
+        &user,
+        "override",
+        "OpenAI",
+        Some("開放人工智能"),
+        None,
+        Some("zh-HK"),
+        0,
+        true,
+    );
+    insert_term(
+        &user,
+        "protected",
+        "OpenAI",
+        None,
+        None,
+        Some("zh-HK"),
+        0,
+        true,
+    );
     let engine = UserControlledLocalizer::open(&shared, &user).expect("engine");
     let result = engine
         .localize("OpenAI", "zh-CN", "zh-HK", None)
@@ -178,7 +211,16 @@ fn protected_beats_override_for_same_surface() {
 #[test]
 fn more_specific_scope_beats_global_override() {
     let (_temp, shared, user) = setup();
-    insert_term(&user, "override", "測試詞", Some("全球答案"), None, None, 0, true);
+    insert_term(
+        &user,
+        "override",
+        "測試詞",
+        Some("全球答案"),
+        None,
+        None,
+        0,
+        true,
+    );
     insert_term(
         &user,
         "override",
@@ -263,6 +305,12 @@ fn shared_changes_keep_global_spans_after_user_segment() {
         .iter()
         .find(|event| event["type"] == "term_rule" && event["original"] == "人工智能")
         .expect("shared term event");
-    assert_eq!(shared_event["original_input_span"], serde_json::json!([6, 10]));
-    assert_eq!(shared_event["final_output_span"], serde_json::json!([6, 10]));
+    assert_eq!(
+        shared_event["original_input_span"],
+        serde_json::json!([6, 10])
+    );
+    assert_eq!(
+        shared_event["final_output_span"],
+        serde_json::json!([6, 10])
+    );
 }
