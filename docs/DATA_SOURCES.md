@@ -14,6 +14,7 @@ The manifest currently contains **24 source IDs**. Rime Cantonese is deliberatel
 - MusicBrainz Core Data — CC0 only.
 - THUOCL reviewed repository lists/signals.
 - Chinese Open WordNet under its recorded permissive notice.
+- OpenHowNet official core-data download — MIT, preserving the MIT notice and exact resource provenance; automated ingestion remains disabled until the exact download resource is pinned.
 
 ## Attribution packs
 
@@ -33,14 +34,14 @@ Chinese Wikipedia, Chinese Wiktionary, CC-CEDICT, CC-Canto, ConceptNet, CFDICT a
 
 - full Words.hk dictionary under its non-commercial licence;
 - MusicBrainz Supplementary Data under CC BY-NC-SA;
+- unrelated/historical/proprietary HowNet distributions not verified as covered by the OpenHowNet MIT statement;
 - any source/file outside the exact reviewed scope;
 - any production resource not listed in `ingest_resources` for an implemented importer.
 
 ## Pending
 
 - Combined DoJ Glossaries;
-- DBnary snapshot licence;
-- OpenHowNet downloadable core data rights.
+- DBnary snapshot licence.
 
 ## Review principle
 
