@@ -1,43 +1,41 @@
 # OpenHowNet
 
-Status: **pending_review**
+Status: **approved_with_conditions**
 
 ## Intended use
 Chinese word senses, sememes, semantic similarity, ambiguity detection and context-aware candidate ranking.
 
-## Official source
+## Official sources
 Repository: https://github.com/thunlp/OpenHowNet
-Project site/download: https://openhownet.thunlp.org/
+Project/download page: https://openhownet.thunlp.org/download
 Publisher: THUNLP / OpenHowNet
 
 ## Evidence reviewed
-- The GitHub repository is published under an **MIT License**.
-- The Python package metadata classifies the software as MIT licensed.
-- The repository README describes the project as “Core Data of HowNet and OpenHowNet Python API”.
-- However, the actual HowNet core data is not stored as an ordinary repository file in the current repo; the API instructs users to run `OpenHowNet.download()` or download the HowNet dictionary separately from the project website.
-- The root MIT licence text uses the standard wording referring to “software and associated documentation files”.
+- The official OpenHowNet download page directly offers the HowNet core data download.
+- On that same download page, the section titled “開源協議與引用規範” states that OpenHowNet is based on the **MIT licence**.
+- The same official section explicitly discusses use of OpenHowNet-provided **data or API** when requesting academic citation, linking the licence/citation statement to both data and API rather than the Python package alone.
+- The official GitHub repository carries the standard MIT License, copyright THUNLP 2019.
+- The repository README identifies the separately downloadable HowNet dictionary as “HowNet core data”.
 
 ## Rights review
-### API / repository code
+For the OpenHowNet-provided downloadable HowNet core data covered by the official OpenHowNet download/licence statement:
 - Commercial use: **Yes under MIT**
-- Modification: **Yes**
-- Redistribution: **Yes with MIT notice**
-
-### Downloaded HowNet core data
-- Commercial use: **Not yet independently confirmed from a data-specific licence**
-- Modification: **Not yet independently confirmed**
-- Redistribution: **Not yet independently confirmed**
-- Attribution/citation: Project requests citation if data/API are used in research, but citation guidance is not a substitute for an explicit redistribution licence
+- Modification / adaptation: **Yes**
+- Redistribution: **Yes**
+- Attribution / notice: **Preserve the MIT copyright and permission notice**
+- Share-alike/copyleft: **No**
+- Research citation: **Requested by the project; preserve citation/provenance metadata where practical**
 
 ## Packaging decision
-Do **not** redistribute the downloaded HowNet core data in this project yet.
+The OpenHowNet-provided core-data download may be used in a permissive/core-compatible pack subject to the MIT notice requirement and exact-resource provenance.
 
-Allowed for now:
-- use the MIT-licensed OpenHowNet API/code if useful;
-- treat online/local HowNet results as reference during research where permitted;
-- keep the core data out of release database packs until a data-specific licence or authoritative statement confirms redistribution/modification rights.
+Approval is intentionally narrow:
+- only use data distributed through the official OpenHowNet download mechanism or an exact resource whose OpenHowNet MIT coverage is documented;
+- preserve source URL, retrieval date, version/checksum where available, and MIT notice;
+- do not assume unrelated historical/proprietary HowNet distributions are covered merely because they contain similar data;
+- production ingestion remains disabled until the exact downloadable resource is pinned in `ingest_resources` and importer validation is designed.
 
-## Next verification task
-Obtain an authoritative statement from OpenHowNet/THUNLP that explicitly says whether the downloadable HowNet core data itself is covered by MIT or another redistribution licence.
+## Update method
+Prefer the official OpenHowNet core-data download. Record the exact download URL/resource identity, retrieval date, checksum and any version metadata available at ingestion time.
 
-Last reviewed: 2026-10-06
+Last reviewed: 2026-10-07
