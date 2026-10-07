@@ -53,3 +53,12 @@ jobs:
           --min-chars-per-sec 100
           --max-p95-ms 10000
           --max-peak-kib 524288
+
+      - name: Rust format check
+        run: cargo fmt --manifest-path rust/Cargo.toml -- --check
+
+      - name: Rust clippy
+        run: cargo clippy --manifest-path rust/Cargo.toml --all-targets -- -D warnings
+
+      - name: Rust parity tests
+        run: cargo test --manifest-path rust/Cargo.toml --all-targets
