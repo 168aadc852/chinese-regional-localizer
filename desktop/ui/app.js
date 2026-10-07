@@ -9,6 +9,21 @@ const changes = document.getElementById('changes');
 const reviewBadge = document.getElementById('reviewBadge');
 const errorMessage = document.getElementById('errorMessage');
 const runtimeBadge = document.getElementById('runtimeBadge');
+const sharedDatabaseStatus = document.getElementById('sharedDatabaseStatus');
+const userDatabaseStatus = document.getElementById('userDatabaseStatus');
+const chooseSharedDatabase = document.getElementById('chooseSharedDatabase');
+const chooseUserDatabase = document.getElementById('chooseUserDatabase');
+const clearUserDatabase = document.getElementById('clearUserDatabase');
+const refreshDatabaseStatus = document.getElementById('refreshDatabaseStatus');
+const databaseMessage = document.getElementById('databaseMessage');
+
+function invokeTauri() {
+  const invoke = window.__TAURI__?.core?.invoke;
+  if (!invoke) {
+    throw new Error('Tauri runtime 未載入。請用 Tauri desktop app 開啟此介面。');
+  }
+  return invoke;
+}
 
 function updateCount() {
   inputCount.textContent = `${[...inputText.value].length} 字`;
@@ -19,13 +34,75 @@ function setBusy(busy) {
   localizeButton.textContent = busy ? '處理中…' : '地區化';
 }
 
+function setSettingsBusy(busy) {
+  for (const button of [chooseSharedDatabase, chooseUserDatabase, clearUserDatabase, refreshDatabaseStatus]) {
+    button.disabled = busy;
+  }
+}
+
 function showError(message) {
   errorMessage.textContent = message;
   errorMessage.classList.toggle('hidden', !message);
 }
 
+function showDatabaseMessage(message, isError = false) {
+  databaseMessage.textContent = message || '';
+  databaseMessage.classList.toggle('hidden', !message);
+  databaseMessage.classList.toggle('settings-error', Boolean(message) && isError);
+}
+
 function text(value) {
   return value == null ? '' : String(value);
+}
+
+function renderDatabaseStatus(status) {
+  const sharedName = status?.shared_name || '未設定';
+  sharedDatabaseStatus.textContent = status?.shared_ready
+    ? `可用：${sharedName}`
+    : `不可用：${sharedName}${status?.shared_message ? ` · ${status.shared_message}` : ''}`;
+  sharedDatabaseStatus.classList.toggle('status-ok', Boolean(status?.shared_ready));
+  sharedDatabaseStatus.classList.toggle('status-error', !status?.shared_ready);
+
+  if (!status?.user_name) {
+    userDatabaseStatus.textContent = '未啟用；會只使用 shared regional database。';
+    userDatabaseStatus.classList.remove('status-error');
+    userDatabaseStatus.classList.add('status-ok');
+    clearUserDatabase.disabled = true;
+  } else {
+    userDatabaseStatus.textContent = status?.user_ready
+      ? `已啟用：${status.user_name}`
+      : `不可用：${status.user_name}${status?.user_message ? ` · ${status.user_message}` : ''}`;
+    userDatabaseStatus.classList.toggle('status-ok', Boolean(status?.user_ready));
+    userDatabaseStatus.classList.toggle('status-error', !status?.user_ready);
+    clearUserDatabase.disabled = false;
+  }
+}
+
+async function loadDatabaseStatus() {
+  showDatabaseMessage('');
+  setSettingsBusy(true);
+  try {
+    const status = await invokeTauri()('database_status');
+    renderDatabaseStatus(status);
+  } catch (error) {
+    showDatabaseMessage(typeof error === 'string' ? error : error?.message || String(error), true);
+  } finally {
+    setSettingsBusy(false);
+  }
+}
+
+async function runDatabaseCommand(command, successMessage) {
+  showDatabaseMessage('');
+  setSettingsBusy(true);
+  try {
+    const status = await invokeTauri()(command);
+    renderDatabaseStatus(status);
+    showDatabaseMessage(successMessage);
+  } catch (error) {
+    showDatabaseMessage(typeof error === 'string' ? error : error?.message || String(error), true);
+  } finally {
+    setSettingsBusy(false);
+  }
 }
 
 function renderChanges(items) {
@@ -82,11 +159,7 @@ async function localize() {
   showError('');
   setBusy(true);
   try {
-    const invoke = window.__TAURI__?.core?.invoke;
-    if (!invoke) {
-      throw new Error('Tauri runtime 未載入。請用 Tauri desktop app 開啟此介面。');
-    }
-    const response = await invoke('localize_text', {
+    const response = await invokeTauri()('localize_text', {
       request: {
         api_version: '1',
         text: inputText.value,
@@ -111,4 +184,10 @@ async function localize() {
 
 inputText.addEventListener('input', updateCount);
 localizeButton.addEventListener('click', localize);
+refreshDatabaseStatus.addEventListener('click', loadDatabaseStatus);
+chooseSharedDatabase.addEventListener('click', () => runDatabaseCommand('choose_shared_database', 'Shared database 設定已更新。'));
+chooseUserDatabase.addEventListener('click', () => runDatabaseCommand('choose_user_database', 'User dictionary 設定已更新。'));
+clearUserDatabase.addEventListener('click', () => runDatabaseCommand('clear_user_database', 'User dictionary 已停用。'));
+
 updateCount();
+loadDatabaseStatus();
