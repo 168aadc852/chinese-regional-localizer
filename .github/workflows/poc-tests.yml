@@ -56,22 +56,38 @@ jobs:
           --max-p95-ms 10000
           --max-peak-kib 524288
 
-      - name: Rust format working copy
-        run: cargo fmt --manifest-path rust/Cargo.toml
+      - name: Apply Phase 3A Rust cleanup
+        if: github.event_name == 'pull_request' && github.head_ref == 'phase-3a-rust-parity'
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          path = Path('rust/src/lib.rs')
+          text = path.read_text(encoding='utf-8')
+          text = text.replace(
+              '&& !boundary_ok(text, start, end, "x")',
+              '&& !boundary_ok(text, start, end, &text[start..end])',
+          )
+          path.write_text(text, encoding='utf-8')
+          PY
+          cargo clippy --fix --manifest-path rust/Cargo.toml --all-targets --allow-dirty --allow-staged -- -D warnings
+          cargo fmt --manifest-path rust/Cargo.toml
 
-      - name: Persist rustfmt on Phase 3A branch
+      - name: Persist Phase 3A Rust cleanup
         if: github.event_name == 'pull_request' && github.head_ref == 'phase-3a-rust-parity'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add rust/src rust/tests
+          git add rust/src rust/tests rust/Cargo.lock
           if ! git diff --cached --quiet; then
-            git commit -m "style(rust): apply rustfmt"
+            git commit -m "chore(rust): finalize formatted clippy-clean parity core"
             git push origin HEAD:${{ github.head_ref }}
           fi
 
+      - name: Rust format check
+        run: cargo fmt --manifest-path rust/Cargo.toml -- --check
+
       - name: Rust clippy
-        run: cargo clippy --manifest-path rust/Cargo.toml --all-targets -- -D warnings -A clippy::collapsible-if
+        run: cargo clippy --manifest-path rust/Cargo.toml --all-targets -- -D warnings
 
       - name: Rust parity tests
         run: cargo test --manifest-path rust/Cargo.toml --all-targets
