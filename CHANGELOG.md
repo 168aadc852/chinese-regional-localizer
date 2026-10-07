@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-10-07 — Phase 3B Rust user-local control parity
+
+- Added a Rust user-local control layer reading the existing separate `user_dictionary.sqlite` v0.1 database directly.
+- Added protected terms and fixed overrides with the same precedence as Python: protected > user override > shared entity > regional terminology > generic/script conversion.
+- Added longest user-surface matching, locale scoping, specificity ranking, priority handling, enabled/disabled filtering and no-guess ambiguity behavior.
+- Added user explanation events with user rule IDs, notes, provenance and original/final character spans.
+- Added global span offset handling for shared-engine events emitted between user-controlled segments.
+- Added optional Rust CLI `--user-db` support.
+- Added Rust user-local regression coverage corresponding to the existing Python scenarios, including conflict review and disabled-rule fallback.
+- Added `rust/clippy.toml` with an eight-argument threshold for the test fixture insertion helper while keeping CI Clippy warnings denied.
+- Added `docs/RUST_USER_LOCAL_CONTROL.md`.
+
 ## 2026-10-07 — Phase 3A Rust shared-core parity
 
 - Added the first Rust reference runtime under `rust/`, reading the existing SQLite v0.2 database directly.
