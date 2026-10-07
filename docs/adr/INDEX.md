@@ -14,3 +14,4 @@ Read only decisions relevant to the current task.
 - [D-010](D-010-on-demand-ai-context.md) — AI context is loaded on demand to reduce repeated token cost.
 - [D-011](D-011-update-safe-source-versions.md) — Resource refreshes are idempotent, versioned and current/superseded aware.
 - [D-012](D-012-user-local-precedence.md) — Private user rules stay separate and outrank shared entity/term rules.
+- [D-013](D-013-rust-parity-before-ui.md) — Rust must match the Python behavioral contract before optimization or Tauri UI integration.
