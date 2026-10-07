@@ -27,7 +27,7 @@ class DataPackageBuilderTests(unittest.TestCase):
         *,
         pack: str = "core",
         source_id: str = "opencc",
-        resource_key: str = "STCharacters.txt",
+        resource_key: str = "opencc:STCharacters.txt",
     ) -> Path:
         path = self.root / f"{source_id}-{pack}.sqlite"
         conn = sqlite3.connect(path)
@@ -95,7 +95,7 @@ class DataPackageBuilderTests(unittest.TestCase):
             )
 
     def test_resource_outside_allowlist_is_rejected(self):
-        db = self.make_db(resource_key="not-approved.txt")
+        db = self.make_db(resource_key="opencc:not-approved.txt")
         with self.assertRaises(package_builder.PackageBuildError):
             package_builder.validate_database_for_release(
                 db, package_builder.poc_builder.load_manifest(self.manifest)
