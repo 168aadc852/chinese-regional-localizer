@@ -1,6 +1,5 @@
 use chinese_regional_localizer::{Runtime, RuntimeRequest, RUNTIME_API_VERSION};
 use rusqlite::{params, Connection};
-use std::fs;
 use std::path::{Path, PathBuf};
 use tempfile::TempDir;
 
