@@ -4,7 +4,7 @@ Updated: 2026-10-07
 
 ## Status
 
-**Phase 3C stable Rust runtime API, shared explanation enrichment and benchmark tooling are implemented on the active branch and awaiting final clean CI/merge.**
+**Phase 3D minimal Tauri 2 command bridge and desktop shell is in progress.**
 
 Current foundations:
 - data governance + machine-readable exact-resource ingestion policy;
@@ -19,6 +19,8 @@ Current foundations:
 - UI-oriented structured explanations with entity QID/evidence, term-rule source/version/upstream provenance and global character spans;
 - Rust CLI delegated to Runtime API v1;
 - reproducible Rust benchmark command reporting determinism, throughput and latency;
+- first Tauri 2 desktop shell under `desktop/`, using static vanilla HTML/CSS/JavaScript and a Rust-managed database configuration;
+- desktop frontend invokes one `localize_text` command backed by Runtime API v1 and does not query SQLite directly;
 - strict Rust CI checks: rustfmt, Clippy and Cargo tests;
 - Apache-2.0 licence for project-authored software, with third-party data kept separately licensed.
 
@@ -27,14 +29,15 @@ Current foundations:
 - Issue #1: 3 unresolved licensing reviews (DoJ Glossaries, DBnary snapshot licence, OpenHowNet core data).
 - OpenCC behavior remains a documented partial/reference implementation rather than full upstream runtime parity.
 - Runtime API v1 explanation enrichment is designed for the current fixture-backed sources; future source/importer additions may add fields without changing existing v1 meanings.
-- Tauri desktop/mobile UI and release/update delivery pipeline are not started.
+- Phase 3D still needs Tauri compile validation, desktop CI integration and beginner Windows run documentation before merge.
+- Production installer/signing, automatic database updater and mobile packaging are not started.
 - Performance numbers from GitHub-hosted runners are smoke signals only, not product targets.
 
 ## Likely next work
 
-1. Phase 3D: add a minimal Tauri 2 command bridge that calls Runtime API v1 without duplicating localization logic.
-2. Add a minimal desktop shell for text input, locale selection, localized output and review/change inspection.
-3. Keep database paths/update delivery explicit and offline-first before broader UI polish.
-4. Expand fixture-backed domains and source coverage while preserving runtime API compatibility.
+1. Finish Phase 3D Tauri compile/Clippy validation and merge the minimal desktop shell.
+2. Add a development database chooser/settings layer without exposing arbitrary paths to frontend JavaScript.
+3. Add packaged database/update delivery and installer/signing only after desktop behavior is stable.
+4. Expand fixture-backed domains and source coverage while preserving Runtime API v1 compatibility.
 
 Historical detail: `docs/history/PROJECT_HISTORY.md`, `CHANGELOG.md`, ADRs under `docs/adr/`, and closed GitHub Issues.
