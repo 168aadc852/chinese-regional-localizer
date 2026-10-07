@@ -18,7 +18,7 @@ The project currently has:
 
 ## Open items
 
-- Issue #1: unresolved licence reviews for DoJ Glossaries, DBnary snapshot licence and OpenHowNet core data.
+- Issue #1: unresolved licence reviews for DoJ Glossaries and the DBnary snapshot licence.
 - OpenCC remains a partial/reference implementation rather than full upstream runtime parity.
 - Desktop updates are manual only; retry/resume and production hosting are not implemented.
 - Release trust-root rotation/delegation, key-vault/HSM operations and installer signing are not implemented.
