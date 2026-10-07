@@ -20,3 +20,10 @@ pub use release_auth::{
     SignatureEnvelope, SignedPayloadKind, TrustedKey, TrustedKeySet, RELEASE_CATALOG_VERSION,
     SIGNATURE_ENVELOPE_VERSION,
 };
+pub mod network_update;
+pub use network_update::{
+    update_state_path, validate_update_base_url, AuthenticatedCatalog, ReqwestTransport,
+    UpdateClient, UpdateConfig, UpdateError, UpdateResult, UpdateState, UpdateTransport,
+    DEFAULT_MAX_CATALOG_BYTES, DEFAULT_MAX_DATABASE_BYTES, DEFAULT_MAX_MANIFEST_BYTES,
+    DEFAULT_MAX_SIGNATURE_BYTES,
+};
