@@ -2,37 +2,72 @@
 
 Offline-first, open-source Chinese regional localization project for converting and localizing text across Mainland China (`zh-CN`), Hong Kong (`zh-HK`) and Taiwan (`zh-TW`).
 
-The project goes beyond Simplified/Traditional character conversion by combining deterministic script conversion, regional terminology, named-entity localization, provenance, conflict review and updateable SQLite data packs.
+The project goes beyond Simplified/Traditional character conversion by combining deterministic script conversion, regional terminology, named-entity localization, user overrides, provenance, ambiguity review and updateable SQLite data packs.
 
 ## Current state
 
-**Phase 2C — Core hardening.**
+**Phase 3I desktop authenticated data-update UI is complete. Phase 0 source-whitelist review has a usable first-pass conclusion for all 24 machine source IDs.**
 
-Implemented foundations:
+Implemented foundations include:
 
-- machine-readable data-source policy and licence-pack separation;
-- SQLite schema v0.2 with current/superseded source-version tracking;
-- LSHK Jyutping importer with pinned Git-blob verification;
-- OpenCC forward CN → Hant → HK/TW phrase/character/variant import;
-- Wikidata regional entity-name importer with revision-aware refresh;
-- deterministic reference localization engine with conservative entity matching, longest-match rules, protected spans and no-guess ambiguity handling;
-- original-to-final span alignment for future diff/review UI;
-- offline fixtures, regression tests and GitHub Actions CI.
+- governed, licence-aware source ingestion with machine-readable allow-lists;
+- SQLite schema v0.2 with source/version/provenance history;
+- deterministic Python reference localization engine;
+- Rust shared core and versioned Runtime API v1 for supported CN/HK/TW routes;
+- private user-dictionary support and protected/user-preferred terms;
+- Tauri 2 desktop shell with Rust-managed validated database selection;
+- full local database paths kept inside Rust rather than exposed to frontend JavaScript;
+- immutable versioned shared-data packages with staging, activation and rollback;
+- pinned Ed25519 signatures for release catalogs and package manifests;
+- authenticated HTTPS update discovery/download with rollback protection and bounded downloads;
+- desktop controls for explicit authenticated shared-data update checks and installs;
+- offline fixture-backed CI covering Python, Rust, Tauri and package/catalog flows;
+- protected `main` requiring pull requests and the `test` status check.
 
-Production Rust/Tauri clients have not started. The Python code is the reference implementation used to stabilize behavior first.
+See `PROJECT_STATE.md` for the concise current status and next work.
 
-See `PROJECT_STATE.md` for the concise current status.
+## Supported localization routes
 
-## Supported reference routes
+Current supported forward routes include:
 
 - `zh-CN -> zh-HK`
 - `zh-CN -> zh-TW`
 - `zh-Hant -> zh-HK`
 - `zh-Hant -> zh-TW`
 
-Reverse routes are not yet implemented.
+Reverse routes are not yet implemented. OpenCC behavior remains a documented partial/reference implementation rather than full upstream runtime parity.
+
+## Desktop application status
+
+A Tauri 2 desktop application now exists and uses the Rust runtime rather than frontend-side SQLite access.
+
+Current desktop capabilities include:
+
+- text localization through Runtime API v1;
+- validated shared-database selection through a native chooser;
+- optional private user-dictionary selection/clearing;
+- structured database status without exposing full filesystem paths to JavaScript;
+- explicit authenticated shared-data update discovery and installation;
+- safe failure behavior where invalid downloads or packages do not replace the active database.
+
+Current desktop limitations:
+
+- database chooser preferences are session-only and do not yet survive restart;
+- shared-data update checks are manual rather than background scheduled;
+- interrupted-download retry/resume and production hosting/CDN configuration are not complete;
+- production Windows/macOS installers and platform signing are not complete;
+- mobile packaging has not started.
+
+Relevant documentation:
+
+- `docs/DESKTOP_DATABASE_SETTINGS.md`
+- `docs/DESKTOP_DATA_UPDATES.md`
+- `docs/NETWORK_UPDATES.md`
+- `docs/DATA_PACKAGE_FORMAT.md`
 
 ## Quick development demo
+
+The Python reference path remains useful for local development and regression checks:
 
 ```bash
 python -m pip install -r requirements-dev.txt
@@ -46,15 +81,9 @@ python scripts/localize_text.py \
 
 The fixture database is for tests/development only and is not an authoritative terminology release.
 
-## Repository workflow
-
-GitHub is the project source of truth. AI tools and human contributors should begin with `AGENTS.md`, then load only the task-specific context it routes to under `.ai/` and `docs/`.
-
-Behavior changes require tests. Importers must preserve provenance, obey exact machine-readable ingest resources and keep incompatible licence packs separate.
-
 ## Data governance
 
-Public visibility is not permission to ingest or redistribute data. Every external source is reviewed under `data-registry/` and represented in `data-registry/sources.yaml`.
+Public visibility is not permission to ingest, transform or redistribute data. External sources are reviewed under `data-registry/` and represented in `data-registry/sources.yaml`.
 
 Production importers require all of the following:
 
@@ -62,16 +91,47 @@ Production importers require all of the following:
 - an exact resource listed in `ingest_resources`;
 - the expected licence pack;
 - revision/version, URL and checksum provenance;
-- input-format validation.
+- input-format and resource-identity validation.
 
-Pending, reference-only, rejected, or out-of-scope material is blocked.
+Reference-only, pending, rejected or out-of-scope material is blocked from redistributable data builds.
+
+The first-pass whitelist review now has a usable conclusion for all 24 machine source IDs. Sources with unresolved rights are kept reference-only/non-ingest rather than being guessed into an approved state.
+
+See:
+
+- `docs/DATA_POLICY.md`
+- `docs/DATA_SOURCES.md`
+- `docs/REVIEW_PROGRESS.md`
+- `docs/LICENSE_PACKAGING.md`
+
+## Repository workflow
+
+GitHub is the project source of truth. AI tools and human contributors should begin with `AGENTS.md`, then load only the task-specific context routed under `.ai/` and `docs/`.
+
+Behavior changes require tests. Importers must preserve provenance, obey exact machine-readable ingest resources and keep incompatible licence packs separated.
+
+Current-state detail belongs in `PROJECT_STATE.md`; historical detail belongs in `docs/history/`, `CHANGELOG.md` and ADRs under `docs/adr/`.
+
+## Product requirements
+
+The canonical editable requirements are in `docs/PRODUCT_REQUIREMENTS.md`.
+
+A dated frozen backup is also kept at:
+
+- `docs/history/PRODUCT_REQUIREMENTS_BACKUP_2026-10-07.md`
+
+The backup is for recovery/reference only and does not supersede the canonical requirements file.
 
 ## Licensing
 
 Project-authored software is licensed under Apache License 2.0; see `LICENSE` and `LICENSE_SCOPE.md`.
 
-Third-party data is **not** relicensed under the software licence. Each source keeps its own licence and attribution/share-alike obligations. See `docs/LICENSE_PACKAGING.md` and the corresponding `data-registry/*.md` review.
+Third-party data is **not** relicensed under the software licence. Each source keeps its own licence and attribution/share-alike obligations.
 
-## Production direction
+## Next planned work
 
-The planned application direction remains Rust + Tauri 2 + SQLite after reference behavior, update semantics and regression coverage are stable. User dictionaries/protected terms come before the Rust port; UI work follows the stable core rather than defining core behavior implicitly.
+The next tracked development phase is **Phase 3J / Issue #38: persisted non-secret desktop settings**.
+
+The goal is to make validated shared-database and optional user-dictionary choices survive app restarts while preserving the existing Rust-only filesystem-path boundary, safe fallback behavior and Runtime API compatibility.
+
+After that, likely work includes production update hosting/retry-resume behavior, release-key operations, desktop packaging/signing and wider source/domain coverage.
