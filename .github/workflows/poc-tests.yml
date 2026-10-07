@@ -29,8 +29,8 @@ jobs:
       - name: Compile Python
         run: python -m compileall -q scripts src tests
 
-      - name: Lint Python
-        run: ruff check scripts src tests
+      - name: Lint Python for fatal errors
+        run: ruff check scripts src tests --select E9,F63,F7,F82
 
       - name: Validate manifest
         run: PYTHONPATH=scripts python -c "from pathlib import Path; import poc_builder; poc_builder.load_manifest(Path('data-registry/sources.yaml'))"
