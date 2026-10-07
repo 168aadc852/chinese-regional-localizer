@@ -1,7 +1,10 @@
-use chinese_regional_localizer::{LocalizerEngine, UserControlledLocalizer};
+mod user_local;
+
+use chinese_regional_localizer::LocalizerEngine;
 use serde_json::to_string_pretty;
 use std::env;
 use std::process::ExitCode;
+use user_local::UserControlledLocalizer;
 
 fn value_after(args: &[String], flag: &str) -> Option<String> {
     args.windows(2)
