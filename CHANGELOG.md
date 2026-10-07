@@ -1,6 +1,27 @@
 # Changelog
 
-## 2026-10-07
+## 2026-10-07 — Phase 2C core hardening
+
+- Added SQLite schema v0.2 and migration `0003_core_hardening.sql` while preserving v0.1 as the historical baseline.
+- Added per-resource `source_versions.resource_key` and `is_current` lifecycle state.
+- Made OpenCC/Wikidata/LSHK refreshes update-safe and repeat imports idempotent.
+- Added manifest synchronization on every production import instead of only on database creation.
+- Added exact machine-readable `ingest_resources` gates for implemented importers.
+- Disabled automated DATA.GOV.HK ingestion while modification/adaptation rights remain unresolved.
+- Added licence-pack enforcement through `build_metadata.pack_type` so core/attribution/share-alike data cannot silently mix.
+- Added LSHK pinned Git-blob verification and current-pronunciation filtering.
+- Updated Wikidata refresh semantics so superseded labels/aliases remain historical but no longer participate in runtime resolution.
+- Added conservative entity-surface matching to reduce common-word false positives.
+- Replaced per-call first-character matcher rebuilding with cached prefix tries.
+- Added executable JSON context constraints for domain/neighbor/boundary-sensitive rules.
+- Added original-to-final span alignment to change/review events.
+- Corrected importer retrieval timestamps to default to current UTC instead of a fixed development date.
+- Added regression coverage for update idempotency, source refreshes, scope gates, pack separation, false-positive entities, span alignment and pinned-blob rejection.
+- Added Ruff/compile checks to CI.
+- Added Apache-2.0 licensing for project-authored software while explicitly preserving separate third-party data licences.
+- Updated README, roadmap, schema/importer/engine docs and source reviews for Phase 2C.
+
+## 2026-10-07 — AI context refactor
 
 - Refactored `AGENTS.md` from a preload checklist into a minimal task/context router.
 - Added task-specific on-demand guides under `.ai/` for coding, data review, importers, database, engine, testing, docs and releases.

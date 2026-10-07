@@ -3,45 +3,47 @@
 Status: **approved_with_conditions**
 
 ## Intended use
-Cantonese character readings, Jyutping display/search, pronunciation validation and HKSCS-related character support.
+
+Cantonese character readings, Jyutping display/search and pronunciation validation.
 
 ## Official source
-Repository: https://github.com/lshk-org/jyutping-table
+
+Repository: https://github.com/lshk-org/jyutping-table  
 Maintainer: Jyutping Workgroup, Linguistic Society of Hong Kong
 
 ## Licence review
-The official repository explicitly states that the Cantonese Pronunciation List of the Characters for Computers is released under **Creative Commons Attribution 4.0 International (CC BY 4.0)**.
 
-The current machine-friendly TSV (`list.tsv`) is maintained by the LSHK Jyutping Workgroup; historical JSON/PDF versions are also present.
+Licence: **CC BY 4.0** for the reviewed current pronunciation table.
 
-- Commercial use: **Yes**
-- Modification/adaptation: **Yes**
-- Redistribution: **Yes**
-- Attribution: **Required**
-- Indicate changes: **Required under CC BY 4.0 when sharing adapted material**
-- ShareAlike: **No**
+- Commercial use: yes.
+- Modification/adaptation: yes.
+- Redistribution: yes.
+- Attribution: required.
+- Indicate changes: required when sharing adapted material.
+- ShareAlike: no.
 
-## Packaging decision
-Approved for an attribution-required Cantonese pronunciation layer.
+## Machine-readable ingest scope
 
-Prefer the maintained `list.tsv` as the canonical import source.
+Current importer allows exactly:
 
-Historical PDFs/JSON files may have additional provenance considerations; ingest the current maintained TSV first and review historical files only if needed.
+`lshk:list.tsv`
 
-## Phase 1A pinned importer baseline
+Historical/third-party material remains excluded unless separately reviewed.
 
-First real importer baseline reviewed on 2026-10-06:
+## Pinned production baseline
 
-- upstream commit: `dad2dd6d6f02fc51138ecc6818f7b38eba5c2ad3`
+- commit: `dad2dd6d6f02fc51138ecc6818f7b38eba5c2ad3`
 - file: `list.tsv`
-- Git blob SHA: `522f41701dd10c4da08d82923ef7ae40d14b9ffb`
-- documented columns: `CH`, `UCODE`, `JP`, `INIT`, `FINL`, `TONE`, `DESC`, `DESC_JP`
-- importer: `scripts/import_lshk_jyutping.py`
-- schema migration: `schema/migrations/0002_pronunciations.sql`
+- Git blob: `522f41701dd10c4da08d82923ef7ae40d14b9ffb`
 
-The importer uses a commit-pinned raw URL when `--download` is explicitly requested, computes SHA-256 from the imported bytes, and records revision/URL/checksum in `source_versions`.
+The importer now verifies the Git blob when the pinned production revision is claimed, then records SHA-256 of the exact imported bytes.
 
-## Update method
-Track the official GitHub repository/versions directory. Record commit/date and retain LSHK/Jyutping Workgroup attribution. Do not silently move a production build from one upstream commit to another; review and pin the new version first.
+## Update behavior
 
-Last reviewed: 2026-10-06
+`lshk:list.tsv` is one resource lifecycle. Identical repeat imports are idempotent. New revisions mark the old source version non-current; `current_pronunciations` exposes current rows while history remains auditable.
+
+## Packaging
+
+Attribution pack. Importing it into a core SQLite pack is rejected by the pack guard.
+
+Last reviewed: 2026-10-07

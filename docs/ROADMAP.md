@@ -1,57 +1,55 @@
 # Roadmap
 
-## Phase 0 — Data governance
+## Phase 0 — Data governance — completed
 
-- Data-source whitelist
-- Licensing evidence registry
-- Data policy
-- Draft schema
-- Initial test corpus
+Source policy, licensing evidence, initial schema and test corpus.
 
-Exit condition: enough verified sources and schema clarity to build a small legal/traceable dataset prototype.
+## Phase 1 — Data proof of concept — completed
 
-## Phase 1 — Data proof of concept
+SQLite prototype, provenance model and initial LSHK/OpenCC/Wikidata importers.
 
-- Implement a small number of importers
-- Normalize source records
-- Build SQLite prototype
-- Preserve provenance
-- Validate regional lookup examples
+## Phase 2A–2B — Localization reference core — completed
 
-## Phase 2 — Localization core
+Staged script/regional conversion, entity resolution, longest-match/no-guess behavior and OpenCC phrase/character/variant coverage.
 
-- Script/character conversion
-- Regional term lookup
-- Entity matching
-- Rule priority/conflict handling
-- Protected terms
-- Explainable change records
-- Automated tests
+## Phase 2C — Core hardening — completed
 
-## Phase 3 — Minimal application
+- update-safe source-version lifecycle;
+- idempotent importer refreshes;
+- exact machine-readable ingest-resource gates;
+- licence-pack separation enforcement;
+- conservative entity matching;
+- cached trie matchers;
+- executable context constraints;
+- original-to-final span alignment;
+- expanded regression/CI checks;
+- explicit project software licence.
 
-- Text input/output
-- Auto/source selection
-- CN/HK/TW targets
-- Diff/review
-- Source explanation cards
-- User dictionary
-- Local database update flow
+## Phase 2D — User-local control
+
+- separate `user_dictionary.sqlite`;
+- protected terms;
+- user overrides and precedence;
+- import/export of user dictionaries;
+- broader realistic evaluation/performance corpus.
+
+## Phase 3 — Production core and minimal application
+
+- Rust implementation matching reference tests;
+- Tauri 2 text input/output UI;
+- source/target selection and detection;
+- diff/review with final-span highlighting;
+- source explanation cards;
+- safe local database update flow.
 
 ## Phase 4 — File workflows
 
-- TXT / Markdown
-- subtitles
-- CSV
-- later: Office and EPUB
+TXT/Markdown, subtitles, CSV, then Office/EPUB where justified.
 
 ## Phase 5 — Cross-platform distribution
 
-- Windows
-- Android
-- macOS
-- iOS/iPadOS
+Windows, Android, macOS, iOS/iPadOS.
 
 ## Phase 6 — Optional ambiguity intelligence
 
-Only after deterministic methods are measured. Consider a local LLM for unresolved context-sensitive cases rather than for all conversions.
+Only after deterministic methods are measured. Consider a local model for unresolved contextual cases rather than routing every conversion through an LLM.

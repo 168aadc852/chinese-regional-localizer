@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Import the LSHK Jyutping Table into the project SQLite schema.
 
-The importer is offline-friendly: pass --input for an already downloaded TSV.
-Network access occurs only when --download is explicitly requested. The
-production baseline is pinned to a specific upstream commit.
+The importer is offline-friendly and update-safe. Network access occurs only
+when --download is explicitly requested. The production baseline is pinned to
+a specific upstream commit and Git blob.
 """
 
 from __future__ import annotations
@@ -21,6 +21,7 @@ from typing import Any, Iterable
 import poc_builder
 
 SOURCE_ID = "lshk-jyutping-table"
+RESOURCE_ID = "lshk:list.tsv"
 PINNED_COMMIT = "dad2dd6d6f02fc51138ecc6818f7b38eba5c2ad3"
 PINNED_GIT_BLOB = "522f41701dd10c4da08d82923ef7ae40d14b9ffb"
 PINNED_URL = (
@@ -43,11 +44,27 @@ def sha256_file(path: Path) -> str:
     return digest.hexdigest()
 
 
+def git_blob_sha1(path: Path) -> str:
+    data = path.read_bytes()
+    digest = hashlib.sha1()  # noqa: S324 - Git blob identity uses SHA-1 by definition.
+    digest.update(f"blob {len(data)}\0".encode("ascii"))
+    digest.update(data)
+    return digest.hexdigest()
+
+
+def verify_pinned_blob(path: Path) -> None:
+    actual = git_blob_sha1(path)
+    if actual != PINNED_GIT_BLOB:
+        raise LshkFormatError(
+            f"Pinned LSHK blob mismatch: expected {PINNED_GIT_BLOB}, got {actual}"
+        )
+
+
 def download_pinned(destination: Path) -> Path:
     destination.parent.mkdir(parents=True, exist_ok=True)
     request = urllib.request.Request(
         PINNED_URL,
-        headers={"User-Agent": "chinese-regional-localizer/phase-1a"},
+        headers={"User-Agent": "chinese-regional-localizer/phase-2c"},
     )
     with urllib.request.urlopen(request, timeout=60) as response, destination.open("wb") as output:
         while True:
@@ -55,6 +72,7 @@ def download_pinned(destination: Path) -> Path:
             if not chunk:
                 break
             output.write(chunk)
+    verify_pinned_blob(destination)
     return destination
 
 
@@ -111,8 +129,9 @@ def open_or_create_database(
     conn.execute("PRAGMA foreign_keys = ON")
     if new_db:
         conn.executescript(schema_path.read_text(encoding="utf-8"))
-        poc_builder.load_manifest_sources(conn, manifest)
+    poc_builder.ensure_hardening_schema(conn, schema_path)
     ensure_schema(conn, migration_path)
+    poc_builder.load_manifest_sources(conn, manifest)
     return conn
 
 
@@ -124,25 +143,75 @@ def add_source_version(
     checksum_sha256: str,
     retrieved_at: str,
     note: str,
-) -> int:
-    cursor = conn.execute(
+) -> tuple[int, bool]:
+    existing = poc_builder.find_current_source_version(
+        conn,
+        source_id=SOURCE_ID,
+        resource_key=RESOURCE_ID,
+        revision_id=revision_id,
+        checksum_sha256=checksum_sha256,
+    )
+    if existing is not None:
+        return existing, False
+
+    conn.execute(
         """
-        INSERT INTO source_versions (
-            source_id, version_label, revision_id, retrieved_at,
-            upstream_url, checksum_sha256, notes
-        ) VALUES (?, ?, ?, ?, ?, ?, ?)
+        UPDATE source_versions
+        SET is_current = 0
+        WHERE source_id = ? AND is_current = 1
+          AND (resource_key = ? OR resource_key = '')
+        """,
+        (SOURCE_ID, RESOURCE_ID),
+    )
+    return poc_builder.register_source_version(
+        conn,
+        source_id=SOURCE_ID,
+        resource_key=RESOURCE_ID,
+        version_label=revision_id[:12],
+        revision_id=revision_id,
+        published_at=None,
+        retrieved_at=retrieved_at,
+        upstream_url=upstream_url,
+        checksum_sha256=checksum_sha256,
+        notes=note,
+    )
+
+
+def _ensure_character_evidence(
+    conn: sqlite3.Connection,
+    *,
+    localized_name_id: int,
+    ucode: str,
+    source_version_id: int,
+    upstream_url: str,
+) -> None:
+    existing = conn.execute(
+        """
+        SELECT 1 FROM name_evidence
+        WHERE localized_name_id = ? AND source_id = ? AND source_version_id = ?
+          AND upstream_record_id = ? AND evidence_type = 'source_character'
+        """,
+        (localized_name_id, SOURCE_ID, source_version_id, ucode),
+    ).fetchone()
+    if existing:
+        return
+    conn.execute(
+        """
+        INSERT INTO name_evidence (
+            localized_name_id, source_id, source_version_id,
+            upstream_record_id, upstream_url, evidence_type,
+            confidence, transformation_note
+        ) VALUES (?, ?, ?, ?, ?, 'source_character', 1.0, ?)
         """,
         (
+            localized_name_id,
             SOURCE_ID,
-            revision_id[:12],
-            revision_id,
-            retrieved_at,
+            source_version_id,
+            ucode,
             upstream_url,
-            checksum_sha256,
-            note,
+            "Character identity recorded while importing LSHK pronunciation data.",
         ),
     )
-    return int(cursor.lastrowid)
 
 
 def get_or_create_character(
@@ -176,7 +245,9 @@ def get_or_create_character(
         """,
         (concept_id, character),
     ).fetchone()
-    if not name_row:
+    if name_row:
+        localized_name_id = int(name_row[0])
+    else:
         cursor = conn.execute(
             """
             INSERT INTO localized_names (
@@ -186,23 +257,14 @@ def get_or_create_character(
             (concept_id, character),
         )
         localized_name_id = int(cursor.lastrowid)
-        conn.execute(
-            """
-            INSERT INTO name_evidence (
-                localized_name_id, source_id, source_version_id,
-                upstream_record_id, upstream_url, evidence_type,
-                confidence, transformation_note
-            ) VALUES (?, ?, ?, ?, ?, 'source_character', 1.0, ?)
-            """,
-            (
-                localized_name_id,
-                SOURCE_ID,
-                source_version_id,
-                ucode,
-                upstream_url,
-                "Character identity recorded while importing LSHK pronunciation data.",
-            ),
-        )
+
+    _ensure_character_evidence(
+        conn,
+        localized_name_id=localized_name_id,
+        ucode=ucode,
+        source_version_id=source_version_id,
+        upstream_url=upstream_url,
+    )
     return concept_id
 
 
@@ -219,29 +281,34 @@ def import_tsv(
     reset: bool = False,
 ) -> dict[str, Any]:
     manifest = poc_builder.load_manifest(manifest_path)
-    source = poc_builder.assert_source_ingest_allowed(manifest, SOURCE_ID)
+    source = poc_builder.assert_source_resource_allowed(manifest, SOURCE_ID, RESOURCE_ID)
     if source["pack"] != "attribution":
         raise poc_builder.IngestPolicyError(
             f"Unexpected pack for {SOURCE_ID}: expected attribution, got {source['pack']}"
         )
 
+    if revision_id == PINNED_COMMIT:
+        verify_pinned_blob(input_path)
+
+    rows = list(iter_rows(input_path))
     checksum = sha256_file(input_path)
     conn = open_or_create_database(db_path, schema_path, migration_path, manifest, reset)
     inserted_readings = 0
     characters: set[str] = set()
     try:
-        source_version_id = add_source_version(
+        poc_builder.assert_database_pack_compatible(conn, source["pack"])
+        source_version_id, _ = add_source_version(
             conn,
             revision_id=revision_id,
             upstream_url=upstream_url,
             checksum_sha256=checksum,
             retrieved_at=retrieved_at,
             note=(
-                f"LSHK Jyutping Table list.tsv; expected Git blob {PINNED_GIT_BLOB}. "
-                "SHA-256 computed from imported bytes."
+                f"LSHK Jyutping Table list.tsv; verified Git blob {PINNED_GIT_BLOB} "
+                "when importing the pinned production revision. SHA-256 records exact bytes."
             ),
         )
-        for row in iter_rows(input_path):
+        for row in rows:
             concept_id = get_or_create_character(
                 conn,
                 row["CH"],
@@ -284,6 +351,9 @@ def import_tsv(
             "INSERT OR REPLACE INTO build_metadata (key, value) VALUES ('lshk_last_sha256', ?)",
             (checksum,),
         )
+        conn.execute(
+            "INSERT OR REPLACE INTO build_metadata (key, value) VALUES ('schema_version', '0.2')"
+        )
         conn.commit()
         integrity = conn.execute("PRAGMA integrity_check").fetchone()[0]
         if integrity != "ok":
@@ -313,7 +383,7 @@ def main() -> int:
     parser.add_argument("--db", type=Path, default=repo_root / "build" / "lshk.sqlite")
     parser.add_argument("--reset", action="store_true", help="Recreate the database before importing")
     parser.add_argument("--revision", default=None, help="Revision identifier for local input")
-    parser.add_argument("--retrieved-at", default="2026-10-06T00:00:00Z")
+    parser.add_argument("--retrieved-at", default=None)
     args = parser.parse_args()
 
     if args.download:
@@ -337,11 +407,11 @@ def main() -> int:
         input_path=input_path,
         db_path=args.db,
         manifest_path=repo_root / "data-registry" / "sources.yaml",
-        schema_path=repo_root / "schema" / "sqlite-v0.1.sql",
+        schema_path=repo_root / "schema" / "sqlite-v0.2.sql",
         migration_path=repo_root / "schema" / "migrations" / "0002_pronunciations.sql",
         revision_id=revision_id,
         upstream_url=upstream_url,
-        retrieved_at=args.retrieved_at,
+        retrieved_at=args.retrieved_at or poc_builder.utc_now_iso(),
         reset=args.reset,
     )
     print(result)

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run the Phase 2A deterministic localization reference engine."""
+"""Run the deterministic localization reference engine."""
 
 from __future__ import annotations
 
@@ -24,6 +24,7 @@ def main() -> int:
     parser.add_argument("--from", dest="source_locale", required=True)
     parser.add_argument("--to", dest="target_locale", required=True)
     parser.add_argument("--text", help="Text to localize; omit to read UTF-8 from stdin")
+    parser.add_argument("--domain", help="Optional runtime domain for context-constrained rules")
     args = parser.parse_args()
 
     text = args.text if args.text is not None else sys.stdin.read()
@@ -34,6 +35,7 @@ def main() -> int:
             text=text,
             source_locale=args.source_locale,
             target_locale=args.target_locale,
+            context={"domain": args.domain} if args.domain else None,
         )
     finally:
         conn.close()
