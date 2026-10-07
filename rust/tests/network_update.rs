@@ -39,17 +39,15 @@ impl UpdateTransport for FakeTransport {
             .cloned()
             .ok_or_else(|| UpdateError::Invalid(format!("missing fake URL: {url}")))?;
         if bytes.len() > max_bytes {
-            return Err(UpdateError::Invalid("fake response exceeds size limit".into()));
+            return Err(UpdateError::Invalid(
+                "fake response exceeds size limit".into(),
+            ));
         }
         Ok(bytes)
     }
 }
 
-fn signed_bytes(
-    kind: SignedPayloadKind,
-    payload: &[u8],
-    key: &SigningKey,
-) -> Vec<u8> {
+fn signed_bytes(kind: SignedPayloadKind, payload: &[u8], key: &SigningKey) -> Vec<u8> {
     serde_json::to_vec(&sign_detached(kind, payload, key)).unwrap()
 }
 
@@ -58,7 +56,8 @@ fn trusted(key: &SigningKey) -> TrustedKeySet {
 }
 
 fn demo_database_bytes() -> Vec<u8> {
-    fs::read(repo_root().join("build/regional-demo.sqlite")).expect("demo DB built before cargo test")
+    fs::read(repo_root().join("build/regional-demo.sqlite"))
+        .expect("demo DB built before cargo test")
 }
 
 fn manifest(version: &str, db: &[u8]) -> (Vec<u8>, DataPackageManifest) {
@@ -114,7 +113,10 @@ fn seed_release(
     let base = "https://updates.example.test/";
     let (manifest_bytes, _) = manifest(version, signed_database);
     let catalog_bytes = catalog(version, &manifest_bytes, sequence);
-    transport.insert(&format!("{base}release-catalog.json"), catalog_bytes.clone());
+    transport.insert(
+        &format!("{base}release-catalog.json"),
+        catalog_bytes.clone(),
+    );
     transport.insert(
         &format!("{base}release-catalog.json.sig"),
         signed_bytes(SignedPayloadKind::ReleaseCatalog, &catalog_bytes, key),

@@ -144,7 +144,9 @@ impl ReqwestTransport {
 impl UpdateTransport for ReqwestTransport {
     fn get(&self, url: &Url, max_bytes: usize) -> UpdateResult<Vec<u8>> {
         if url.scheme() != "https" {
-            return Err(UpdateError::Invalid("Only HTTPS downloads are allowed".into()));
+            return Err(UpdateError::Invalid(
+                "Only HTTPS downloads are allowed".into(),
+            ));
         }
         let mut response = self.client.get(url.clone()).send()?;
         if !response.status().is_success() {
@@ -157,7 +159,9 @@ impl UpdateTransport for ReqwestTransport {
             .content_length()
             .is_some_and(|length| length > max_bytes as u64)
         {
-            return Err(UpdateError::Invalid("Update response exceeds size limit".into()));
+            return Err(UpdateError::Invalid(
+                "Update response exceeds size limit".into(),
+            ));
         }
         let mut bytes = Vec::new();
         response
@@ -165,7 +169,9 @@ impl UpdateTransport for ReqwestTransport {
             .take(max_bytes as u64 + 1)
             .read_to_end(&mut bytes)?;
         if bytes.len() > max_bytes {
-            return Err(UpdateError::Invalid("Update response exceeds size limit".into()));
+            return Err(UpdateError::Invalid(
+                "Update response exceeds size limit".into(),
+            ));
         }
         Ok(bytes)
     }
@@ -281,7 +287,9 @@ impl<T: UpdateTransport> UpdateClient<T> {
             self.config.max_manifest_bytes,
         )?;
         let signature_bytes = self.transport.get(
-            &self.config.endpoint(&(prefix.clone() + "package.json.sig"))?,
+            &self
+                .config
+                .endpoint(&(prefix.clone() + "package.json.sig"))?,
             self.config.max_signature_bytes,
         )?;
         let envelope: SignatureEnvelope = serde_json::from_slice(&signature_bytes)?;
