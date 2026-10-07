@@ -80,7 +80,9 @@ fn load_config() -> DatabaseConfig {
 }
 
 fn load_update_config() -> Result<Option<UpdateRuntimeConfig>, String> {
-    let base_url = env::var("CRL_UPDATE_BASE_URL").ok().filter(|v| !v.is_empty());
+    let base_url = env::var("CRL_UPDATE_BASE_URL")
+        .ok()
+        .filter(|v| !v.is_empty());
     let trusted_keys_file = env::var_os("CRL_TRUSTED_KEYS_FILE")
         .filter(|v| !v.is_empty())
         .map(PathBuf::from);
@@ -200,15 +202,14 @@ fn read_trusted_keys(path: &Path) -> Result<TrustedKeySet, String> {
     let keys = match document {
         TrustedKeyDocument::List(keys) | TrustedKeyDocument::Object { keys } => keys,
     };
-    TrustedKeySet::from_entries(&keys)
-        .map_err(|error| format!("Trusted-key 設定無效：{error:?}"))
+    TrustedKeySet::from_entries(&keys).map_err(|error| format!("Trusted-key 設定無效：{error:?}"))
 }
 
 fn build_update_client(
     config: &UpdateRuntimeConfig,
 ) -> Result<UpdateClient<ReqwestTransport>, String> {
-    let transport = ReqwestTransport::new()
-        .map_err(|error| format!("無法建立安全更新連線：{error:?}"))?;
+    let transport =
+        ReqwestTransport::new().map_err(|error| format!("無法建立安全更新連線：{error:?}"))?;
     let update_config = UpdateConfig::production(config.base_url.clone())
         .map_err(|error| format!("更新來源設定無效：{error:?}"))?;
     let trusted_keys = read_trusted_keys(&config.trusted_keys_file)?;
@@ -309,11 +310,7 @@ async fn check_data_update(state: State<'_, AppState>) -> Result<UpdateStatus, S
     .await
     .map_err(|error| format!("更新檢查工作失敗：{error}"))??;
 
-    let package = recommended_package(
-        &catalog,
-        &config.package_id,
-        current_version.as_deref(),
-    );
+    let package = recommended_package(&catalog, &config.package_id, current_version.as_deref());
     {
         let mut offer = state
             .update_offer
