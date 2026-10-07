@@ -16,6 +16,11 @@ const chooseUserDatabase = document.getElementById('chooseUserDatabase');
 const clearUserDatabase = document.getElementById('clearUserDatabase');
 const refreshDatabaseStatus = document.getElementById('refreshDatabaseStatus');
 const databaseMessage = document.getElementById('databaseMessage');
+const updateBadge = document.getElementById('updateBadge');
+const updateStatusText = document.getElementById('updateStatusText');
+const checkDataUpdate = document.getElementById('checkDataUpdate');
+const installDataUpdate = document.getElementById('installDataUpdate');
+const updateMessage = document.getElementById('updateMessage');
 
 function invokeTauri() {
   const invoke = window.__TAURI__?.core?.invoke;
@@ -40,6 +45,12 @@ function setSettingsBusy(busy) {
   }
 }
 
+function setUpdateBusy(busy) {
+  checkDataUpdate.disabled = busy;
+  installDataUpdate.disabled = busy || installDataUpdate.dataset.available !== 'true';
+  checkDataUpdate.textContent = busy ? '處理中…' : '檢查更新';
+}
+
 function showError(message) {
   errorMessage.textContent = message;
   errorMessage.classList.toggle('hidden', !message);
@@ -49,6 +60,12 @@ function showDatabaseMessage(message, isError = false) {
   databaseMessage.textContent = message || '';
   databaseMessage.classList.toggle('hidden', !message);
   databaseMessage.classList.toggle('settings-error', Boolean(message) && isError);
+}
+
+function showUpdateMessage(message, isError = false) {
+  updateMessage.textContent = message || '';
+  updateMessage.classList.toggle('hidden', !message);
+  updateMessage.classList.toggle('settings-error', Boolean(message) && isError);
 }
 
 function text(value) {
@@ -78,6 +95,30 @@ function renderDatabaseStatus(status) {
   }
 }
 
+function renderUpdateStatus(status) {
+  const configured = Boolean(status?.configured);
+  const available = Boolean(status?.update_available);
+  installDataUpdate.dataset.available = available ? 'true' : 'false';
+  installDataUpdate.disabled = !available;
+  checkDataUpdate.disabled = !configured;
+
+  if (!configured) {
+    updateBadge.textContent = '未設定';
+    updateStatusText.textContent = status?.message || '更新服務尚未設定；離線功能仍可正常使用。';
+    return;
+  }
+
+  const current = status?.current_version || '未由 package store 管理';
+  if (available) {
+    updateBadge.textContent = '有更新';
+    updateStatusText.textContent = `目前版本：${current} · 可安裝版本：${status.offered_version}`;
+  } else {
+    updateBadge.textContent = '已就緒';
+    updateStatusText.textContent = `目前版本：${current}`;
+  }
+  if (status?.message) showUpdateMessage(status.message);
+}
+
 async function loadDatabaseStatus() {
   showDatabaseMessage('');
   setSettingsBusy(true);
@@ -88,6 +129,30 @@ async function loadDatabaseStatus() {
     showDatabaseMessage(typeof error === 'string' ? error : error?.message || String(error), true);
   } finally {
     setSettingsBusy(false);
+  }
+}
+
+async function loadUpdateStatus() {
+  showUpdateMessage('');
+  try {
+    const status = await invokeTauri()('update_status');
+    renderUpdateStatus(status);
+  } catch (error) {
+    showUpdateMessage(typeof error === 'string' ? error : error?.message || String(error), true);
+  }
+}
+
+async function runUpdateCommand(command) {
+  showUpdateMessage('');
+  setUpdateBusy(true);
+  try {
+    const status = await invokeTauri()(command);
+    renderUpdateStatus(status);
+    if (command === 'install_data_update') await loadDatabaseStatus();
+  } catch (error) {
+    showUpdateMessage(typeof error === 'string' ? error : error?.message || String(error), true);
+  } finally {
+    setUpdateBusy(false);
   }
 }
 
@@ -188,6 +253,9 @@ refreshDatabaseStatus.addEventListener('click', loadDatabaseStatus);
 chooseSharedDatabase.addEventListener('click', () => runDatabaseCommand('choose_shared_database', 'Shared database 設定已更新。'));
 chooseUserDatabase.addEventListener('click', () => runDatabaseCommand('choose_user_database', 'User dictionary 設定已更新。'));
 clearUserDatabase.addEventListener('click', () => runDatabaseCommand('clear_user_database', 'User dictionary 已停用。'));
+checkDataUpdate.addEventListener('click', () => runUpdateCommand('check_data_update'));
+installDataUpdate.addEventListener('click', () => runUpdateCommand('install_data_update'));
 
 updateCount();
 loadDatabaseStatus();
+loadUpdateStatus();
