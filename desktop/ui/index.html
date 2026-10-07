@@ -14,8 +14,38 @@
         <h1>Chinese Regional Localizer</h1>
         <p class="subtitle">中國大陸、香港、台灣中文地區化轉換</p>
       </div>
-      <span id="runtimeBadge" class="badge">Rust runtime</span>
+      <span id="runtimeBadge" class="badge">Rust Runtime API v1</span>
     </header>
+
+    <section class="card settings-panel" aria-label="Database settings">
+      <div class="panel-heading settings-heading">
+        <div>
+          <h2>資料庫設定</h2>
+          <p class="muted">檔案選擇由 Rust 原生視窗處理；前端不會把任意檔案路徑傳入地區化指令。</p>
+        </div>
+        <span id="dbReadyBadge" class="status-badge">檢查中…</span>
+      </div>
+      <div class="database-grid">
+        <div class="database-item">
+          <div>
+            <strong>地區資料庫</strong>
+            <p id="sharedDbPath" class="path-text">讀取中…</p>
+          </div>
+          <button id="chooseSharedDb" class="secondary-button" type="button">選擇資料庫</button>
+        </div>
+        <div class="database-item">
+          <div>
+            <strong>私人詞庫</strong>
+            <p id="userDbPath" class="path-text">讀取中…</p>
+          </div>
+          <div class="button-row">
+            <button id="chooseUserDb" class="secondary-button" type="button">選擇詞庫</button>
+            <button id="clearUserDb" class="text-button" type="button">停用</button>
+          </div>
+        </div>
+      </div>
+      <p id="dbValidationMessage" class="settings-message hidden" role="status"></p>
+    </section>
 
     <section class="controls card" aria-label="Localization settings">
       <label>
