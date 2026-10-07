@@ -18,3 +18,4 @@ Read only decisions relevant to the current task.
 - [D-014](D-014-runtime-api-boundary.md) — The versioned Rust Runtime API is the application/Tauri boundary.
 - [D-015](D-015-tauri-thin-frontend-managed-db-state.md) — Tauri keeps the frontend thin and database paths in managed Rust state.
 - [D-016](D-016-native-db-chooser-rust-validation.md) — Native database selection and compatibility validation stay inside Rust; frontend receives only safe status metadata.
+- [D-017](D-017-versioned-data-packages-rollback.md) — Shared data releases use immutable versioned packages, staged validation/activation and rollback instead of in-place replacement.
