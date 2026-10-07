@@ -377,15 +377,15 @@ sources:
 
   - id: openhownet-core-data
     name: OpenHowNet downloadable HowNet core data
-    status: pending_review
-    pack: pending
-    licence: null
-    commercial_use: null
-    modification_allowed: null
-    redistribution_allowed: null
-    attribution_required: null
-    share_alike: null
+    status: approved_with_conditions
+    pack: core
+    licence: MIT
+    commercial_use: true
+    modification_allowed: true
+    redistribution_allowed: true
+    attribution_required: true
+    share_alike: false
     ingest_allowed: false
-    ingest_scope: "None until data-specific redistribution rights are verified."
-    excluded_scope: "Downloaded HowNet core data; MIT licence for repository/API code must not be assumed to license separate data downloads."
+    ingest_scope: "Official OpenHowNet-provided core-data download covered by the official OpenHowNet MIT licence statement; exact production resource must be pinned before ingestion."
+    excluded_scope: "Unrelated/historical/proprietary HowNet distributions and any resource whose OpenHowNet MIT coverage cannot be verified."
     review_record: data-registry/openhownet.md
