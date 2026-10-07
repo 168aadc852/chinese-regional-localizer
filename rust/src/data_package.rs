@@ -171,10 +171,9 @@ impl PackageStore {
 
     pub fn rollback(&self) -> PackageResult<PathBuf> {
         let mut state = self.state()?;
-        let previous = state
-            .previous
-            .clone()
-            .ok_or_else(|| PackageError::Invalid("No previous package is available for rollback".into()))?;
+        let previous = state.previous.clone().ok_or_else(|| {
+            PackageError::Invalid("No previous package is available for rollback".into())
+        })?;
         let validated = validate_package_dir(&self.package_dir(&previous))?;
         let current = state.current.take();
         state.current = Some(previous);
@@ -222,7 +221,9 @@ pub fn validate_package_dir(package_dir: &Path) -> PackageResult<ValidatedPackag
 
     let database_path = package_dir.join(&manifest.database.file);
     if !database_path.is_file() {
-        return Err(PackageError::Invalid("Package database file is missing".into()));
+        return Err(PackageError::Invalid(
+            "Package database file is missing".into(),
+        ));
     }
     let size = fs::metadata(&database_path)?.len();
     if size != manifest.database.size_bytes {
@@ -251,7 +252,10 @@ fn validate_manifest(manifest: &DataPackageManifest) -> PackageResult<()> {
     }
     validate_token(&manifest.package_id, "package_id")?;
     validate_token(&manifest.version, "version")?;
-    if !matches!(manifest.pack_type.as_str(), "core" | "attribution" | "sharealike") {
+    if !matches!(
+        manifest.pack_type.as_str(),
+        "core" | "attribution" | "sharealike"
+    ) {
         return Err(PackageError::Invalid("Invalid package pack_type".into()));
     }
     let minimum = manifest
@@ -270,10 +274,14 @@ fn validate_manifest(manifest: &DataPackageManifest) -> PackageResult<()> {
     validate_single_filename(&manifest.database.file)?;
     let checksum = manifest.database.sha256.as_bytes();
     if checksum.len() != 64 || !checksum.iter().all(u8::is_ascii_hexdigit) {
-        return Err(PackageError::Invalid("database.sha256 must be 64 hex characters".into()));
+        return Err(PackageError::Invalid(
+            "database.sha256 must be 64 hex characters".into(),
+        ));
     }
     if manifest.sources.is_empty() {
-        return Err(PackageError::Invalid("Package sources must not be empty".into()));
+        return Err(PackageError::Invalid(
+            "Package sources must not be empty".into(),
+        ));
     }
     Ok(())
 }
@@ -304,9 +312,16 @@ fn validate_sqlite(path: &Path, expected_pack: &str) -> PackageResult<()> {
     let conn = Connection::open_with_flags(path, OpenFlags::SQLITE_OPEN_READ_ONLY)?;
     let integrity: String = conn.query_row("PRAGMA integrity_check", [], |row| row.get(0))?;
     if integrity.to_ascii_lowercase() != "ok" {
-        return Err(PackageError::Invalid("SQLite integrity_check failed".into()));
+        return Err(PackageError::Invalid(
+            "SQLite integrity_check failed".into(),
+        ));
     }
-    for table in ["concepts", "localized_names", "term_rules", "source_versions"] {
+    for table in [
+        "concepts",
+        "localized_names",
+        "term_rules",
+        "source_versions",
+    ] {
         let exists: i64 = conn.query_row(
             "SELECT EXISTS(SELECT 1 FROM sqlite_master WHERE type='table' AND name=?1)",
             [table],
