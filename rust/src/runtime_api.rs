@@ -91,7 +91,13 @@ impl Runtime {
                         })
                     })
                     .collect();
-                (result.output, result.route, result.review_needed, false, changes)
+                (
+                    result.output,
+                    result.route,
+                    result.review_needed,
+                    false,
+                    changes,
+                )
             };
 
         let conn = Connection::open(&self.shared_db)?;
@@ -162,7 +168,14 @@ fn enrich_changes(
         }
 
         if kind == "entity" {
-            enrich_entity(conn, source_locale, target_locale, &original, &replacement, &mut object)?;
+            enrich_entity(
+                conn,
+                source_locale,
+                target_locale,
+                &original,
+                &replacement,
+                &mut object,
+            )?;
         } else if kind == "term_rule" {
             enrich_term_rule(conn, route, &original, &replacement, &mut object)?;
         }
