@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026-10-07 — Phase 3G signed release metadata authenticity
+
+- Added Ed25519 detached signature envelope v1 using strict verification from a maintained Rust cryptography library.
+- Added pinned trusted public-key records with key IDs derived from SHA-256 fingerprints of the exact public-key bytes and support for multiple pinned keys.
+- Added separate signed-message domains for package manifests and release catalogs so a valid signature cannot be reused across metadata types.
+- Added release catalog v1 with monotonic sequence rollback protection, signed expiry and unique package/version entries.
+- Added exact package-manifest SHA-256 and identity binding between signed catalog entries and Phase 3F package manifests.
+- Added deterministic unsigned release-catalog construction that re-validates Phase 3F package governance before cataloging a release.
+- Added an offline Rust signing utility that reads a 32-byte Ed25519 seed from an explicitly supplied external base64 key file; production private keys are never stored in the repository or application bundle.
+- Added regressions for payload tampering, wrong/unknown keys, cross-domain signature reuse, malformed signatures, expired catalogs, rollback sequences and package/catalog binding changes.
+- Added unsigned catalog CI smoke plus committed/locked Rust crypto dependencies.
+- Added `docs/RELEASE_SIGNING.md` and ADR D-018 documenting the pinned-key trust model and the rule that future network updates must pass both Phase 3G authenticity and Phase 3F package validation.
+- Internet update discovery/download, remote trust-root rotation, HSM integration and installer signing remain out of scope for this phase.
+
 ## 2026-10-07 — Phase 3F versioned shared-database packages and rollback core
 
 - Added `scripts/build_data_package.py` to create governed shared-database release directories with `package.json` plus immutable `regional.sqlite`.
