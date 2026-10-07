@@ -16,11 +16,19 @@ if str(SRC_DIR) not in sys.path:
     sys.path.insert(0, str(SRC_DIR))
 
 from localizer_engine import LocalizerEngine  # noqa: E402
+from user_dictionary import UserDictionary  # noqa: E402
+from user_localizer import UserControlledLocalizer  # noqa: E402
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--db", type=Path, required=True, help="SQLite localization database")
+    parser.add_argument("--user-db", type=Path, help="Optional private user_dictionary.sqlite")
+    parser.add_argument(
+        "--user-schema",
+        type=Path,
+        default=REPO_ROOT / "schema" / "user-dictionary-v0.1.sql",
+    )
     parser.add_argument("--from", dest="source_locale", required=True)
     parser.add_argument("--to", dest="target_locale", required=True)
     parser.add_argument("--text", help="Text to localize; omit to read UTF-8 from stdin")
@@ -30,14 +38,22 @@ def main() -> int:
     text = args.text if args.text is not None else sys.stdin.read()
     conn = sqlite3.connect(args.db)
     conn.row_factory = sqlite3.Row
+    user_dictionary = None
     try:
-        result = LocalizerEngine(conn).localize(
+        shared = LocalizerEngine(conn)
+        engine = shared
+        if args.user_db is not None:
+            user_dictionary = UserDictionary.open(args.user_db, args.user_schema)
+            engine = UserControlledLocalizer(shared, user_dictionary)
+        result = engine.localize(
             text=text,
             source_locale=args.source_locale,
             target_locale=args.target_locale,
             context={"domain": args.domain} if args.domain else None,
         )
     finally:
+        if user_dictionary is not None:
+            user_dictionary.close()
         conn.close()
 
     print(json.dumps(result, ensure_ascii=False, indent=2))
