@@ -84,9 +84,9 @@ impl TrustedKeySet {
             let decoded = STANDARD
                 .decode(&entry.public_key_base64)
                 .map_err(|_| ReleaseAuthError::Invalid("Invalid trusted-key base64".into()))?;
-            let bytes: [u8; 32] = decoded
-                .try_into()
-                .map_err(|_| ReleaseAuthError::Invalid("Ed25519 public key must be 32 bytes".into()))?;
+            let bytes: [u8; 32] = decoded.try_into().map_err(|_| {
+                ReleaseAuthError::Invalid("Ed25519 public key must be 32 bytes".into())
+            })?;
             let expected_id = key_id_for_public_key(&bytes);
             if entry.key_id != expected_id {
                 return Err(ReleaseAuthError::Invalid(format!(
@@ -280,7 +280,10 @@ fn validate_catalog(
     for package in &catalog.packages {
         validate_token(&package.package_id, "package_id")?;
         validate_token(&package.version, "version")?;
-        if !matches!(package.pack_type.as_str(), "core" | "attribution" | "sharealike") {
+        if !matches!(
+            package.pack_type.as_str(),
+            "core" | "attribution" | "sharealike"
+        ) {
             return Err(ReleaseAuthError::Invalid(
                 "Release catalog contains invalid pack_type".into(),
             ));
