@@ -40,6 +40,21 @@ The report includes:
 
 The Python reference implementation is the behavioral baseline, not the final performance target. Future Rust/Tauri work should use the same corpus and equivalent measurement method, then record environment details alongside results.
 
+## Initial CI sample
+
+The first passing Phase 2E pull-request run used CPython 3.11.17 on a GitHub-hosted Ubuntu 24.04 runner. The smoke payload used the `zh-CN -> zh-TW` route, 5,145 input characters, one warmup and three measured iterations.
+
+Observed sample:
+- exact realistic corpus: 8 / 8 cases passed;
+- complete unit suite: 44 tests passed;
+- deterministic repeated output: yes;
+- throughput: about 200,043 characters/second;
+- p50 latency: about 24.7 ms;
+- p95 latency: about 28.2 ms;
+- peak Python allocation tracked by `tracemalloc`: about 1,667 KiB.
+
+These numbers are a historical smoke sample only. Hosted runner hardware and load vary, so they must not be treated as guaranteed product performance.
+
 ## CI policy
 
 GitHub-hosted runners are noisy and are not treated as precise benchmark machines. CI therefore uses deliberately generous limits only to detect catastrophic regressions:
