@@ -9,14 +9,46 @@ const changes = document.getElementById('changes');
 const reviewBadge = document.getElementById('reviewBadge');
 const errorMessage = document.getElementById('errorMessage');
 const runtimeBadge = document.getElementById('runtimeBadge');
+const dbReadyBadge = document.getElementById('dbReadyBadge');
+const sharedDbPath = document.getElementById('sharedDbPath');
+const userDbPath = document.getElementById('userDbPath');
+const dbValidationMessage = document.getElementById('dbValidationMessage');
+const chooseSharedDb = document.getElementById('chooseSharedDb');
+const chooseUserDb = document.getElementById('chooseUserDb');
+const clearUserDb = document.getElementById('clearUserDb');
+
+let runtimeReady = false;
+let localizationBusy = false;
+let settingsBusy = false;
+
+function invoke() {
+  const fn = window.__TAURI__?.core?.invoke;
+  if (!fn) {
+    throw new Error('Tauri runtime 未載入。請用 Tauri desktop app 開啟此介面。');
+  }
+  return fn;
+}
 
 function updateCount() {
   inputCount.textContent = `${[...inputText.value].length} 字`;
 }
 
-function setBusy(busy) {
-  localizeButton.disabled = busy;
-  localizeButton.textContent = busy ? '處理中…' : '地區化';
+function syncButtons() {
+  localizeButton.disabled = localizationBusy || settingsBusy || !runtimeReady;
+  localizeButton.textContent = localizationBusy ? '處理中…' : '地區化';
+  for (const button of [chooseSharedDb, chooseUserDb, clearUserDb]) {
+    button.disabled = settingsBusy || localizationBusy;
+  }
+}
+
+function setLocalizationBusy(busy) {
+  localizationBusy = busy;
+  syncButtons();
+}
+
+function setSettingsBusy(busy) {
+  settingsBusy = busy;
+  syncButtons();
 }
 
 function showError(message) {
@@ -26,6 +58,52 @@ function showError(message) {
 
 function text(value) {
   return value == null ? '' : String(value);
+}
+
+function renderRuntimeStatus(status) {
+  runtimeReady = Boolean(status?.runtime_ready);
+  sharedDbPath.textContent = status?.shared_db || '未設定';
+  userDbPath.textContent = status?.user_dictionary_enabled
+    ? (status?.user_db || '已啟用，但路徑不可用')
+    : '未啟用私人詞庫';
+
+  dbReadyBadge.classList.toggle('ready', runtimeReady);
+  dbReadyBadge.classList.toggle('problem', !runtimeReady);
+  dbReadyBadge.textContent = runtimeReady ? '資料庫可用' : '資料庫有問題';
+  runtimeBadge.textContent = status?.user_dictionary_enabled
+    ? 'Rust Runtime API v1 + private dictionary'
+    : 'Rust Runtime API v1';
+
+  const validationMessage = status?.validation_error || '';
+  dbValidationMessage.textContent = validationMessage;
+  dbValidationMessage.classList.toggle('hidden', !validationMessage);
+  clearUserDb.classList.toggle('hidden', !status?.user_dictionary_enabled);
+  syncButtons();
+}
+
+async function refreshRuntimeStatus() {
+  try {
+    const status = await invoke()('runtime_status');
+    renderRuntimeStatus(status);
+  } catch (error) {
+    runtimeReady = false;
+    syncButtons();
+    showError(typeof error === 'string' ? error : error?.message || String(error));
+  }
+}
+
+async function runSettingsCommand(command) {
+  showError('');
+  setSettingsBusy(true);
+  try {
+    const status = await invoke()(command);
+    renderRuntimeStatus(status);
+  } catch (error) {
+    showError(typeof error === 'string' ? error : error?.message || String(error));
+    await refreshRuntimeStatus();
+  } finally {
+    setSettingsBusy(false);
+  }
 }
 
 function renderChanges(items) {
@@ -80,13 +158,9 @@ function renderChanges(items) {
 
 async function localize() {
   showError('');
-  setBusy(true);
+  setLocalizationBusy(true);
   try {
-    const invoke = window.__TAURI__?.core?.invoke;
-    if (!invoke) {
-      throw new Error('Tauri runtime 未載入。請用 Tauri desktop app 開啟此介面。');
-    }
-    const response = await invoke('localize_text', {
+    const response = await invoke()('localize_text', {
       request: {
         api_version: '1',
         text: inputText.value,
@@ -97,18 +171,24 @@ async function localize() {
     });
     outputText.value = response.output || '';
     reviewBadge.classList.toggle('hidden', !response.review_needed);
-    runtimeBadge.textContent = response.user_dictionary_applied ? 'Rust + user dictionary' : 'Rust runtime';
     renderChanges(Array.isArray(response.changes) ? response.changes : []);
   } catch (error) {
     outputText.value = '';
     reviewBadge.classList.add('hidden');
     renderChanges([]);
     showError(typeof error === 'string' ? error : error?.message || String(error));
+    await refreshRuntimeStatus();
   } finally {
-    setBusy(false);
+    setLocalizationBusy(false);
   }
 }
 
 inputText.addEventListener('input', updateCount);
 localizeButton.addEventListener('click', localize);
+chooseSharedDb.addEventListener('click', () => runSettingsCommand('choose_shared_database'));
+chooseUserDb.addEventListener('click', () => runSettingsCommand('choose_user_database'));
+clearUserDb.addEventListener('click', () => runSettingsCommand('clear_user_database'));
+
 updateCount();
+syncButtons();
+refreshRuntimeStatus();
