@@ -29,4 +29,5 @@ Read `README.md`, project overview, product requirements, history or unrelated t
 - Preserve offline-first and distinct `zh-CN` / `zh-HK` / `zh-TW` goals.
 - Run the smallest relevant tests first; run the full relevant suite before declaring implementation complete.
 - Write material decisions, source-review results and meaningful progress back to the repository.
+- At every major phase closeout, and whenever user-facing capabilities or the public project status materially change, review `README.md` and update it in the same PR when it is no longer accurate.
 - If context is missing, load the next relevant file on demand instead of preloading the documentation tree.
