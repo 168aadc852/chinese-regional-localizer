@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-10-07 — Phase 3D minimal Tauri desktop shell
+
+- Added a Tauri 2 desktop application under `desktop/` with a static vanilla HTML/CSS/JavaScript frontend.
+- Added one async `localize_text` Tauri command backed exclusively by Rust Runtime API v1.
+- Kept shared/user SQLite paths in Rust managed state; frontend JavaScript cannot supply arbitrary database paths or query SQLite directly.
+- Added development database configuration through `CRL_SHARED_DB` and optional `CRL_USER_DB` environment variables.
+- Added a minimal responsive UI for source/target selection, input, localized output, review state and structured change/provenance display.
+- Enabled Tauri's global JavaScript API so this first shell does not require Node.js, npm, Vite or a frontend framework.
+- Added Tauri compile/format/Clippy validation to CI using the required Linux WebKitGTK dependencies.
+- Added beginner Windows development guidance and ADR D-015 defining the thin-frontend/managed-database boundary.
+
 ## 2026-10-07 — Phase 3C Rust runtime API and explanations
 
 - Added versioned Rust Runtime API v1 as the application-facing localization boundary.

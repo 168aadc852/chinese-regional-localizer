@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Chinese Regional Localizer</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="app-shell">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">Offline-first · Runtime API v1</p>
+        <h1>Chinese Regional Localizer</h1>
+        <p class="subtitle">中國大陸、香港、台灣中文地區化轉換</p>
+      </div>
+      <span id="runtimeBadge" class="badge">Rust runtime</span>
+    </header>
+
+    <section class="controls card" aria-label="Localization settings">
+      <label>
+        <span>來源</span>
+        <select id="sourceLocale">
+          <option value="zh-CN">中國大陸 · 簡體</option>
+          <option value="zh-Hant">繁體中文</option>
+        </select>
+      </label>
+      <div class="arrow" aria-hidden="true">→</div>
+      <label>
+        <span>目標</span>
+        <select id="targetLocale">
+          <option value="zh-HK">香港</option>
+          <option value="zh-TW">台灣</option>
+        </select>
+      </label>
+      <button id="localizeButton" type="button">地區化</button>
+    </section>
+
+    <section class="workspace">
+      <article class="card editor-panel">
+        <div class="panel-heading">
+          <h2>原文</h2>
+          <span id="inputCount" class="muted">0 字</span>
+        </div>
+        <textarea id="inputText" spellcheck="false" placeholder="貼上需要地區化的中文文字…">布拉德·皮特研究人工智能。</textarea>
+      </article>
+
+      <article class="card editor-panel">
+        <div class="panel-heading">
+          <h2>結果</h2>
+          <span id="reviewBadge" class="review-badge hidden">需要檢查</span>
+        </div>
+        <textarea id="outputText" readonly placeholder="地區化結果會顯示在這裡"></textarea>
+      </article>
+    </section>
+
+    <section class="card review-panel">
+      <div class="panel-heading">
+        <div>
+          <h2>變更與來源</h2>
+          <p class="muted">只顯示 Runtime API 回傳的決策；前端不直接讀取 SQLite。</p>
+        </div>
+        <span id="changeCount" class="muted">0 項變更</span>
+      </div>
+      <div id="changes" class="changes empty-state">按「地區化」後，這裡會顯示術語、人物名稱、來源與檢查狀態。</div>
+    </section>
+
+    <p id="errorMessage" class="error hidden" role="alert"></p>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>
