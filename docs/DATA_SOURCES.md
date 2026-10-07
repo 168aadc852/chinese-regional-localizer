@@ -14,6 +14,7 @@ The manifest currently contains **24 source IDs**. Rime Cantonese is deliberatel
 - MusicBrainz Core Data — CC0 only.
 - THUOCL reviewed repository lists/signals.
 - Chinese Open WordNet under its recorded permissive notice.
+- OpenHowNet official core-data download — MIT, preserving the MIT notice and exact resource provenance; automated ingestion remains disabled until the exact download resource is pinned.
 
 ## Attribution packs
 
@@ -27,20 +28,22 @@ DATA.GOV.HK has a conditional human review conclusion, but automated derived-dat
 
 ## Share-alike isolated packs
 
-Chinese Wikipedia, Chinese Wiktionary, CC-CEDICT, CC-Canto, ConceptNet, CFDICT and Rime `jyut6ping3.maps` remain separated from permissive/core releases. DBnary is also ShareAlike in principle but remains pending because the exact licence version/snapshot is unresolved.
+Chinese Wikipedia, Chinese Wiktionary, CC-CEDICT, CC-Canto, ConceptNet, CFDICT and Rime `jyut6ping3.maps` remain separated from permissive/core releases.
+
+## Reference-only sources
+
+- Combined DoJ Glossaries — official XML/download access is verified, but authoritative modification/adaptation and derived-data redistribution rights were not established; manual/reference use only.
+- DBnary — ShareAlike reuse is clear in principle, but the exact licence version for a specific Chinese snapshot was not pinned; no project packaging until a snapshot-specific licence is verified.
+
+Reference-only sources have `ingest_allowed: false` and are not included in redistributable project packs. They can be reviewed again later if stronger source-specific evidence becomes available.
 
 ## Excluded portions
 
 - full Words.hk dictionary under its non-commercial licence;
 - MusicBrainz Supplementary Data under CC BY-NC-SA;
+- unrelated/historical/proprietary HowNet distributions not verified as covered by the OpenHowNet MIT statement;
 - any source/file outside the exact reviewed scope;
 - any production resource not listed in `ingest_resources` for an implemented importer.
-
-## Pending
-
-- Combined DoJ Glossaries;
-- DBnary snapshot licence;
-- OpenHowNet downloadable core data rights.
 
 ## Review principle
 
