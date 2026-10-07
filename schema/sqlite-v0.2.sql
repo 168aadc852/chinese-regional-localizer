@@ -140,3 +140,11 @@ SELECT ne.*
 FROM name_evidence ne
 LEFT JOIN source_versions sv ON sv.source_version_id = ne.source_version_id
 WHERE ne.source_version_id IS NULL OR sv.is_current = 1;
+
+-- This view is valid once the optional pronunciation migration creates
+-- `pronunciations`; SQLite permits the forward view reference beforehand.
+CREATE VIEW IF NOT EXISTS current_pronunciations AS
+SELECT p.*
+FROM pronunciations p
+LEFT JOIN source_versions sv ON sv.source_version_id = p.source_version_id
+WHERE p.source_version_id IS NULL OR sv.is_current = 1;
