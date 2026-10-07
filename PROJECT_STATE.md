@@ -4,7 +4,7 @@ Updated: 2026-10-07
 
 ## Status
 
-**Phase 2E realistic evaluation and performance baselines are implemented on the active development branch and awaiting CI/merge.**
+**Phase 2E realistic evaluation and performance baselines are implemented.**
 
 Current foundations:
 - data governance + machine-readable exact-resource ingestion policy;
