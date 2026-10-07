@@ -1,5 +1,18 @@
 # Changelog
 
+## 2026-10-07 — Phase 3F versioned shared-database packages and rollback core
+
+- Added `scripts/build_data_package.py` to create governed shared-database release directories with `package.json` plus immutable `regional.sqlite`.
+- Added package manifest v1 fields for package/version identity, licence pack, minimum Runtime API, creation time, byte size, SHA-256 and current source/resource provenance.
+- Added a release-time governance gate that re-checks `sources.yaml`, `ingest_allowed`, exact `ingest_resources` and licence-pack consistency before packaging.
+- Added Rust package validation for manifest compatibility, safe relative filenames, size/SHA-256 integrity, SQLite integrity, required runtime tables and package/database pack agreement.
+- Added a versioned Rust `PackageStore` using staging directories and immutable `<package_id>/<version>` installations.
+- Added separate `current`/`previous` state and validated rollback; active databases are never overwritten in place.
+- Added regressions for checksum mismatch, path traversal, pack mismatch, corrupt SQLite, failed-install safety and rollback.
+- Added a CI smoke build of a governed package from the fixture demo database and switched Rust checks to the committed lockfile with `--locked`.
+- Added `docs/DATA_PACKAGE_FORMAT.md`, updated licence-packaging guidance and ADR D-017.
+- Network update discovery/download and publisher signing remain deliberately out of scope for this phase.
+
 ## 2026-10-07 — Phase 3E safe desktop database settings
 
 - Added Rust-managed mutable database configuration for the Tauri desktop shell.

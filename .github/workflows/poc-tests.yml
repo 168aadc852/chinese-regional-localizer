@@ -41,6 +41,15 @@ jobs:
       - name: Build demo database
         run: python scripts/build_demo_database.py
 
+      - name: Build governed data package smoke
+        run: >-
+          python scripts/build_data_package.py
+          --db build/regional-demo.sqlite
+          --output-dir build/package-smoke
+          --package-id regional-core
+          --version ci
+          --created-at 2026-10-07T00:00:00Z
+
       - name: Run realistic corpus evaluation
         run: python scripts/evaluate_corpus.py
 
@@ -58,14 +67,14 @@ jobs:
         run: cargo fmt --manifest-path rust/Cargo.toml -- --check
 
       - name: Rust clippy
-        run: cargo clippy --manifest-path rust/Cargo.toml --all-targets -- -D warnings
+        run: cargo clippy --locked --manifest-path rust/Cargo.toml --all-targets -- -D warnings
 
       - name: Rust parity tests
-        run: cargo test --manifest-path rust/Cargo.toml --all-targets
+        run: cargo test --locked --manifest-path rust/Cargo.toml --all-targets
 
       - name: Rust benchmark smoke
         run: >-
-          cargo run --release --manifest-path rust/Cargo.toml --bin benchmark --
+          cargo run --locked --release --manifest-path rust/Cargo.toml --bin benchmark --
           --db build/regional-demo.sqlite
           --corpus data/fixtures/realistic_corpus.json
           --target-chars 5000
