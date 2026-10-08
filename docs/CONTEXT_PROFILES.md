@@ -4,8 +4,9 @@ Date: 2026-10-09.
 
 A usage context is a named folder for a writing situation, such as General or
 Technology / Software. This foundation identifies folders and their parent links;
-it does **not** yet change wording, choose terms or add desktop context controls.
-Context-aware terminology selection belongs to separately approved Issue #47.
+the #46 module itself does not change wording or add desktop context controls.
+Separately approved [Issue #47 selection](CONTEXT_SELECTION.md) now uses its validated
+snapshots for core/runtime terminology requests; the model/store contract is unchanged.
 
 The implementation follows the [approved design](https://github.com/168aadc852/chinese-regional-localizer/issues/46#issuecomment-6063752375)
 and [Implementation Brief v0.1](https://github.com/168aadc852/chinese-regional-localizer/issues/46#issuecomment-6063785354).
@@ -14,8 +15,10 @@ and [Implementation Brief v0.1](https://github.com/168aadc852/chinese-regional-l
 
 `rust/src/context_profiles.rs` is a standalone module in the shared Rust library.
 Desktop, a future CLI and a future MCP client can reuse this model rather than
-implement different inheritance logic. Runtime API v1 is unchanged and does not
-call this module. Python localization and existing private dictionaries are unchanged.
+implement different inheritance logic. Issue #47 reuses its resolver through internal
+snapshot configuration while preserving Runtime API v1's outer contract. A Python
+reference adapter mirrors this contract for parity, not a separate production-client
+engine. Existing private dictionary schemas remain unchanged.
 
 | Stable ID | Default display name | Parent |
 | --- | --- | --- |
@@ -62,8 +65,8 @@ missing parents are rejected even for disabled profiles. There is no guessed fal
 Disabled profiles remain stored and identifiable. Resolving a disabled profile, or
 a child whose chain contains a disabled ancestor, returns `DisabledContext` and no
 partial chain. It does not silently skip the disabled ancestor. Re-enabling requires
-building a new validated snapshot. This is availability behavior, not a term-ranking
-rule; reconciliation with terminology precedence belongs to Issue #47.
+building a new validated snapshot. Issue #47 propagates these failures before any
+localization, including empty input or fully user-protected text, rather than falling back.
 
 ## Independent storage and version handling
 
@@ -108,11 +111,11 @@ deterministic round trips, storage preservation and separation from existing fil
 Existing Python/Rust/Tauri suites still cover runtime behavior, data governance and
 desktop settings. See [ADR D-022](adr/D-022-independent-context-profile-foundation.md).
 
-Local Windows validation: 22 focused profile tests (including failed locked-file
+Initial #46 Windows validation: 22 focused profile tests (including failed locked-file
 replacement), 65 Rust tests in total, 54 Python tests and 25 Tauri tests passed.
 Rust/Tauri formatting, Clippy with warnings denied, Tauri all-target compile check and Windows debug build,
 demo/package/catalog smoke, corpus evaluation and Python/Rust benchmark smoke passed.
-GitHub CI and protected-main review/merge remain the PR closeout gate.
+Issue #46 subsequently merged through protected `main`; #47 keeps these regressions.
 
 No term-selection changes, multiple inheritance, My Terms migration, alternative-term
 UI, Alpha redesign, LLM classification, packaging or repository/application rename

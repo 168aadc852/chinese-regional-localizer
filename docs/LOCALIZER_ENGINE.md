@@ -41,13 +41,21 @@ Names supported only by superseded `source_versions` do not participate in runti
 For each stage:
 
 1. longest applicable source phrase wins;
-2. for that phrase, highest priority wins;
-3. lower-priority targets remain alternatives;
-4. tied highest-priority different targets trigger review.
+2. for regional terminology with an explicit usage context, the most specific eligible
+   context level wins (exact, inherited parents, General if inherited, unscoped);
+3. within that winning level, highest priority wins;
+4. lower-priority targets within that level retain existing explanation behavior;
+5. tied highest-priority different targets preserve stage text and trigger review,
+   without falling through to another context level.
+
+Without `context.usage_context_id`, legacy ranking remains unchanged. Script conversion
+stays context-neutral, and no route/entity/user-protection order changes. See the
+canonical [Issue #47 selection contract](CONTEXT_SELECTION.md).
 
 `context_constraint` JSON is no longer merely decorative. Executable restrictions are placed under `constraints`, currently supporting:
 
 - `domain`;
+- `usage_context_id` (one stable profile ID, independent from legacy domain);
 - `preceded_by` / `not_preceded_by`;
 - `followed_by` / `not_followed_by`;
 - `word_boundary`.

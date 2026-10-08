@@ -24,3 +24,4 @@ Read only decisions relevant to the current task.
 - [D-020](D-020-desktop-update-ui-keeps-network-trust-in-rust.md) — Desktop update controls remain narrow; network origin, trust roots and package activation stay inside Rust.
 - [D-021](D-021-versioned-desktop-settings.md) — Versioned non-secret desktop preferences stay in Rust storage, outside Runtime API v1 and future context/My Terms schemas.
 - [D-022](D-022-independent-context-profile-foundation.md) — Usage-context identity, validated single-parent chains and versioned local storage stay separate from localization and desktop settings.
+- [D-023](D-023-context-aware-regional-terminology-selection.md) — Explicit usage-context ranking extends regional term selection after longest eligible phrase, preserving protection, staged routes, no-guess ties and Runtime API v1.

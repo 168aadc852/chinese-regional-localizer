@@ -12,6 +12,7 @@ import json
 import sqlite3
 from dataclasses import dataclass
 from typing import Any, Iterable
+from context_profiles import ContextProfiles, context_level, context_selection
 
 
 ROUTES: dict[tuple[str, str], list[tuple[str, str]]] = {
@@ -75,8 +76,11 @@ class PrefixMatcher:
 
 
 class LocalizerEngine:
-    def __init__(self, conn: sqlite3.Connection):
+    def __init__(self, conn: sqlite3.Connection, *, context_profiles: ContextProfiles | None = None):
         self.conn = conn
+        self._context_profiles = context_profiles if context_profiles is not None else ContextProfiles()
+        if not isinstance(self._context_profiles, ContextProfiles):
+            raise TypeError("context_profiles must be a validated ContextProfiles snapshot")
         self.conn.row_factory = sqlite3.Row
         self._entity_cache: dict[
             str, tuple[dict[str, list[dict[str, Any]]], PrefixMatcher]
@@ -106,6 +110,7 @@ class LocalizerEngine:
         route = ROUTES.get((source_locale, target_locale))
         if route is None:
             raise UnsupportedRouteError(f"Unsupported route: {source_locale} -> {target_locale}")
+        usage_chain = self.validate_usage_context(context)
 
         initial_alignment = (
             [AlignmentSpan(0, len(text), 0, len(text))] if text else []
@@ -126,6 +131,7 @@ class LocalizerEngine:
                 stage_source,
                 stage_target,
                 context=context or {},
+                usage_chain=usage_chain if stage_target in ("zh-HK", "zh-TW") else None,
             )
             current_text = stage["text"]
             protected = stage["protected"]
@@ -150,6 +156,9 @@ class LocalizerEngine:
             "changes": events,
             "review_needed": any(event.get("review_needed", False) for event in events),
         }
+
+    def validate_usage_context(self, context: dict[str, Any] | None) -> tuple[str, ...] | None:
+        return self._context_profiles.resolve_request(context)
 
     def _current_evidence_clause(self, alias: str) -> str:
         if not self._has_current_versions:
@@ -468,9 +477,11 @@ class LocalizerEngine:
         for row in rows:
             item = dict(row)
             item["context_parse_error"] = False
-            if item.get("context_constraint"):
+            if item.get("context_constraint") is not None:
                 try:
                     item["context"] = json.loads(item["context_constraint"])
+                    if not isinstance(item["context"], dict):
+                        item["context_parse_error"] = True
                 except json.JSONDecodeError:
                     item["context"] = None
                     item["context_parse_error"] = True
@@ -545,6 +556,7 @@ class LocalizerEngine:
         target_locale: str,
         *,
         context: dict[str, Any],
+        usage_chain: tuple[str, ...] | None = None,
     ) -> dict[str, Any]:
         rule_index = self._term_rule_index(source_locale, target_locale)
         matcher = self._term_matcher(source_locale, target_locale)
@@ -577,17 +589,19 @@ class LocalizerEngine:
                 protected[span_cursor].start if span_cursor < len(protected) else len(text)
             )
             source_text: str | None = None
-            rows: list[dict[str, Any]] = []
+            ranked_rows: list[tuple[dict[str, Any], int]] = []
             for key in matcher.matches(text, i, next_protected_start):
                 key_end = i + len(key)
-                applicable = [
-                    row
-                    for row in rule_index[key]
-                    if self._rule_context_allows(row, text, i, key_end, context)
-                ]
+                applicable = []
+                for row in rule_index[key]:
+                    level = context_level(row.get("context"), usage_chain)
+                    if level is not None and self._rule_context_allows(
+                        row, text, i, key_end, context
+                    ):
+                        applicable.append((row, level))
                 if applicable:
                     source_text = key
-                    rows = applicable
+                    ranked_rows = applicable
                     break
 
             if source_text is None:
@@ -599,6 +613,11 @@ class LocalizerEngine:
                 i += 1
                 continue
 
+            level = min(level for _, level in ranked_rows)
+            rows = [row for row, rank in ranked_rows if rank == level]
+            selected_context = (
+                context_selection(usage_chain, level) if usage_chain is not None else None
+            )
             max_priority = max(int(row["priority"]) for row in rows)
             winners = [row for row in rows if int(row["priority"]) == max_priority]
             winner_targets = {row["target_text"] for row in winners}
@@ -634,6 +653,8 @@ class LocalizerEngine:
                         "candidates": [self._public_rule(row) for row in winners],
                     }
                 )
+                if selected_context is not None:
+                    events[-1]["context_selection"] = selected_context
                 i = input_end
                 continue
 
@@ -673,6 +694,8 @@ class LocalizerEngine:
                     }
                 )
                 events.append(event)
+                if selected_context is not None:
+                    event["context_selection"] = selected_context
             i = input_end
 
         return {

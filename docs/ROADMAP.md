@@ -7,14 +7,15 @@ Planned capabilities must not be presented as implemented.
 
 Phase 3J / Issue #38 desktop settings persistence is complete.
 
-Issue #46's approved standalone profile/model/store foundation is implemented in its
-focused PR; protected-main review, CI and merge remain the closeout gate. It does
-not change localization or add desktop context controls. See `CONTEXT_PROFILES.md`.
+Issue #46's approved standalone profile/model/store foundation is merged; see
+`CONTEXT_PROFILES.md`. Issue #47's approved core terminology selection is implemented
+in its focused PR, subject to protected-main CI/review/merge; see `CONTEXT_SELECTION.md`.
+Desktop context controls, context-sensitive My Terms and alternatives remain future work.
 
 Review `HANCONTEXT_ALPHA_MVP.md` and the scoped work packages:
 
-1. Context profile/data model foundation (#46); review its focused PR.
-2. Context-aware deterministic terminology selection.
+1. Context profile/data model foundation (#46); merged.
+2. Context-aware deterministic terminology selection (#47); review its focused PR.
 3. Alternative-term and ambiguity handling.
 4. Context-aware My Terms / remembered preferences.
 5. Alpha desktop UX and plain-language explanations.
@@ -22,7 +23,7 @@ Review `HANCONTEXT_ALPHA_MVP.md` and the scoped work packages:
 
 Each requires separate approval and a focused PR. Preserve Runtime API v1 unless
 a specific issue approves a change; preserve licence gates and offline operation.
-Issue #47 needs separate terminology-selection design approval after #46 lands.
+Issues #48–#51 need separate design/implementation approval; do not start them automatically.
 
 ## Consolidated delivery direction
 
