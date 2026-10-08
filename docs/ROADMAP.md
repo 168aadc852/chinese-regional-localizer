@@ -1,55 +1,47 @@
 # Roadmap
 
-## Phase 0 — Data governance — completed
+Updated: 2026-10-08. This consolidated direction supersedes the earlier roadmap.
+Planned capabilities must not be presented as implemented.
 
-Source policy, licensing evidence, initial schema and test corpus.
+## Current priority and next phase
 
-## Phase 1 — Data proof of concept — completed
+Finish Phase 3J / Issue #38: safe desktop settings persistence only.
+[PR #45](https://github.com/168aadc852/chinese-regional-localizer/pull/45) contains the
+implementation and awaits review/CI/protected-main merge. Add no Alpha features to it.
 
-SQLite prototype, provenance model and initial LSHK/OpenCC/Wikidata importers.
+Next review `HANCONTEXT_ALPHA_MVP.md` and the proposed small issues:
 
-## Phase 2A–2B — Localization reference core — completed
+1. Context profile/data model, including inheritance and migration.
+2. Context-aware deterministic terminology selection.
+3. Alternative-term and ambiguity handling.
+4. Context-aware My Terms / remembered preferences.
+5. Alpha desktop UX and plain-language explanations.
+6. Limited Alpha packaging and onboarding.
 
-Staged script/regional conversion, entity resolution, longest-match/no-guess behavior and OpenCC phrase/character/variant coverage.
+Each requires separate approval and a focused PR. Preserve Runtime API v1 unless
+a specific issue approves a change; preserve licence gates and offline operation.
 
-## Phase 2C — Core hardening — completed
+## Consolidated delivery direction
 
-- update-safe source-version lifecycle;
-- idempotent importer refreshes;
-- exact machine-readable ingest-resource gates;
-- licence-pack separation enforcement;
-- conservative entity matching;
-- cached trie matchers;
-- executable context constraints;
-- original-to-final span alignment;
-- expanded regression/CI checks;
-- explicit project software licence.
+Desktop Alpha → product CLI → MCP Server → production Windows/macOS packaging/signing
+→ editor/plugin integrations → optional AI assistance.
 
-## Phase 2D — User-local control
+HanContext Core / Runtime serves Desktop, CLI and MCP: same rules, same data, same
+result. The Rust demo CLI already uses Runtime API v1; product CLI batch, scripting,
+automation and CI workflows are future work. A future MCP server may expose localization,
+terminology, alternatives and explanations through that same runtime.
 
-- separate `user_dictionary.sqlite`;
-- protected terms;
-- user overrides and precedence;
-- import/export of user dictionaries;
-- broader realistic evaluation/performance corpus.
+Release hosting/CDN, retry/resume and key operations remain separate follow-ups.
+Additional regional routes, governed context/source coverage, file workflows and
+mobile delivery need their own issues. Use Chinese Mainland, Hong Kong and Taiwan
+in future copy. Precise implemented status is in `../PROJECT_STATE.md` and `../CHANGELOG.md`.
 
-## Phase 3 — Production core and minimal application
+## Implemented foundations
 
-- Rust implementation matching reference tests;
-- Tauri 2 text input/output UI;
-- source/target selection and detection;
-- diff/review with final-span highlighting;
-- source explanation cards;
-- safe local database update flow.
-
-## Phase 4 — File workflows
-
-TXT/Markdown, subtitles, CSV, then Office/EPUB where justified.
-
-## Phase 5 — Cross-platform distribution
-
-Windows, Android, macOS, iOS/iPadOS.
-
-## Phase 6 — Optional ambiguity intelligence
-
-Only after deterministic methods are measured. Consider a local model for unresolved contextual cases rather than routing every conversion through an LLM.
+Phase 0 has a first-pass source-whitelist conclusion with unresolved rights kept
+non-ingest. Phases 1–2 built the SQLite proof of concept, Python reference engine,
+hardening, private user control and evaluation. Phases 3A–3I added Rust/runtime parity,
+the minimal Tauri desktop, validated database selection, immutable packages/rollback,
+signing, authenticated network updates and manual desktop update controls.
+OpenCC remains partial/reference. Detailed phase history belongs in `../CHANGELOG.md`
+and `history/PROJECT_HISTORY.md`, rather than implying every older roadmap item shipped.

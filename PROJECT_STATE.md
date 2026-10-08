@@ -6,8 +6,11 @@ Updated: 2026-10-08
 
 **Phase 3I desktop authenticated data-update UI is complete and merged. Phase 0 source whitelist review now has a usable conclusion for all 24 machine source IDs.**
 
-Phase 3J / Issue #38 implementation is tested and ready for PR review. It is not
-closed or merged until protected-main review and CI requirements are satisfied.
+Phase 3J / Issue #38 implementation is tested and open for PR review; its GitHub
+`test` check passed. It is not closed or merged until protected-main review/merge.
+
+Implementation: [PR #45](https://github.com/168aadc852/chinese-regional-localizer/pull/45).
+Working identity is HanContext; repository/application identifiers remain unchanged.
 
 The project currently has:
 - governed, licence-aware source ingestion;
@@ -32,8 +35,16 @@ The project currently has:
 ## Likely next work
 
 1. Review and merge Phase 3J / Issue #38 through protected `main`.
-2. Prepare the HanContext Alpha MVP specification and small, separately scoped issues; do not start Alpha implementation automatically.
+2. Review the HanContext Alpha MVP specification and small, separately scoped issues; do not start Alpha implementation automatically.
+   Planning is in `docs/HANCONTEXT_ALPHA_MVP.md` and `docs/PRODUCT_REQUIREMENTS.md`.
+   Six unimplemented proposals are tracked in Issues #46–#51, with dependencies and separate approval gates.
 3. Track remaining release hosting, retry/resume, key operations and production packaging work separately.
+
+Planned order: Desktop Alpha → CLI → MCP Server → production Windows/macOS
+packaging/signing → editor/plugin integrations → optional AI assistance. Each client
+reuses the same Core / Runtime. Context inheritance, context-sensitive My Terms,
+alternatives, modes and Alpha UX remain unimplemented. Next review the specification
+and issues and approve each scope separately, without automatically starting work.
 
 For detail, load only what the task needs:
 - history: `docs/history/PROJECT_HISTORY.md`
