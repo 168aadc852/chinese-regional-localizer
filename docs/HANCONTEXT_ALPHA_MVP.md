@@ -1,6 +1,7 @@
 # HanContext Alpha MVP — planning specification
 
-Date: 2026-10-08. Status: proposed; separate approval is required for implementation.
+Updated: 2026-10-09. Issue #46's approved profile foundation is implemented in its
+focused PR. Other Alpha packages remain proposed and require separate approval.
 
 **HanContext — Chinese, localized with context. / 懂情境的中文地區化**.
 Use **Chinese Mainland**, Hong Kong and Taiwan in future product copy.
@@ -32,13 +33,13 @@ Approve exact semantics and tests before implementing modes.
 
 ## Context and preference requirements
 
-Possible built-ins: General; Technology / Software; Banking / Finance; Business /
-Marketing; Legal; Education; Government / Public Administration. These are proposed
-profiles, not promises of terminology coverage. Existing licence/ingestion gates apply.
+Issue #46's built-ins: General; Technology / Software; Banking / Finance; Business /
+Marketing; Legal; Education; Government / Public Administration. These profiles are
+not promises of terminology coverage. Existing licence/ingestion gates apply.
 
-Custom profiles such as Hi-Fi Audio, ESG and University Administration should inherit
-a general context. Define stable identity, parent relationships, cycle rejection,
-missing-parent behavior, inheritance ranking and migrations before implementation.
+Custom profiles default to General, with validated single-parent chains and explicit
+version handling in the [Issue #46 foundation](CONTEXT_PROFILES.md). It is not wired
+to localization or desktop controls. Inherited terminology ranking remains Issue #47.
 Do not duplicate every rule or require LLM context classification.
 
 My Terms preferences conceptually depend on source term, preferred term, target locale
@@ -67,7 +68,7 @@ time only / Remember for this context / Remember for all contexts.
 
 | Package | Scope | Dependencies |
 | --- | --- | --- |
-| [#46 Context profiles/model](https://github.com/168aadc852/chinese-regional-localizer/issues/46) | Versioned identity, inheritance and migration design | Phase 3J complete; model approval |
+| [#46 Context profiles/model](https://github.com/168aadc852/chinese-regional-localizer/issues/46) | Approved standalone model/store implemented in its focused PR; no selection/UI wiring | Phase 3J complete; protected-main review/CI/merge |
 | [#47 Context-aware selection](https://github.com/168aadc852/chinese-regional-localizer/issues/47) | Governed deterministic selection and inheritance | #46; approved behavior contract |
 | [#48 Alternatives/ambiguity](https://github.com/168aadc852/chinese-regional-localizer/issues/48) | Candidates, ties, spans and local alternative application | #47 |
 | [#49 My Terms](https://github.com/168aadc852/chinese-regional-localizer/issues/49) | Context/all-context preferences and private-dictionary migration | #46–#48 |

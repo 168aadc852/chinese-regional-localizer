@@ -1,15 +1,19 @@
 # Roadmap
 
-Updated: 2026-10-08. This consolidated direction supersedes the earlier roadmap.
+Updated: 2026-10-09. This consolidated direction supersedes the earlier roadmap.
 Planned capabilities must not be presented as implemented.
 
 ## Current priority and next phase
 
 Phase 3J / Issue #38 desktop settings persistence is complete.
 
-Next review `HANCONTEXT_ALPHA_MVP.md` and the proposed small issues:
+Issue #46's approved standalone profile/model/store foundation is implemented in its
+focused PR; protected-main review, CI and merge remain the closeout gate. It does
+not change localization or add desktop context controls. See `CONTEXT_PROFILES.md`.
 
-1. Context profile/data model, including inheritance and migration.
+Review `HANCONTEXT_ALPHA_MVP.md` and the scoped work packages:
+
+1. Context profile/data model foundation (#46); review its focused PR.
 2. Context-aware deterministic terminology selection.
 3. Alternative-term and ambiguity handling.
 4. Context-aware My Terms / remembered preferences.
@@ -18,7 +22,7 @@ Next review `HANCONTEXT_ALPHA_MVP.md` and the proposed small issues:
 
 Each requires separate approval and a focused PR. Preserve Runtime API v1 unless
 a specific issue approves a change; preserve licence gates and offline operation.
-Start with Issue #46 only after its schema/API/migration design is approved.
+Issue #47 needs separate terminology-selection design approval after #46 lands.
 
 ## Consolidated delivery direction
 
