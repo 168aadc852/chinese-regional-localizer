@@ -9,6 +9,8 @@ Updated: 2026-10-08
 Persistence covers database choices and the private-dictionary enabled state only.
 General Alpha preferences are not implemented. Runtime API v1 remains unchanged.
 
+Working product identity is HanContext; repository/application identifiers remain unchanged.
+
 The project currently has:
 - governed, licence-aware source ingestion;
 - a completed first-pass source whitelist with unresolved-rights sources locked to reference-only/non-ingest status;
@@ -26,13 +28,21 @@ The project currently has:
 - OpenCC remains a partial/reference implementation rather than full upstream runtime parity.
 - Desktop updates are manual only; retry/resume and production hosting are not implemented.
 - Release trust-root rotation/delegation, key-vault/HSM operations and installer signing are not implemented.
-- General Alpha preferences are not implemented; persistence covers database choices and private-dictionary enabled state only.
+- General Alpha preferences, context inheritance, context-sensitive My Terms, alternatives and modes are not implemented.
 - Production Windows/macOS installers and mobile packaging are not started.
 
 ## Likely next work
 
-1. Prepare the HanContext Alpha MVP specification and small, separately scoped issues; do not start Alpha implementation automatically.
-2. Track remaining release hosting, retry/resume, key operations and production packaging work separately.
+1. Review the HanContext Alpha MVP specification and separately approve the first scoped implementation issue.
+   Planning is in `docs/HANCONTEXT_ALPHA_MVP.md` and `docs/PRODUCT_REQUIREMENTS.md`.
+   Six unimplemented proposals are tracked in Issues #46–#51, with dependencies and separate approval gates.
+2. Start with Issue #46 (context profiles/model) only after its schema/API/migration design is approved.
+3. Track remaining release hosting, retry/resume, key operations and production packaging work separately.
+
+Planned order: Desktop Alpha → CLI → MCP Server → production Windows/macOS
+packaging/signing → editor/plugin integrations → optional AI assistance. Each client
+reuses the same Core / Runtime. Planning and issue creation do not authorize automatic
+implementation of the Alpha feature set.
 
 For detail, load only what the task needs:
 - history: `docs/history/PROJECT_HISTORY.md`

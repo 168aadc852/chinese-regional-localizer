@@ -1,5 +1,8 @@
 # Chinese Regional Localizer
 
+Working product identity: **HanContext — Chinese, localized with context. / 懂情境的中文地區化**.
+The repository name and existing application identifier are unchanged.
+
 Offline-first, open-source Chinese regional localization project for converting and localizing text across the Chinese Mainland (`zh-CN`), Hong Kong (`zh-HK`) and Taiwan (`zh-TW`).
 
 The project goes beyond Simplified/Traditional character conversion by combining deterministic script conversion, regional terminology, named-entity localization, user overrides, provenance, ambiguity review and updateable SQLite data packs.
@@ -121,6 +124,10 @@ Current-state detail belongs in `PROJECT_STATE.md`; historical detail belongs in
 
 The canonical editable requirements are in `docs/PRODUCT_REQUIREMENTS.md`.
 
+The proposed HanContext Alpha MVP is in `docs/HANCONTEXT_ALPHA_MVP.md`, with delivery order in
+`docs/ROADMAP.md`. Context profiles, context-sensitive My Terms, clickable alternatives,
+Alpha modes/UX and an MCP server remain planned, not implemented.
+
 A dated frozen backup is also kept at:
 
 - `docs/history/PRODUCT_REQUIREMENTS_BACKUP_2026-10-07.md`
@@ -137,9 +144,12 @@ Third-party data is **not** relicensed under the software licence. Each source k
 
 **Phase 3J / Issue #38** is complete with persisted non-secret desktop settings.
 
-Validated shared-database and optional user-dictionary choices now survive app
-restarts, preserving the Rust-only filesystem-path boundary, safe fallback behavior
-and Runtime API v1 compatibility.
+Validated shared-database and optional user-dictionary choices survive app restarts while
+preserving the Rust-only filesystem-path boundary, safe fallback behavior and Runtime API v1 compatibility.
 
-The next step is planning the HanContext Alpha MVP
-and its small reviewable issues. New Alpha features are not implemented here.
+The HanContext Alpha MVP specification and Issues #46–#51 are planning proposals only.
+Next review and separately approve the first implementation scope, starting with
+Issue #46 (context profiles/model), before any Alpha feature work begins. Suggested
+longer-term order: Desktop Alpha → CLI → MCP Server → production Windows/macOS
+packaging/signing → editor/plugin integrations → optional AI assistance. All clients
+reuse the same Core / Runtime.
