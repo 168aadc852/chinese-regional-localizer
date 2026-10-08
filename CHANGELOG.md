@@ -1,6 +1,6 @@
 # Changelog
 
-## 2026-10-08 — Phase 3J desktop settings persistence (pending PR merge)
+## 2026-10-08 — Phase 3J desktop settings persistence
 
 - Added Rust-only versioned non-secret settings under Tauri's per-user configuration directory.
 - Persisted validated shared/private database choices and private dictionary enabled state; added re-enable control without forgetting the selection.

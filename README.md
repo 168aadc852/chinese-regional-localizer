@@ -6,10 +6,10 @@ The project goes beyond Simplified/Traditional character conversion by combining
 
 ## Current state
 
-**Phase 3I desktop authenticated data-update UI is complete. Phase 0 source-whitelist review has a usable first-pass conclusion for all 24 machine source IDs.**
+**Phase 3J / Issue #38 desktop settings persistence is complete. Phase 0 source-whitelist review has a usable first-pass conclusion for all 24 machine source IDs.**
 
-Phase 3J / Issue #38 adds tested desktop settings persistence in this change;
-issue closure remains subject to PR review, CI and protected-main merge.
+Persistence covers database choices and the private-dictionary enabled state only.
+General Alpha preferences are not implemented. Runtime API v1 remains unchanged.
 
 Implemented foundations include:
 
@@ -57,7 +57,7 @@ Current desktop capabilities include:
 
 Current desktop limitations:
 
-- persisted settings cover database choices and dictionary enabled state only;
+- persisted settings cover database choices and private-dictionary enabled state only; general Alpha preferences are not implemented;
 - shared-data update checks are manual rather than background scheduled;
 - interrupted-download retry/resume and production hosting/CDN configuration are not complete;
 - production Windows/macOS installers and platform signing are not complete;
@@ -135,12 +135,11 @@ Third-party data is **not** relicensed under the software licence. Each source k
 
 ## Next planned work
 
-**Phase 3J / Issue #38** implements persisted non-secret desktop settings and awaits
-review/CI/merge before being treated as a closed phase.
+**Phase 3J / Issue #38** is complete with persisted non-secret desktop settings.
 
 Validated shared-database and optional user-dictionary choices now survive app
 restarts, preserving the Rust-only filesystem-path boundary, safe fallback behavior
 and Runtime API v1 compatibility.
 
-After this focused PR is opened, the next step is planning the HanContext Alpha MVP
+The next step is planning the HanContext Alpha MVP
 and its small reviewable issues. New Alpha features are not implemented here.
