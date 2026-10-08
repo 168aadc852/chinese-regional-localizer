@@ -1,12 +1,15 @@
 # Chinese Regional Localizer
 
-Offline-first, open-source Chinese regional localization project for converting and localizing text across Mainland China (`zh-CN`), Hong Kong (`zh-HK`) and Taiwan (`zh-TW`).
+Offline-first, open-source Chinese regional localization project for converting and localizing text across the Chinese Mainland (`zh-CN`), Hong Kong (`zh-HK`) and Taiwan (`zh-TW`).
 
 The project goes beyond Simplified/Traditional character conversion by combining deterministic script conversion, regional terminology, named-entity localization, user overrides, provenance, ambiguity review and updateable SQLite data packs.
 
 ## Current state
 
-**Phase 3I desktop authenticated data-update UI is complete. Phase 0 source-whitelist review has a usable first-pass conclusion for all 24 machine source IDs.**
+**Phase 3J / Issue #38 desktop settings persistence is complete. Phase 0 source-whitelist review has a usable first-pass conclusion for all 24 machine source IDs.**
+
+Persistence covers database choices and the private-dictionary enabled state only.
+General Alpha preferences are not implemented. Runtime API v1 remains unchanged.
 
 Implemented foundations include:
 
@@ -16,6 +19,7 @@ Implemented foundations include:
 - Rust shared core and versioned Runtime API v1 for supported CN/HK/TW routes;
 - private user-dictionary support and protected/user-preferred terms;
 - Tauri 2 desktop shell with Rust-managed validated database selection;
+- versioned non-secret desktop database preferences with safe restart validation and atomic saves;
 - full local database paths kept inside Rust rather than exposed to frontend JavaScript;
 - immutable versioned shared-data packages with staging, activation and rollback;
 - pinned Ed25519 signatures for release catalogs and package manifests;
@@ -46,13 +50,14 @@ Current desktop capabilities include:
 - text localization through Runtime API v1;
 - validated shared-database selection through a native chooser;
 - optional private user-dictionary selection/clearing;
+- persisted shared/private database choices and private dictionary enabled state;
 - structured database status without exposing full filesystem paths to JavaScript;
 - explicit authenticated shared-data update discovery and installation;
 - safe failure behavior where invalid downloads or packages do not replace the active database.
 
 Current desktop limitations:
 
-- database chooser preferences are session-only and do not yet survive restart;
+- persisted settings cover database choices and private-dictionary enabled state only; general Alpha preferences are not implemented;
 - shared-data update checks are manual rather than background scheduled;
 - interrupted-download retry/resume and production hosting/CDN configuration are not complete;
 - production Windows/macOS installers and platform signing are not complete;
@@ -130,8 +135,11 @@ Third-party data is **not** relicensed under the software licence. Each source k
 
 ## Next planned work
 
-The next tracked development phase is **Phase 3J / Issue #38: persisted non-secret desktop settings**.
+**Phase 3J / Issue #38** is complete with persisted non-secret desktop settings.
 
-The goal is to make validated shared-database and optional user-dictionary choices survive app restarts while preserving the existing Rust-only filesystem-path boundary, safe fallback behavior and Runtime API compatibility.
+Validated shared-database and optional user-dictionary choices now survive app
+restarts, preserving the Rust-only filesystem-path boundary, safe fallback behavior
+and Runtime API v1 compatibility.
 
-After that, likely work includes production update hosting/retry-resume behavior, release-key operations, desktop packaging/signing and wider source/domain coverage.
+The next step is planning the HanContext Alpha MVP
+and its small reviewable issues. New Alpha features are not implemented here.

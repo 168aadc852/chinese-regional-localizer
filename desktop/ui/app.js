@@ -14,6 +14,7 @@ const userDatabaseStatus = document.getElementById('userDatabaseStatus');
 const chooseSharedDatabase = document.getElementById('chooseSharedDatabase');
 const chooseUserDatabase = document.getElementById('chooseUserDatabase');
 const clearUserDatabase = document.getElementById('clearUserDatabase');
+const enableUserDatabase = document.getElementById('enableUserDatabase');
 const refreshDatabaseStatus = document.getElementById('refreshDatabaseStatus');
 const databaseMessage = document.getElementById('databaseMessage');
 const updateBadge = document.getElementById('updateBadge');
@@ -21,6 +22,7 @@ const updateStatusText = document.getElementById('updateStatusText');
 const checkDataUpdate = document.getElementById('checkDataUpdate');
 const installDataUpdate = document.getElementById('installDataUpdate');
 const updateMessage = document.getElementById('updateMessage');
+let lastDatabaseStatus = null;
 
 function invokeTauri() {
   const invoke = window.__TAURI__?.core?.invoke;
@@ -40,9 +42,10 @@ function setBusy(busy) {
 }
 
 function setSettingsBusy(busy) {
-  for (const button of [chooseSharedDatabase, chooseUserDatabase, clearUserDatabase, refreshDatabaseStatus]) {
+  for (const button of [chooseSharedDatabase, chooseUserDatabase, clearUserDatabase, enableUserDatabase, refreshDatabaseStatus]) {
     button.disabled = busy;
   }
+  if (!busy && lastDatabaseStatus) renderDatabaseStatus(lastDatabaseStatus);
 }
 
 function setUpdateBusy(busy) {
@@ -73,6 +76,7 @@ function text(value) {
 }
 
 function renderDatabaseStatus(status) {
+  lastDatabaseStatus = status;
   const sharedName = status?.shared_name || '未設定';
   sharedDatabaseStatus.textContent = status?.shared_ready
     ? `可用：${sharedName}`
@@ -85,13 +89,15 @@ function renderDatabaseStatus(status) {
     userDatabaseStatus.classList.remove('status-error');
     userDatabaseStatus.classList.add('status-ok');
     clearUserDatabase.disabled = true;
+    enableUserDatabase.disabled = true;
   } else {
     userDatabaseStatus.textContent = status?.user_ready
-      ? `已啟用：${status.user_name}`
+      ? `${status.user_enabled ? '已啟用' : '已停用'}：${status.user_name}`
       : `不可用：${status.user_name}${status?.user_message ? ` · ${status.user_message}` : ''}`;
     userDatabaseStatus.classList.toggle('status-ok', Boolean(status?.user_ready));
     userDatabaseStatus.classList.toggle('status-error', !status?.user_ready);
-    clearUserDatabase.disabled = false;
+    clearUserDatabase.disabled = !status.user_enabled;
+    enableUserDatabase.disabled = status.user_enabled || !status.user_ready;
   }
 }
 
@@ -125,6 +131,7 @@ async function loadDatabaseStatus() {
   try {
     const status = await invokeTauri()('database_status');
     renderDatabaseStatus(status);
+    showDatabaseMessage(status.settings_message, Boolean(status.settings_message));
   } catch (error) {
     showDatabaseMessage(typeof error === 'string' ? error : error?.message || String(error), true);
   } finally {
@@ -162,7 +169,7 @@ async function runDatabaseCommand(command, successMessage) {
   try {
     const status = await invokeTauri()(command);
     renderDatabaseStatus(status);
-    showDatabaseMessage(successMessage);
+    showDatabaseMessage(status.settings_message || successMessage, Boolean(status.settings_message));
   } catch (error) {
     showDatabaseMessage(typeof error === 'string' ? error : error?.message || String(error), true);
   } finally {
@@ -253,6 +260,7 @@ refreshDatabaseStatus.addEventListener('click', loadDatabaseStatus);
 chooseSharedDatabase.addEventListener('click', () => runDatabaseCommand('choose_shared_database', 'Shared database 設定已更新。'));
 chooseUserDatabase.addEventListener('click', () => runDatabaseCommand('choose_user_database', 'User dictionary 設定已更新。'));
 clearUserDatabase.addEventListener('click', () => runDatabaseCommand('clear_user_database', 'User dictionary 已停用。'));
+enableUserDatabase.addEventListener('click', () => runDatabaseCommand('enable_user_database', 'User dictionary 已啟用。'));
 checkDataUpdate.addEventListener('click', () => runUpdateCommand('check_data_update'));
 installDataUpdate.addEventListener('click', () => runUpdateCommand('install_data_update'));
 

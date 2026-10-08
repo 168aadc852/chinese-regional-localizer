@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-10-08 — Phase 3J desktop settings persistence
+
+- Added Rust-only versioned non-secret settings under Tauri's per-user configuration directory.
+- Persisted validated shared/private database choices and private dictionary enabled state; added re-enable control without forgetting the selection.
+- Added bounded startup parsing, independent read-only compatibility/integrity validation and safe environment/demo fallbacks.
+- Preserved unsupported versions/fields for explicit future migration rather than silently downgrading or overwriting them.
+- Added synced temporary writes and atomic replacement before changing the working session; failed saves leave it unchanged.
+- Persisted authenticated update database activation through the same acceptance boundary, without changing the update trust pipeline.
+- Added restart, corruption, compatibility, future-version, failed-save, concurrency, path-privacy and Runtime API v1 toggle regressions.
+- Kept Runtime API v1, localization precedence, user-term schema and future Alpha contexts/My Terms outside this change.
+
 ## 2026-10-07 — Phase 3I desktop authenticated data-update UI
 
 - Added narrow Tauri commands for update status, explicit authenticated catalog checks and explicit package installation.

@@ -10,13 +10,24 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use std::sync::RwLock;
 use std::time::{SystemTime, UNIX_EPOCH};
-use tauri::{AppHandle, State};
+use tauri::{AppHandle, Manager, State};
 use tauri_plugin_dialog::DialogExt;
+
+mod settings;
+use settings::SettingsStore;
 
 #[derive(Debug, Clone)]
 struct DatabaseConfig {
     shared_db: PathBuf,
     user_db: Option<PathBuf>,
+    user_enabled: bool,
+    settings_message: Option<String>,
+}
+
+impl DatabaseConfig {
+    fn active_user_db(&self) -> Option<&Path> {
+        self.user_db.as_deref().filter(|_| self.user_enabled)
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -36,6 +47,7 @@ struct UpdateOffer {
 #[derive(Debug)]
 struct AppState {
     config: RwLock<DatabaseConfig>,
+    settings: SettingsStore,
     update_offer: RwLock<Option<UpdateOffer>>,
 }
 
@@ -47,6 +59,8 @@ struct DatabaseStatus {
     user_name: Option<String>,
     user_ready: bool,
     user_message: Option<String>,
+    user_enabled: bool,
+    settings_message: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -71,12 +85,27 @@ fn default_shared_db() -> PathBuf {
 
 fn load_config() -> DatabaseConfig {
     let shared_db = env::var_os("CRL_SHARED_DB")
-        .map(PathBuf::from)
+        .map(|path| absolute_development_path(PathBuf::from(path)))
         .unwrap_or_else(default_shared_db);
     let user_db = env::var_os("CRL_USER_DB")
         .filter(|value| !value.is_empty())
-        .map(PathBuf::from);
-    DatabaseConfig { shared_db, user_db }
+        .map(|path| absolute_development_path(PathBuf::from(path)));
+    DatabaseConfig {
+        shared_db,
+        user_enabled: user_db.is_some(),
+        user_db,
+        settings_message: None,
+    }
+}
+
+fn absolute_development_path(path: PathBuf) -> PathBuf {
+    if path.is_absolute() {
+        path
+    } else {
+        env::current_dir()
+            .unwrap_or_else(|_| PathBuf::from(env!("CARGO_MANIFEST_DIR")))
+            .join(path)
+    }
 }
 
 fn load_update_config() -> Result<Option<UpdateRuntimeConfig>, String> {
@@ -88,7 +117,7 @@ fn load_update_config() -> Result<Option<UpdateRuntimeConfig>, String> {
         .map(PathBuf::from);
     let store_root = env::var_os("CRL_UPDATE_STORE")
         .filter(|v| !v.is_empty())
-        .map(PathBuf::from);
+        .map(|path| absolute_development_path(PathBuf::from(path)));
     let package_id = env::var("CRL_UPDATE_PACKAGE_ID")
         .ok()
         .filter(|v| !v.is_empty());
@@ -120,12 +149,32 @@ fn display_name(path: &Path) -> String {
         .to_owned()
 }
 
-fn has_table(conn: &Connection, table: &str) -> rusqlite::Result<bool> {
-    conn.query_row(
-        "SELECT EXISTS(SELECT 1 FROM sqlite_master WHERE type='table' AND name=?1)",
-        [table],
-        |row| row.get(0),
-    )
+fn validate_columns(conn: &Connection, table: &str, columns: &str) -> Result<(), String> {
+    let exists: bool = conn
+        .query_row(
+            "SELECT EXISTS(SELECT 1 FROM sqlite_master WHERE type='table' AND name=?1)",
+            [table],
+            |row| row.get(0),
+        )
+        .map_err(|_| "無法檢查 database schema。".to_string())?;
+    if !exists {
+        return Err(format!("所選檔案不是相容的 database：缺少 {table} table。"));
+    }
+    // Both identifiers are compile-time lists below, never frontend input.
+    conn.prepare(&format!("SELECT {columns} FROM {table} LIMIT 0"))
+        .map(|_| ())
+        .map_err(|_| format!("所選檔案不是相容的 database：{table} schema 不相容。"))
+}
+
+fn validate_integrity(conn: &Connection) -> Result<(), String> {
+    let result: String = conn
+        .query_row("PRAGMA quick_check", [], |row| row.get(0))
+        .map_err(|_| "無法檢查 SQLite database 完整性。".to_string())?;
+    if result == "ok" {
+        Ok(())
+    } else {
+        Err("SQLite database 完整性檢查失敗。".into())
+    }
 }
 
 fn validate_shared_db(path: &Path) -> Result<(), String> {
@@ -134,18 +183,16 @@ fn validate_shared_db(path: &Path) -> Result<(), String> {
     }
     let conn = Connection::open_with_flags(path, rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY)
         .map_err(|_| "無法以 SQLite database 開啟所選檔案。".to_string())?;
-    for table in [
-        "concepts",
-        "localized_names",
-        "term_rules",
-        "source_versions",
+    validate_integrity(&conn)?;
+    for (table, columns) in [
+        ("concepts", "concept_id, concept_type"),
+        ("localized_names", "localized_name_id, concept_id, locale, text, name_type, domain, is_preferred, confidence"),
+        ("term_rules", "rule_id, rule_type, source_text, target_text, source_locale, target_locale, domain, context_constraint, priority, source_id, source_version_id, upstream_record_id, upstream_url, confidence, active"),
+        ("source_versions", "source_version_id, is_current, version_label, revision_id, checksum_sha256"),
+        ("name_evidence", "evidence_id, localized_name_id, source_id, source_version_id, upstream_record_id, upstream_url, upstream_revision, evidence_type, confidence, retrieved_at"),
+        ("external_ids", "concept_id, namespace, external_value"),
     ] {
-        if !has_table(&conn, table).map_err(|_| "無法檢查 shared database schema。".to_string())?
-        {
-            return Err(format!(
-                "所選檔案不是相容的 shared database：缺少 {table} table。"
-            ));
-        }
+        validate_columns(&conn, table, columns)?;
     }
     Ok(())
 }
@@ -156,12 +203,8 @@ fn validate_user_db(path: &Path) -> Result<(), String> {
     }
     let conn = Connection::open_with_flags(path, rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY)
         .map_err(|_| "無法以 SQLite database 開啟所選 user dictionary。".to_string())?;
-    if !has_table(&conn, "user_terms")
-        .map_err(|_| "無法檢查 user dictionary schema。".to_string())?
-    {
-        return Err("所選檔案不是相容的 user dictionary：缺少 user_terms table。".into());
-    }
-    Ok(())
+    validate_integrity(&conn)?;
+    validate_columns(&conn, "user_terms", "user_term_id, kind, source_text, replacement, source_locale, target_locale, priority, enabled, note")
 }
 
 fn status_for(config: &DatabaseConfig) -> DatabaseStatus {
@@ -184,7 +227,62 @@ fn status_for(config: &DatabaseConfig) -> DatabaseStatus {
         user_name,
         user_ready,
         user_message,
+        user_enabled: config.user_enabled,
+        settings_message: config.settings_message.clone(),
     }
+}
+
+// Serialize mutations under the same lock, and publish only after durable save.
+// A failed save never replaces a working session configuration.
+fn change_config(
+    state: &AppState,
+    change: impl FnOnce(&mut DatabaseConfig) -> Result<(), String>,
+) -> Result<DatabaseStatus, String> {
+    let mut current = state
+        .config
+        .write()
+        .map_err(|_| "Database configuration state is unavailable.".to_string())?;
+    let mut candidate = current.clone();
+    change(&mut candidate)?;
+    candidate.settings_message = None;
+    state.settings.save(&candidate)?;
+    *current = candidate;
+    Ok(status_for(&current))
+}
+
+fn accept_shared_database(state: &AppState, path: PathBuf) -> Result<DatabaseStatus, String> {
+    change_config(state, |config| {
+        validate_shared_db(&path)?;
+        config.shared_db = fs::canonicalize(&path)
+            .map_err(|_| "無法確認所選 database 的本機位置。".to_string())?;
+        Ok(())
+    })
+}
+
+fn accept_user_database(state: &AppState, path: PathBuf) -> Result<DatabaseStatus, String> {
+    change_config(state, |config| {
+        validate_user_db(&path)?;
+        config.user_db = Some(
+            fs::canonicalize(&path)
+                .map_err(|_| "無法確認所選 user dictionary 的本機位置。".to_string())?,
+        );
+        config.user_enabled = true;
+        Ok(())
+    })
+}
+
+fn set_user_enabled(state: &AppState, enabled: bool) -> Result<DatabaseStatus, String> {
+    change_config(state, |config| {
+        if enabled {
+            let path = config
+                .user_db
+                .as_deref()
+                .ok_or("請先選擇 user dictionary。")?;
+            validate_user_db(path)?;
+        }
+        config.user_enabled = enabled;
+        Ok(())
+    })
 }
 
 fn current_config(state: &State<'_, AppState>) -> Result<DatabaseConfig, String> {
@@ -352,14 +450,7 @@ async fn install_data_update(state: State<'_, AppState>) -> Result<UpdateStatus,
     .await
     .map_err(|error| format!("更新安裝工作失敗：{error}"))??;
 
-    validate_shared_db(&active_db)?;
-    {
-        let mut database = state
-            .config
-            .write()
-            .map_err(|_| "Database configuration state is unavailable.".to_string())?;
-        database.shared_db = active_db;
-    }
+    accept_shared_database(&state, active_db)?;
     {
         let mut pending = state
             .update_offer
@@ -388,15 +479,7 @@ async fn choose_shared_database(
     let path = selected
         .into_path()
         .map_err(|_| "所選項目不是可用的本機檔案。".to_string())?;
-    validate_shared_db(&path)?;
-    {
-        let mut config = state
-            .config
-            .write()
-            .map_err(|_| "Database configuration state is unavailable.".to_string())?;
-        config.shared_db = path;
-    }
-    database_status(state)
+    accept_shared_database(&state, path)
 }
 
 #[tauri::command]
@@ -415,27 +498,17 @@ async fn choose_user_database(
     let path = selected
         .into_path()
         .map_err(|_| "所選項目不是可用的本機檔案。".to_string())?;
-    validate_user_db(&path)?;
-    {
-        let mut config = state
-            .config
-            .write()
-            .map_err(|_| "Database configuration state is unavailable.".to_string())?;
-        config.user_db = Some(path);
-    }
-    database_status(state)
+    accept_user_database(&state, path)
 }
 
 #[tauri::command]
 fn clear_user_database(state: State<'_, AppState>) -> Result<DatabaseStatus, String> {
-    {
-        let mut config = state
-            .config
-            .write()
-            .map_err(|_| "Database configuration state is unavailable.".to_string())?;
-        config.user_db = None;
-    }
-    database_status(state)
+    set_user_enabled(&state, false)
+}
+
+#[tauri::command]
+fn enable_user_database(state: State<'_, AppState>) -> Result<DatabaseStatus, String> {
+    set_user_enabled(&state, true)
 }
 
 #[tauri::command]
@@ -445,11 +518,11 @@ async fn localize_text(
 ) -> Result<RuntimeResponse, String> {
     let config = current_config(&state)?;
     validate_shared_db(&config.shared_db)?;
-    if let Some(path) = &config.user_db {
+    let user_db = config.active_user_db().map(Path::to_path_buf);
+    if let Some(path) = &user_db {
         validate_user_db(path)?;
     }
     let shared_db = config.shared_db;
-    let user_db = config.user_db;
 
     tauri::async_runtime::spawn_blocking(move || {
         Runtime::new(&shared_db, user_db.as_ref())
@@ -464,9 +537,20 @@ async fn localize_text(
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
-        .manage(AppState {
-            config: RwLock::new(load_config()),
-            update_offer: RwLock::new(None),
+        .setup(|app| {
+            let path = app
+                .path()
+                .app_config_dir()
+                .ok()
+                .map(|dir| dir.join("settings.json"));
+            let mut settings = SettingsStore::new(path);
+            let config = settings.restore(load_config());
+            app.manage(AppState {
+                config: RwLock::new(config),
+                settings,
+                update_offer: RwLock::new(None),
+            });
+            Ok(())
         })
         .invoke_handler(tauri::generate_handler![
             localize_text,
@@ -476,7 +560,8 @@ pub fn run() {
             install_data_update,
             choose_shared_database,
             choose_user_database,
-            clear_user_database
+            clear_user_database,
+            enable_user_database
         ])
         .run(tauri::generate_context!())
         .expect("error while running Chinese Regional Localizer desktop app");
@@ -489,15 +574,13 @@ mod tests {
 
     fn create_shared_db(path: &Path) {
         let conn = Connection::open(path).expect("create shared db");
-        conn.execute_batch(
-            "CREATE TABLE concepts(id INTEGER);\n             CREATE TABLE localized_names(id INTEGER);\n             CREATE TABLE term_rules(id INTEGER);\n             CREATE TABLE source_versions(id INTEGER);",
-        )
-        .expect("create schema");
+        conn.execute_batch(include_str!("../../../schema/sqlite-v0.2.sql"))
+            .expect("create schema");
     }
 
     fn create_user_db(path: &Path) {
         let conn = Connection::open(path).expect("create user db");
-        conn.execute_batch("CREATE TABLE user_terms(id INTEGER);")
+        conn.execute_batch(include_str!("../../../schema/user-dictionary-v0.1.sql"))
             .expect("create user schema");
     }
 
@@ -539,6 +622,8 @@ mod tests {
         let status = status_for(&DatabaseConfig {
             shared_db: shared,
             user_db: None,
+            user_enabled: false,
+            settings_message: None,
         });
         assert_eq!(status.shared_name, "shared.sqlite");
         assert!(status.shared_ready);
