@@ -11,7 +11,7 @@ The project goes beyond Simplified/Traditional character conversion by combining
 
 **Phase 3J / Issue #38 desktop settings persistence is complete. Phase 0 source-whitelist review has a usable first-pass conclusion for all 24 machine source IDs.**
 
-Persistence covers database choices and the private-dictionary enabled state only.
+Desktop settings persistence covers database choices and the private-dictionary enabled state only.
 General Alpha preferences are not implemented. Runtime API v1 remains unchanged.
 
 Implemented foundations include:
@@ -21,6 +21,7 @@ Implemented foundations include:
 - deterministic Python reference localization engine;
 - Rust shared core and versioned Runtime API v1 for supported CN/HK/TW routes;
 - private user-dictionary support and protected/user-preferred terms;
+- Rust usage-context profile foundation: seven built-ins, validated single-parent inheritance and a separate versioned local store (not yet connected to localization or desktop UI);
 - Tauri 2 desktop shell with Rust-managed validated database selection;
 - versioned non-secret desktop database preferences with safe restart validation and atomic saves;
 - full local database paths kept inside Rust rather than exposed to frontend JavaScript;
@@ -125,8 +126,10 @@ Current-state detail belongs in `PROJECT_STATE.md`; historical detail belongs in
 The canonical editable requirements are in `docs/PRODUCT_REQUIREMENTS.md`.
 
 The proposed HanContext Alpha MVP is in `docs/HANCONTEXT_ALPHA_MVP.md`, with delivery order in
-`docs/ROADMAP.md`. Context profiles, context-sensitive My Terms, clickable alternatives,
-Alpha modes/UX and an MCP server remain planned, not implemented.
+`docs/ROADMAP.md`. The approved Issue #46 profile foundation is described in
+[Usage Context Profiles](docs/CONTEXT_PROFILES.md). Context-aware terminology selection,
+context-sensitive My Terms, clickable alternatives, Alpha modes/UX and an MCP server
+remain planned, not implemented.
 
 A dated frozen backup is also kept at:
 
@@ -147,9 +150,9 @@ Third-party data is **not** relicensed under the software licence. Each source k
 Validated shared-database and optional user-dictionary choices survive app restarts while
 preserving the Rust-only filesystem-path boundary, safe fallback behavior and Runtime API v1 compatibility.
 
-The HanContext Alpha MVP specification and Issues #46–#51 are planning proposals only.
-Next review and separately approve the first implementation scope, starting with
-Issue #46 (context profiles/model), before any Alpha feature work begins. Suggested
+Issue #46 implements only the approved context-profile foundation. After its PR is
+reviewed and merged, separately approve Issue #47's terminology-selection design;
+Issues #47–#51 remain planning proposals, not implemented features. Suggested
 longer-term order: Desktop Alpha → CLI → MCP Server → production Windows/macOS
 packaging/signing → editor/plugin integrations → optional AI assistance. All clients
 reuse the same Core / Runtime.

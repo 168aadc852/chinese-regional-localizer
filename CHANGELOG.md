@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-10-09 — Issue #46 usage-context profile foundation
+
+- Added a standalone shared-Rust context-profile model with seven stable built-in IDs and human-readable names.
+- Added custom profiles defaulting to General, single-parent chain resolution in specific-to-general order, and explicit disabled-ancestor unavailability.
+- Rejected duplicate/reserved IDs, self-parenting, cycles, missing parents, invalid fields and incomplete documents before accepting a snapshot.
+- Added an independent bounded JSON v1 store with explicit version dispatch, deterministic v1 round trips and synced atomic replacement; invalid/unsupported existing files are preserved.
+- Added focused model/storage regressions and documented the approved Issue #46 boundary.
+- Left Runtime API v1, localization selection, desktop settings v1, private dictionary schemas and UI unchanged. Context-aware terminology, My Terms and later Alpha features remain separate issues.
+
 ## 2026-10-08 — Phase 3J desktop settings persistence
 
 - Added Rust-only versioned non-secret settings under Tauri's per-user configuration directory.
