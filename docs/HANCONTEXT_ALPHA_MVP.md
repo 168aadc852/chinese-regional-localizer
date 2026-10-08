@@ -8,8 +8,8 @@ Use **Chinese Mainland**, Hong Kong and Taiwan in future product copy.
 ## Goal and entry gate
 
 Prove a usable, explainable, reproducible plain-text workflow using the shared
-deterministic runtime. Phase 3J / Issue #38 is complete. Keep every major Alpha
-feature in a separate approved, tested PR; split packages further if needed.
+deterministic runtime. Phase 3J / Issue #38 is complete and closed. Keep every major
+Alpha feature in a separate approved, tested PR; split packages further if needed.
 
 Current routes: `zh-CN → zh-HK/zh-TW` and `zh-Hant → zh-HK/zh-TW`. Source-region
 labels must map honestly to supported routes. Do not imply all regional pairs or
