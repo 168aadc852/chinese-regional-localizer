@@ -9,10 +9,10 @@ The project goes beyond Simplified/Traditional character conversion by combining
 
 ## Current state
 
-**Phase 3I desktop authenticated data-update UI is complete. Phase 0 source-whitelist review has a usable first-pass conclusion for all 24 machine source IDs.**
+**Phase 3J / Issue #38 desktop settings persistence is complete. Phase 0 source-whitelist review has a usable first-pass conclusion for all 24 machine source IDs.**
 
-Phase 3J / Issue #38 adds tested desktop settings persistence in this change;
-issue closure remains subject to PR review, CI and protected-main merge.
+Persistence covers database choices and the private-dictionary enabled state only.
+General Alpha preferences are not implemented. Runtime API v1 remains unchanged.
 
 Implemented foundations include:
 
@@ -60,7 +60,7 @@ Current desktop capabilities include:
 
 Current desktop limitations:
 
-- persisted settings cover database choices and dictionary enabled state only;
+- persisted settings cover database choices and private-dictionary enabled state only; general Alpha preferences are not implemented;
 - shared-data update checks are manual rather than background scheduled;
 - interrupted-download retry/resume and production hosting/CDN configuration are not complete;
 - production Windows/macOS installers and platform signing are not complete;
@@ -124,7 +124,7 @@ Current-state detail belongs in `PROJECT_STATE.md`; historical detail belongs in
 
 The canonical editable requirements are in `docs/PRODUCT_REQUIREMENTS.md`.
 
-The proposed next phase is in `docs/HANCONTEXT_ALPHA_MVP.md`, with delivery order in
+The proposed HanContext Alpha MVP is in `docs/HANCONTEXT_ALPHA_MVP.md`, with delivery order in
 `docs/ROADMAP.md`. Context profiles, context-sensitive My Terms, clickable alternatives,
 Alpha modes/UX and an MCP server remain planned, not implemented.
 
@@ -142,15 +142,14 @@ Third-party data is **not** relicensed under the software licence. Each source k
 
 ## Next planned work
 
-**Phase 3J / Issue #38** implements persisted non-secret desktop settings and awaits
-review/CI/merge before being treated as a closed phase.
+**Phase 3J / Issue #38** is complete with persisted non-secret desktop settings.
 
-Validated shared-database and optional user-dictionary choices now survive app
-restarts, preserving the Rust-only filesystem-path boundary, safe fallback behavior
-and Runtime API v1 compatibility.
+Validated shared-database and optional user-dictionary choices survive app restarts while
+preserving the Rust-only filesystem-path boundary, safe fallback behavior and Runtime API v1 compatibility.
 
-The focused implementation is in [PR #45](https://github.com/168aadc852/chinese-regional-localizer/pull/45).
-Next review the Alpha MVP specification and small issues, then separately approve
-feature PRs. Suggested order: Desktop Alpha → CLI → MCP Server → production
-Windows/macOS packaging/signing → editor/plugin integrations → optional AI assistance.
-All clients reuse the same Core / Runtime.
+The HanContext Alpha MVP specification and Issues #46–#51 are planning proposals only.
+Next review and separately approve the first implementation scope, starting with
+Issue #46 (context profiles/model), before any Alpha feature work begins. Suggested
+longer-term order: Desktop Alpha → CLI → MCP Server → production Windows/macOS
+packaging/signing → editor/plugin integrations → optional AI assistance. All clients
+reuse the same Core / Runtime.

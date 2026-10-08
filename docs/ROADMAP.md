@@ -5,9 +5,7 @@ Planned capabilities must not be presented as implemented.
 
 ## Current priority and next phase
 
-Finish Phase 3J / Issue #38: safe desktop settings persistence only.
-[PR #45](https://github.com/168aadc852/chinese-regional-localizer/pull/45) contains the
-implementation and awaits review/CI/protected-main merge. Add no Alpha features to it.
+Phase 3J / Issue #38 desktop settings persistence is complete.
 
 Next review `HANCONTEXT_ALPHA_MVP.md` and the proposed small issues:
 
@@ -20,6 +18,7 @@ Next review `HANCONTEXT_ALPHA_MVP.md` and the proposed small issues:
 
 Each requires separate approval and a focused PR. Preserve Runtime API v1 unless
 a specific issue approves a change; preserve licence gates and offline operation.
+Start with Issue #46 only after its schema/API/migration design is approved.
 
 ## Consolidated delivery direction
 
@@ -40,8 +39,9 @@ in future copy. Precise implemented status is in `../PROJECT_STATE.md` and `../C
 
 Phase 0 has a first-pass source-whitelist conclusion with unresolved rights kept
 non-ingest. Phases 1–2 built the SQLite proof of concept, Python reference engine,
-hardening, private user control and evaluation. Phases 3A–3I added Rust/runtime parity,
+hardening, private user control and evaluation. Phases 3A–3J added Rust/runtime parity,
 the minimal Tauri desktop, validated database selection, immutable packages/rollback,
-signing, authenticated network updates and manual desktop update controls.
-OpenCC remains partial/reference. Detailed phase history belongs in `../CHANGELOG.md`
-and `history/PROJECT_HISTORY.md`, rather than implying every older roadmap item shipped.
+signing, authenticated network updates, manual desktop update controls and safe
+versioned desktop settings persistence. OpenCC remains partial/reference. Detailed
+phase history belongs in `../CHANGELOG.md` and `history/PROJECT_HISTORY.md`, rather
+than implying every older roadmap item shipped.

@@ -8,9 +8,8 @@ Use **Chinese Mainland**, Hong Kong and Taiwan in future product copy.
 ## Goal and entry gate
 
 Prove a usable, explainable, reproducible plain-text workflow using the shared
-deterministic runtime. Finish/review Phase 3J / Issue #38 first
-([PR #45](https://github.com/168aadc852/chinese-regional-localizer/pull/45)). Keep every
-major Alpha feature in a separate approved, tested PR; split packages further if needed.
+deterministic runtime. Phase 3J / Issue #38 is complete. Keep every major Alpha
+feature in a separate approved, tested PR; split packages further if needed.
 
 Current routes: `zh-CN → zh-HK/zh-TW` and `zh-Hant → zh-HK/zh-TW`. Source-region
 labels must map honestly to supported routes. Do not imply all regional pairs or
@@ -68,7 +67,7 @@ time only / Remember for this context / Remember for all contexts.
 
 | Package | Scope | Dependencies |
 | --- | --- | --- |
-| [#46 Context profiles/model](https://github.com/168aadc852/chinese-regional-localizer/issues/46) | Versioned identity, inheritance and migration design | Phase 3J reviewed; model approval |
+| [#46 Context profiles/model](https://github.com/168aadc852/chinese-regional-localizer/issues/46) | Versioned identity, inheritance and migration design | Phase 3J complete; model approval |
 | [#47 Context-aware selection](https://github.com/168aadc852/chinese-regional-localizer/issues/47) | Governed deterministic selection and inheritance | #46; approved behavior contract |
 | [#48 Alternatives/ambiguity](https://github.com/168aadc852/chinese-regional-localizer/issues/48) | Candidates, ties, spans and local alternative application | #47 |
 | [#49 My Terms](https://github.com/168aadc852/chinese-regional-localizer/issues/49) | Context/all-context preferences and private-dictionary migration | #46–#48 |
@@ -97,6 +96,6 @@ same Core / Runtime; cross-client parity tests are required when clients are add
 Future MCP capabilities may include localization, terminology, alternatives and explanations.
 
 No repository rename, production signing, background scheduling, broad data ingestion,
-mobile UI, file-format pipeline or AI implementation belongs in Phase 3J or this
-planning change. Release hosting/retry-resume/key operations remain separate follow-ups
-and may become prerequisites for later distribution.
+mobile UI, file-format pipeline or AI implementation belongs in this planning change.
+Release hosting/retry-resume/key operations remain separate follow-ups and may become
+prerequisites for later distribution.

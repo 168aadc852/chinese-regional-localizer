@@ -41,8 +41,9 @@ The tool should convert text while distinguishing several classes of change:
 
 ## Next development gate
 
-Finish the focused Phase 3J settings-persistence PR first. The consolidated direction
-is in `PRODUCT_REQUIREMENTS.md`; `HANCONTEXT_ALPHA_MVP.md` scopes proposed Alpha work.
-These describe future capabilities, not implemented features. Desktop, the future
-product CLI and MCP server must reuse the same Core / Runtime. No repository rename
-or Alpha implementation is part of this planning update.
+Phase 3J / Issue #38 settings persistence is complete. The consolidated direction is
+in `PRODUCT_REQUIREMENTS.md`; `HANCONTEXT_ALPHA_MVP.md` scopes proposed Alpha work.
+These describe future capabilities, not implemented features. Next review and separately
+approve the first scoped Alpha issue, beginning with #46. Desktop, the future product
+CLI and MCP server must reuse the same Core / Runtime. No repository rename or Alpha
+implementation is part of this planning update.

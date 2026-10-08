@@ -8,10 +8,8 @@ for the Chinese Mainland, Hong Kong and Taiwan, going beyond character conversio
 Use **Chinese Mainland** in future UI, documentation, issues and product copy.
 The repository name and application identifier remain unchanged.
 
-First finish Phase 3J / Issue #38 ([PR #45](https://github.com/168aadc852/chinese-regional-localizer/pull/45),
-pending review/CI/merge) as scoped; no Alpha feature belongs in that PR.
-Next review [the Alpha MVP specification](HANCONTEXT_ALPHA_MVP.md) and its small issues.
-Planning/issue creation is not blanket approval to implement features.
+Phase 3J / Issue #38 is complete. Next review [the Alpha MVP specification](HANCONTEXT_ALPHA_MVP.md)
+and its small issues. Planning/issue creation is not blanket approval to implement features.
 Implemented capabilities/routes are recorded in `../README.md` and `../PROJECT_STATE.md`;
 these requirements describe intended behavior.
 
