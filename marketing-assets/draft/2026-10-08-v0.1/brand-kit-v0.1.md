@@ -104,4 +104,4 @@ Avoid exposing raw implementation concepts such as confidence scores, rule IDs, 
 
 ## Asset note
 
-`hancontext-brand-kit-v0.1.jpg` is a compressed visual reference derived from the exploratory brand board created on 2026-10-08. It is included for direction-setting only and is not a final logo or production design asset.
+`hancontext-brand-kit-v0.1.png` is the original, unchanged PNG of the exploratory brand board created on 2026-10-08 (1536×1024; approximately 1.8 MB). It is included for direction-setting only and is not a final logo or production design asset.

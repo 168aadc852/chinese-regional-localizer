@@ -18,7 +18,7 @@ This folder stores early HanContext branding and marketing concepts for review. 
 
 - `brand-copy-v0.1.md` — draft brand and marketing copy.
 - `brand-kit-v0.1.md` — draft identity, tone, palette and usage guidance.
-- `hancontext-brand-kit-v0.1.jpg` — visual brand-board draft.
+- `hancontext-brand-kit-v0.1.png` — visual brand-board draft, preserved unchanged from the original PNG (1536×1024; approximately 1.8 MB).
 
 ## Terminology note
 
