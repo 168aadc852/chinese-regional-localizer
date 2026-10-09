@@ -28,6 +28,7 @@ class UserControlledLocalizer:
         route = ROUTES.get((source_locale, target_locale))
         if route is None:
             raise UnsupportedRouteError(f"Unsupported route: {source_locale} -> {target_locale}")
+        self.shared_engine.validate_usage_context(context)
 
         terms = self.user_dictionary.candidates(source_locale, target_locale)
         by_surface = group_by_surface(terms)

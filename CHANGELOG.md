@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-10-09 — Issue #47 deterministic context-aware terminology selection
+
+- Added optional `context.usage_context_id` using a validated immutable #46 profile snapshot, with built-in defaults and clear errors for unknown/disabled chains.
+- Extended shared regional terminology ranking: longest eligible phrase, exact context, inherited parents, General only when inherited, then unscoped fallback; numeric priority applies within the winning level.
+- Kept equal-level conflicting winners unresolved with protected original stage text and review-needed; retained actual winning rule provenance and optional context-selection explanations.
+- Reused existing rule JSON constraints without schema migrations; legacy `domain`, spatial constraints, locale isolation, entities and private user protections remain intact.
+- Preserved context-neutral script conversion and existing staged routes. Requests without a usage-context ID keep legacy behavior.
+- Added a Python reference profile adapter, 50 project-authored shared cases, live Python/Rust parity and malformed-condition/API compatibility regressions.
+- Kept Runtime API v1's outer contract, desktop/settings code, #46 storage, private dictionaries, ingestion/licence gates and later #48–#51 work unchanged.
+
 ## 2026-10-09 — Issue #46 usage-context profile foundation
 
 - Added a standalone shared-Rust context-profile model with seven stable built-in IDs and human-readable names.

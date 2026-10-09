@@ -11,9 +11,10 @@ General Alpha preferences are not implemented. Runtime API v1 remains unchanged.
 
 Working product identity is HanContext; repository/application identifiers remain unchanged.
 
-Issue #46's approved context-profile foundation is implemented in this PR; issue
-closeout remains subject to protected-main review, CI and merge. It adds a separate
-Rust model/store, not context-aware localization or desktop context controls.
+Issue #46's approved context-profile foundation is merged. Issue #47's approved
+context-aware regional terminology selection is implemented in this focused PR;
+closeout remains subject to protected-main CI, review and merge. It preserves
+Runtime API v1 and adds no desktop context controls or context-sensitive My Terms.
 
 The project currently has:
 - governed, licence-aware source ingestion;
@@ -22,6 +23,7 @@ The project currently has:
 - Python reference localization plus Rust shared-core/runtime support for CN/HK/TW routes;
 - private user-dictionary support;
 - versioned usage-context profiles with seven built-ins, validated single-parent inheritance and independent local storage;
+- explicit context-aware shared terminology selection with Python/Rust parity, inherited fallback and no-guess ties;
 - Tauri 2 desktop UI with validated database selection;
 - versioned non-secret desktop database preferences, atomic saving, safe restart fallback and persisted dictionary enabled state;
 - signed, authenticated shared-data update discovery/install/rollback;
@@ -33,14 +35,14 @@ The project currently has:
 - OpenCC remains a partial/reference implementation rather than full upstream runtime parity.
 - Desktop updates are manual only; retry/resume and production hosting are not implemented.
 - Release trust-root rotation/delegation, key-vault/HSM operations and installer signing are not implemented.
-- General Alpha preferences, context-aware terminology selection, desktop context controls, context-sensitive My Terms, alternatives and modes are not implemented.
+- General Alpha preferences, desktop context controls, context-sensitive My Terms, alternatives and modes are not implemented.
 - Production Windows/macOS installers and mobile packaging are not started.
 
 ## Likely next work
 
-1. Review and merge the focused Issue #46 foundation PR; details are in `docs/CONTEXT_PROFILES.md`.
-2. Separately approve Issue #47's terminology-selection behavior before wiring context chains into localization.
-   Remaining Alpha proposals (#47–#51) retain their dependencies and approval gates in
+1. Review and merge the focused Issue #47 selection PR; details are in `docs/CONTEXT_SELECTION.md`.
+2. Separately approve the next Alpha package before implementation.
+   Remaining Alpha proposals (#48–#51) retain their dependencies and approval gates in
    `docs/HANCONTEXT_ALPHA_MVP.md`; none are implemented automatically.
 3. Track remaining release hosting, retry/resume, key operations and production packaging work separately.
 

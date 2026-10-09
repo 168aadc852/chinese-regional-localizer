@@ -1,3 +1,7 @@
+use crate::context_profiles::ContextProfiles;
+use crate::usage_context::{
+    resolve_usage_context, rule_context_level, selection, ContextSelection,
+};
 use rusqlite::{params, Connection};
 use serde::Serialize;
 use serde_json::Value;
@@ -7,6 +11,7 @@ use std::collections::{HashMap, HashSet};
 pub enum LocalizerError {
     Sql(rusqlite::Error),
     UnsupportedRoute(String, String),
+    UsageContext(String),
 }
 
 impl From<rusqlite::Error> for LocalizerError {
@@ -25,6 +30,13 @@ pub struct Change {
     pub replacement: String,
     pub applied: bool,
     pub review_needed: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub context_selection: Option<ContextSelection>,
+    // Actual selected identity for existing v1 provenance enrichment, not a new API.
+    #[serde(skip)]
+    pub matched_rule_id: Option<i64>,
+    #[serde(skip)]
+    pub matched_stage: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -51,6 +63,7 @@ struct EntitySurface {
 
 #[derive(Debug, Clone)]
 struct TermRule {
+    rule_id: i64,
     target_text: String,
     priority: i64,
     context_constraint: Option<String>,
@@ -58,17 +71,34 @@ struct TermRule {
 
 pub struct LocalizerEngine {
     conn: Connection,
+    context_profiles: ContextProfiles,
 }
 
 impl LocalizerEngine {
     pub fn open(path: impl AsRef<std::path::Path>) -> Result<Self> {
         Ok(Self {
             conn: Connection::open(path)?,
+            context_profiles: ContextProfiles::default(),
         })
     }
 
     pub fn from_connection(conn: Connection) -> Self {
-        Self { conn }
+        Self {
+            conn,
+            context_profiles: ContextProfiles::default(),
+        }
+    }
+
+    pub fn with_context_profiles(mut self, profiles: ContextProfiles) -> Self {
+        self.context_profiles = profiles;
+        self
+    }
+
+    pub(crate) fn validate_usage_context(
+        &self,
+        context: Option<&Value>,
+    ) -> Result<Option<Vec<String>>> {
+        resolve_usage_context(&self.context_profiles, context)
     }
 
     pub fn localize(
@@ -79,14 +109,25 @@ impl LocalizerEngine {
         context: Option<&Value>,
     ) -> Result<LocalizationResult> {
         let route = route(source_locale, target_locale)?;
+        let usage_chain = self.validate_usage_context(context)?;
         let entity_result = self.apply_entities(text, source_locale, target_locale)?;
         let mut current = entity_result.0;
         let mut protected = entity_result.1;
         let mut changes = entity_result.2;
 
         for (stage_source, stage_target) in &route {
-            let stage =
-                self.apply_term_stage(&current, &protected, stage_source, stage_target, context)?;
+            let stage = self.apply_term_stage(
+                &current,
+                &protected,
+                stage_source,
+                stage_target,
+                context,
+                if stage_target == "zh-HK" || stage_target == "zh-TW" {
+                    usage_chain.as_deref()
+                } else {
+                    None
+                },
+            )?;
             current = stage.0;
             protected = stage.1;
             changes.extend(stage.2);
@@ -150,6 +191,9 @@ impl LocalizerEngine {
                 changes.push(Change {
                     kind: "entity".into(),
                     reason: "ambiguous_source_entity".into(),
+                    context_selection: None,
+                    matched_rule_id: None,
+                    matched_stage: None,
                     original: source_text.into(),
                     replacement: source_text.into(),
                     applied: false,
@@ -173,6 +217,9 @@ impl LocalizerEngine {
                     } else {
                         "ambiguous_target_name".into()
                     },
+                    context_selection: None,
+                    matched_rule_id: None,
+                    matched_stage: None,
                     original: source_text.into(),
                     replacement: source_text.into(),
                     applied: false,
@@ -191,6 +238,9 @@ impl LocalizerEngine {
             changes.push(Change {
                 kind: "entity".into(),
                 reason: "localized_entity_name".into(),
+                context_selection: None,
+                matched_rule_id: None,
+                matched_stage: None,
                 original: source_text.into(),
                 replacement: replacement.clone(),
                 applied: replacement != source_text,
@@ -295,6 +345,7 @@ impl LocalizerEngine {
         source_locale: &str,
         target_locale: &str,
         context: Option<&Value>,
+        usage_chain: Option<&[String]>,
     ) -> Result<(String, Vec<ProtectedSpan>, Vec<Change>)> {
         let index = self.term_rule_index(source_locale, target_locale)?;
         let mut keys: Vec<&String> = index.keys().collect();
@@ -329,7 +380,7 @@ impl LocalizerEngine {
                 .unwrap_or(text.len());
 
             let mut selected_key: Option<&str> = None;
-            let mut selected_rows: Vec<&TermRule> = Vec::new();
+            let mut selected_rows: Vec<(&TermRule, usize)> = Vec::new();
             for key in &keys {
                 let end = i + key.len();
                 if end > next_protected_start
@@ -340,7 +391,10 @@ impl LocalizerEngine {
                 }
                 let applicable: Vec<_> = index[*key]
                     .iter()
-                    .filter(|rule| rule_context_allows(rule, text, i, end, context))
+                    .filter_map(|rule| {
+                        rule_context_rank(rule, text, i, end, context, usage_chain)
+                            .map(|level| (rule, level))
+                    })
                     .collect();
                 if !applicable.is_empty() {
                     selected_key = Some(key.as_str());
@@ -356,6 +410,17 @@ impl LocalizerEngine {
                 continue;
             };
 
+            let level = selected_rows
+                .iter()
+                .map(|(_, level)| *level)
+                .min()
+                .expect("eligible rules");
+            let selected_rows: Vec<_> = selected_rows
+                .into_iter()
+                .filter(|(_, rank)| *rank == level)
+                .map(|(rule, _)| rule)
+                .collect();
+            let context_selection = usage_chain.map(|chain| selection(chain, level));
             let max_priority = selected_rows
                 .iter()
                 .map(|rule| rule.priority)
@@ -380,6 +445,9 @@ impl LocalizerEngine {
                 changes.push(Change {
                     kind: "term_rule".into(),
                     reason: "ambiguous_rule_tie".into(),
+                    context_selection,
+                    matched_rule_id: None,
+                    matched_stage: None,
                     original: source_text.into(),
                     replacement: source_text.into(),
                     applied: false,
@@ -394,6 +462,15 @@ impl LocalizerEngine {
             changes.push(Change {
                 kind: "term_rule".into(),
                 reason: "term_rule".into(),
+                context_selection,
+                matched_rule_id: usage_chain.map(|_| {
+                    winners
+                        .iter()
+                        .map(|rule| rule.rule_id)
+                        .min()
+                        .expect("winner")
+                }),
+                matched_stage: usage_chain.map(|_| format!("{source_locale}->{target_locale}")),
                 original: source_text.into(),
                 replacement: replacement.clone(),
                 applied: replacement != source_text,
@@ -412,7 +489,7 @@ impl LocalizerEngine {
     ) -> Result<HashMap<String, Vec<TermRule>>> {
         let mut stmt = self.conn.prepare(
             r#"
-            SELECT tr.source_text, tr.target_text, tr.priority, tr.context_constraint
+            SELECT tr.source_text, tr.target_text, tr.priority, tr.context_constraint, tr.rule_id
             FROM term_rules tr
             LEFT JOIN source_versions sv ON sv.source_version_id = tr.source_version_id
             WHERE tr.source_locale = ?1 AND tr.target_locale = ?2 AND tr.active = 1
@@ -424,6 +501,7 @@ impl LocalizerEngine {
             Ok((
                 row.get::<_, String>(0)?,
                 TermRule {
+                    rule_id: row.get(4)?,
                     target_text: row.get(1)?,
                     priority: row.get(2)?,
                     context_constraint: row.get(3)?,
@@ -520,25 +598,25 @@ fn string_list(value: Option<&Value>) -> Vec<&str> {
     }
 }
 
-fn rule_context_allows(
+fn rule_context_rank(
     rule: &TermRule,
     text: &str,
     start: usize,
     end: usize,
     runtime_context: Option<&Value>,
-) -> bool {
+    usage_chain: Option<&[String]>,
+) -> Option<usize> {
     let Some(raw) = &rule.context_constraint else {
-        return true;
+        return rule_context_level(None, usage_chain);
     };
     let Ok(metadata) = serde_json::from_str::<Value>(raw) else {
-        return false;
+        return None;
     };
+    let level = rule_context_level(Some(&metadata), usage_chain)?;
     let Some(constraints) = metadata.get("constraints") else {
-        return true;
+        return Some(level);
     };
-    let Some(constraints) = constraints.as_object() else {
-        return false;
-    };
+    let constraints = constraints.as_object()?;
 
     let domains = string_list(constraints.get("domain"));
     if !domains.is_empty() {
@@ -546,7 +624,7 @@ fn rule_context_allows(
             .and_then(|ctx| ctx.get("domain"))
             .and_then(Value::as_str);
         if !runtime_domain.is_some_and(|domain| domains.contains(&domain)) {
-            return false;
+            return None;
         }
     }
 
@@ -566,7 +644,7 @@ fn rule_context_allows(
             values.iter().any(|value| text[end..].starts_with(value))
         };
         if matched != positive {
-            return false;
+            return None;
         }
     }
 
@@ -576,9 +654,9 @@ fn rule_context_allows(
         .unwrap_or(false)
         && !boundary_ok(text, start, end, &text[start..end])
     {
-        return false;
+        return None;
     }
-    true
+    Some(level)
 }
 
 #[cfg(test)]

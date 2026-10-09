@@ -24,6 +24,14 @@ Changing the meaning or shape of existing v1 fields should be treated as an API 
 
 The supported routes remain the deterministic Phase 3A routes.
 
+Issue #47 accepts additive `context.usage_context_id`, for example
+`{"usage_context_id":"technology-software"}`. Omitting this key retains legacy behavior;
+legacy `domain` remains independent. Unknown, malformed or unavailable context IDs
+return an error, not an implicit General fallback. Requests do not supply profile paths
+or definitions: Rust callers may configure `Runtime::with_context_profiles` with a
+validated immutable #46 snapshot, otherwise built-in defaults apply. No profile-file
+I/O occurs during localization. See [Context Selection](CONTEXT_SELECTION.md).
+
 ## Response
 
 `RuntimeResponse` contains:
@@ -62,6 +70,15 @@ Term-rule events can include:
 - original-input and final-output character spans.
 
 User-local events retain the Phase 3B `user_term_id`, note, `user_dictionary` provenance and spans.
+
+For explicit usage-context requests, shared regional term events may add optional
+`context_selection` containing `usage_context_id`, `matched_usage_context_id`,
+`context_distance` and `context_level` (`exact`, `parent`, `general`, `unscoped`).
+Unscoped fallback has null matched ID/distance. Context-free requests, script events
+and entity/user events do not acquire this metadata. Winning provenance identifies
+an actual eligible rule; equal-level conflicting targets do not invent a winning rule.
+These are additive explanation fields, not an alternatives-choice UI contract or
+changes to the existing v1 outer fields.
 
 ## CLI
 

@@ -1,3 +1,4 @@
+use crate::context_profiles::ContextProfiles;
 use crate::{LocalizerEngine, LocalizerError, Result};
 use rusqlite::{params, Connection};
 use serde::Serialize;
@@ -49,6 +50,11 @@ impl UserControlledLocalizer {
         }
     }
 
+    pub fn with_context_profiles(mut self, profiles: ContextProfiles) -> Self {
+        self.shared = self.shared.with_context_profiles(profiles);
+        self
+    }
+
     pub fn localize(
         &self,
         text: &str,
@@ -57,6 +63,8 @@ impl UserControlledLocalizer {
         context: Option<&Value>,
     ) -> Result<UserLocalizationResult> {
         let route = route_strings(source_locale, target_locale)?;
+        // Validate even empty/fully user-protected input; never hide an invalid request.
+        self.shared.validate_usage_context(context)?;
         let terms = self.candidates(source_locale, target_locale)?;
         let mut by_surface: HashMap<String, Vec<UserTerm>> = HashMap::new();
         for term in terms {
@@ -90,7 +98,7 @@ impl UserControlledLocalizer {
                     for change in &result.changes {
                         let local_input = find_char_span(source_text, &change.original);
                         let local_output = find_char_span(&result.output, &change.replacement);
-                        changes.push(json!({
+                        let mut event = json!({
                             "type": change.kind,
                             "applied": change.applied,
                             "review_needed": change.review_needed,
@@ -103,7 +111,17 @@ impl UserControlledLocalizer {
                             "final_output_span": local_output.map(|[a,b]| [a + output_start_chars, b + output_start_chars]),
                             "user_layer_segment_input_span": [input_start_chars, text[..segment.end].chars().count()],
                             "provenance": "shared_database",
-                        }));
+                        });
+                        if let Some(selection) = &change.context_selection {
+                            event["context_selection"] = json!(selection);
+                            if let Some(id) = change.matched_rule_id {
+                                event["rule_id"] = json!(id);
+                            }
+                            if let Some(stage) = &change.matched_stage {
+                                event["stage"] = json!(stage);
+                            }
+                        }
+                        changes.push(event);
                     }
                     output.push_str(&result.output);
                 }

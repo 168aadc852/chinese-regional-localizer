@@ -1,7 +1,8 @@
 # HanContext Alpha MVP — planning specification
 
-Updated: 2026-10-09. Issue #46's approved profile foundation is implemented in its
-focused PR. Other Alpha packages remain proposed and require separate approval.
+Updated: 2026-10-09. Issue #46's approved profile foundation is merged. Issue #47's
+approved core selection is implemented in its focused PR, pending CI/review/merge.
+Other Alpha packages remain proposed and require separate approval.
 
 **HanContext — Chinese, localized with context. / 懂情境的中文地區化**.
 Use **Chinese Mainland**, Hong Kong and Taiwan in future product copy.
@@ -38,8 +39,9 @@ Marketing; Legal; Education; Government / Public Administration. These profiles 
 not promises of terminology coverage. Existing licence/ingestion gates apply.
 
 Custom profiles default to General, with validated single-parent chains and explicit
-version handling in the [Issue #46 foundation](CONTEXT_PROFILES.md). It is not wired
-to localization or desktop controls. Inherited terminology ranking remains Issue #47.
+version handling in the [Issue #46 foundation](CONTEXT_PROFILES.md).
+[Issue #47 selection](CONTEXT_SELECTION.md) uses validated snapshots for explicit
+core/runtime requests, without desktop controls or automatic profile-file loading.
 Do not duplicate every rule or require LLM context classification.
 
 My Terms preferences conceptually depend on source term, preferred term, target locale
@@ -60,6 +62,12 @@ Reconcile inherited-context ranking, protected terms, entities and longest-match
 with the existing contract before changing behavior. Equal-level ties stay unresolved;
 preserve original text rather than guess. Use Recommended / Also valid / Needs your decision.
 
+The approved #47 reconciliation preserves longest eligible phrase before context rank
+and numeric priority, existing entity/user protection, and the actual
+`zh-CN → zh-Hant → zh-HK/zh-TW` pipeline. Script conversion stays context-neutral;
+#47 does not reorder stages to implement the proposed Alpha precedence above.
+Context-sensitive user preferences and candidate labels/UI remain future work.
+
 Alternative selection updates a specific occurrence without rerunning the document.
 Define stable span tracking and undo so adjacent edits remain correct. Offer Use this
 time only / Remember for this context / Remember for all contexts.
@@ -68,8 +76,8 @@ time only / Remember for this context / Remember for all contexts.
 
 | Package | Scope | Dependencies |
 | --- | --- | --- |
-| [#46 Context profiles/model](https://github.com/168aadc852/chinese-regional-localizer/issues/46) | Approved standalone model/store implemented in its focused PR; no selection/UI wiring | Phase 3J complete; protected-main review/CI/merge |
-| [#47 Context-aware selection](https://github.com/168aadc852/chinese-regional-localizer/issues/47) | Governed deterministic selection and inheritance | #46; approved behavior contract |
+| [#46 Context profiles/model](https://github.com/168aadc852/chinese-regional-localizer/issues/46) | Merged standalone model/store; no desktop wiring | Phase 3J complete |
+| [#47 Context-aware selection](https://github.com/168aadc852/chinese-regional-localizer/issues/47) | Approved core selection and inheritance implemented in its focused PR; no My Terms/UI | Merged #46; protected-main CI/review/merge |
 | [#48 Alternatives/ambiguity](https://github.com/168aadc852/chinese-regional-localizer/issues/48) | Candidates, ties, spans and local alternative application | #47 |
 | [#49 My Terms](https://github.com/168aadc852/chinese-regional-localizer/issues/49) | Context/all-context preferences and private-dictionary migration | #46–#48 |
 | [#50 Alpha desktop UX](https://github.com/168aadc852/chinese-regional-localizer/issues/50) | Plain-text workflow, modes, explanations and preference controls | #46–#49; mode semantics approval |

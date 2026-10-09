@@ -21,7 +21,8 @@ Implemented foundations include:
 - deterministic Python reference localization engine;
 - Rust shared core and versioned Runtime API v1 for supported CN/HK/TW routes;
 - private user-dictionary support and protected/user-preferred terms;
-- Rust usage-context profile foundation: seven built-ins, validated single-parent inheritance and a separate versioned local store (not yet connected to localization or desktop UI);
+- Rust usage-context profile foundation: seven built-ins, validated single-parent inheritance and a separate versioned local store;
+- explicit context-aware regional terminology selection in the shared Rust runtime and Python reference engine (no desktop context controls yet);
 - Tauri 2 desktop shell with Rust-managed validated database selection;
 - versioned non-secret desktop database preferences with safe restart validation and atomic saves;
 - full local database paths kept inside Rust rather than exposed to frontend JavaScript;
@@ -127,7 +128,9 @@ The canonical editable requirements are in `docs/PRODUCT_REQUIREMENTS.md`.
 
 The proposed HanContext Alpha MVP is in `docs/HANCONTEXT_ALPHA_MVP.md`, with delivery order in
 `docs/ROADMAP.md`. The approved Issue #46 profile foundation is described in
-[Usage Context Profiles](docs/CONTEXT_PROFILES.md). Context-aware terminology selection,
+[Usage Context Profiles](docs/CONTEXT_PROFILES.md). Issue #47 adds
+[deterministic context-aware terminology selection](docs/CONTEXT_SELECTION.md), preserving
+Runtime API v1 and existing protection/route rules. Desktop context controls,
 context-sensitive My Terms, clickable alternatives, Alpha modes/UX and an MCP server
 remain planned, not implemented.
 
@@ -150,9 +153,9 @@ Third-party data is **not** relicensed under the software licence. Each source k
 Validated shared-database and optional user-dictionary choices survive app restarts while
 preserving the Rust-only filesystem-path boundary, safe fallback behavior and Runtime API v1 compatibility.
 
-Issue #46 implements only the approved context-profile foundation. After its PR is
-reviewed and merged, separately approve Issue #47's terminology-selection design;
-Issues #47–#51 remain planning proposals, not implemented features. Suggested
+Issue #46's context-profile foundation is merged. Issue #47's approved core terminology
+selection is implemented in this focused PR, subject to CI, review and merge;
+Issues #48–#51 still require separate approval and implementation. Suggested
 longer-term order: Desktop Alpha → CLI → MCP Server → production Windows/macOS
 packaging/signing → editor/plugin integrations → optional AI assistance. All clients
 reuse the same Core / Runtime.

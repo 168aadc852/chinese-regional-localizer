@@ -1,3 +1,4 @@
+use crate::context_profiles::ContextProfiles;
 use crate::{LocalizerEngine, Result, UserControlledLocalizer};
 use rusqlite::{params, Connection, OptionalExtension};
 use serde::{Deserialize, Serialize};
@@ -38,6 +39,7 @@ pub struct RuntimeResponse {
 pub struct Runtime {
     shared_db: PathBuf,
     user_db: Option<PathBuf>,
+    context_profiles: ContextProfiles,
 }
 
 impl Runtime {
@@ -45,14 +47,21 @@ impl Runtime {
         Self {
             shared_db: shared_db.as_ref().to_path_buf(),
             user_db: user_db.map(|path| path.as_ref().to_path_buf()),
+            context_profiles: ContextProfiles::default(),
         }
+    }
+
+    pub fn with_context_profiles(mut self, profiles: ContextProfiles) -> Self {
+        self.context_profiles = profiles;
+        self
     }
 
     pub fn localize(&self, request: &RuntimeRequest) -> Result<RuntimeResponse> {
         let context = request.context.as_ref();
         let (output, route, review_needed, user_dictionary_applied, raw_changes) =
             if let Some(user_db) = &self.user_db {
-                let engine = UserControlledLocalizer::open(&self.shared_db, user_db)?;
+                let engine = UserControlledLocalizer::open(&self.shared_db, user_db)?
+                    .with_context_profiles(self.context_profiles.clone());
                 let result = engine.localize(
                     &request.text,
                     &request.source_locale,
@@ -67,7 +76,8 @@ impl Runtime {
                     result.changes,
                 )
             } else {
-                let engine = LocalizerEngine::open(&self.shared_db)?;
+                let engine = LocalizerEngine::open(&self.shared_db)?
+                    .with_context_profiles(self.context_profiles.clone());
                 let result = engine.localize(
                     &request.text,
                     &request.source_locale,
@@ -78,7 +88,7 @@ impl Runtime {
                     .changes
                     .into_iter()
                     .map(|change| {
-                        json!({
+                        let mut event = json!({
                             "type": change.kind,
                             "reason": change.reason,
                             "original": change.original,
@@ -88,7 +98,17 @@ impl Runtime {
                             "source_locale": request.source_locale,
                             "target_locale": request.target_locale,
                             "provenance": "shared_database",
-                        })
+                        });
+                        if let Some(selection) = &change.context_selection {
+                            event["context_selection"] = json!(selection);
+                            if let Some(id) = change.matched_rule_id {
+                                event["rule_id"] = json!(id);
+                            }
+                            if let Some(stage) = &change.matched_stage {
+                                event["stage"] = json!(stage);
+                            }
+                        }
+                        event
                     })
                     .collect();
                 (
@@ -278,7 +298,21 @@ fn enrich_term_rule(
     replacement: &str,
     object: &mut Map<String, Value>,
 ) -> Result<()> {
+    // A reviewed context conflict has no chosen provenance record. Do not guess one.
+    if object.contains_key("context_selection")
+        && object.get("review_needed").and_then(Value::as_bool) == Some(true)
+    {
+        return Ok(());
+    }
+    let selected_rule_id = object.get("rule_id").and_then(Value::as_i64);
     for stage in route {
+        if object
+            .get("stage")
+            .and_then(Value::as_str)
+            .is_some_and(|matched| matched != stage)
+        {
+            continue;
+        }
         let Some((source_locale, target_locale)) = stage.split_once("->") else {
             continue;
         };
@@ -294,10 +328,17 @@ fn enrich_term_rule(
                 WHERE tr.source_locale = ?1 AND tr.target_locale = ?2
                   AND tr.source_text = ?3 AND tr.target_text = ?4 AND tr.active = 1
                   AND (tr.source_version_id IS NULL OR sv.is_current = 1)
+                  AND (?5 IS NULL OR tr.rule_id = ?5)
                 ORDER BY tr.priority DESC, tr.rule_id
                 LIMIT 1
                 "#,
-                params![source_locale, target_locale, original, replacement],
+                params![
+                    source_locale,
+                    target_locale,
+                    original,
+                    replacement,
+                    selected_rule_id
+                ],
                 |row| {
                     Ok(json!({
                         "rule_id": row.get::<_, i64>(0)?,
