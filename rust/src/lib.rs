@@ -1,3 +1,4 @@
+use crate::alternative_terms::{build_choice, Occurrence};
 use crate::context_profiles::ContextProfiles;
 use crate::usage_context::{
     resolve_usage_context, rule_context_level, selection, ContextSelection,
@@ -37,6 +38,13 @@ pub struct Change {
     pub matched_rule_id: Option<i64>,
     #[serde(skip)]
     pub matched_stage: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub choice: Option<Occurrence>,
+    // Traversal positions, never recovered by substring search.
+    #[serde(skip)]
+    pub stage_input_span: [usize; 2],
+    #[serde(skip)]
+    pub stage_output_span: [usize; 2],
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -67,6 +75,12 @@ struct TermRule {
     target_text: String,
     priority: i64,
     context_constraint: Option<String>,
+}
+
+struct StageContext<'a> {
+    runtime: Option<&'a Value>,
+    usage_chain: Option<&'a [String]>,
+    alignment: &'a [[usize; 2]],
 }
 
 pub struct LocalizerEngine {
@@ -114,6 +128,12 @@ impl LocalizerEngine {
         let mut current = entity_result.0;
         let mut protected = entity_result.1;
         let mut changes = entity_result.2;
+        let mut alignment = apply_alignment(
+            &(0..text.chars().count())
+                .map(|i| [i, i + 1])
+                .collect::<Vec<_>>(),
+            &changes,
+        );
 
         for (stage_source, stage_target) in &route {
             let stage = self.apply_term_stage(
@@ -121,19 +141,30 @@ impl LocalizerEngine {
                 &protected,
                 stage_source,
                 stage_target,
-                context,
-                if stage_target == "zh-HK" || stage_target == "zh-TW" {
-                    usage_chain.as_deref()
-                } else {
-                    None
+                StageContext {
+                    runtime: context,
+                    usage_chain: if stage_target == "zh-HK" || stage_target == "zh-TW" {
+                        usage_chain.as_deref()
+                    } else {
+                        None
+                    },
+                    alignment: &alignment,
                 },
             )?;
+            alignment = apply_alignment(&alignment, &stage.2);
             current = stage.0;
             protected = stage.1;
             changes.extend(stage.2);
         }
 
         let review_needed = changes.iter().any(|change| change.review_needed);
+        for (index, choice) in changes
+            .iter_mut()
+            .filter_map(|change| change.choice.as_mut())
+            .enumerate()
+        {
+            choice.assign_id(index);
+        }
         Ok(LocalizationResult {
             input: text.to_owned(),
             output: current,
@@ -182,6 +213,11 @@ impl LocalizerEngine {
 
             let concepts = &index[source_text];
             let output_start = out.len();
+            let source_span = [
+                text[..i].chars().count(),
+                text[..i + source_text.len()].chars().count(),
+            ];
+            let output_start_chars = out.chars().count();
             if concepts.len() != 1 {
                 out.push_str(source_text);
                 protected.push(ProtectedSpan {
@@ -191,6 +227,9 @@ impl LocalizerEngine {
                 changes.push(Change {
                     kind: "entity".into(),
                     reason: "ambiguous_source_entity".into(),
+                    choice: None,
+                    stage_input_span: source_span,
+                    stage_output_span: [output_start_chars, out.chars().count()],
                     context_selection: None,
                     matched_rule_id: None,
                     matched_stage: None,
@@ -217,6 +256,9 @@ impl LocalizerEngine {
                     } else {
                         "ambiguous_target_name".into()
                     },
+                    choice: None,
+                    stage_input_span: source_span,
+                    stage_output_span: [output_start_chars, out.chars().count()],
                     context_selection: None,
                     matched_rule_id: None,
                     matched_stage: None,
@@ -238,6 +280,9 @@ impl LocalizerEngine {
             changes.push(Change {
                 kind: "entity".into(),
                 reason: "localized_entity_name".into(),
+                choice: None,
+                stage_input_span: source_span,
+                stage_output_span: [output_start_chars, out.chars().count()],
                 context_selection: None,
                 matched_rule_id: None,
                 matched_stage: None,
@@ -344,9 +389,13 @@ impl LocalizerEngine {
         protected: &[ProtectedSpan],
         source_locale: &str,
         target_locale: &str,
-        context: Option<&Value>,
-        usage_chain: Option<&[String]>,
+        stage_context: StageContext<'_>,
     ) -> Result<(String, Vec<ProtectedSpan>, Vec<Change>)> {
+        let StageContext {
+            runtime: context,
+            usage_chain,
+            alignment,
+        } = stage_context;
         let index = self.term_rule_index(source_locale, target_locale)?;
         let mut keys: Vec<&String> = index.keys().collect();
         keys.sort_by(|a, b| b.len().cmp(&a.len()).then_with(|| a.cmp(b)));
@@ -415,6 +464,7 @@ impl LocalizerEngine {
                 .map(|(_, level)| *level)
                 .min()
                 .expect("eligible rules");
+            let all_rows = selected_rows.clone();
             let selected_rows: Vec<_> = selected_rows
                 .into_iter()
                 .filter(|(_, rank)| *rank == level)
@@ -434,6 +484,16 @@ impl LocalizerEngine {
                 .iter()
                 .map(|rule| rule.target_text.as_str())
                 .collect();
+            let stage_input_span = [
+                text[..i].chars().count(),
+                text[..i + source_text.len()].chars().count(),
+            ];
+            let source_span = [
+                alignment[stage_input_span[0]][0],
+                alignment[stage_input_span[1] - 1][1],
+            ];
+            let output_start_chars = out.chars().count();
+            let regional = target_locale == "zh-HK" || target_locale == "zh-TW";
 
             if targets.len() != 1 {
                 let output_start = out.len();
@@ -445,6 +505,20 @@ impl LocalizerEngine {
                 changes.push(Change {
                     kind: "term_rule".into(),
                     reason: "ambiguous_rule_tie".into(),
+                    choice: regional.then(|| {
+                        build_choice(
+                            all_rows.iter().map(|(rule, rank)| {
+                                (rule.target_text.clone(), *rank, rule.priority)
+                            }),
+                            source_text,
+                            source_span,
+                            stage_input_span,
+                            [output_start_chars, out.chars().count()],
+                            source_text,
+                        )
+                    }),
+                    stage_input_span,
+                    stage_output_span: [output_start_chars, out.chars().count()],
                     context_selection,
                     matched_rule_id: None,
                     matched_stage: None,
@@ -462,15 +536,29 @@ impl LocalizerEngine {
             changes.push(Change {
                 kind: "term_rule".into(),
                 reason: "term_rule".into(),
+                choice: regional.then(|| {
+                    build_choice(
+                        all_rows
+                            .iter()
+                            .map(|(rule, rank)| (rule.target_text.clone(), *rank, rule.priority)),
+                        source_text,
+                        source_span,
+                        stage_input_span,
+                        [output_start_chars, out.chars().count()],
+                        &replacement,
+                    )
+                }),
+                stage_input_span,
+                stage_output_span: [output_start_chars, out.chars().count()],
                 context_selection,
-                matched_rule_id: usage_chain.map(|_| {
+                matched_rule_id: regional.then(|| {
                     winners
                         .iter()
                         .map(|rule| rule.rule_id)
                         .min()
                         .expect("winner")
                 }),
-                matched_stage: usage_chain.map(|_| format!("{source_locale}->{target_locale}")),
+                matched_stage: regional.then(|| format!("{source_locale}->{target_locale}")),
                 original: source_text.into(),
                 replacement: replacement.clone(),
                 applied: replacement != source_text,
@@ -516,6 +604,30 @@ impl LocalizerEngine {
         }
         Ok(index)
     }
+}
+
+/// Compose stage traversal against original Unicode character positions. No text search.
+fn apply_alignment(previous: &[[usize; 2]], changes: &[Change]) -> Vec<[usize; 2]> {
+    let mut alignment = Vec::new();
+    let mut cursor = 0;
+    for change in changes {
+        let [start, end] = change.stage_input_span;
+        alignment.extend_from_slice(&previous[cursor..start]);
+        if change.original == change.replacement {
+            alignment.extend_from_slice(&previous[start..end]);
+        } else {
+            let span = [previous[start][0], previous[end - 1][1]];
+            let length = change.replacement.chars().count();
+            if span[1] - span[0] == length {
+                alignment.extend((span[0]..span[1]).map(|i| [i, i + 1]));
+            } else {
+                alignment.extend(std::iter::repeat_n(span, length));
+            }
+        }
+        cursor = end;
+    }
+    alignment.extend_from_slice(&previous[cursor..]);
+    alignment
 }
 
 fn route(source: &str, target: &str) -> Result<Vec<(String, String)>> {

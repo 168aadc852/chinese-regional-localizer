@@ -13,6 +13,7 @@ import sqlite3
 from dataclasses import dataclass
 from typing import Any, Iterable
 from context_profiles import ContextProfiles, context_level, context_selection
+from alternative_terms import assign_choice_ids, make_choice
 
 
 ROUTES: dict[tuple[str, str], list[tuple[str, str]]] = {
@@ -139,6 +140,10 @@ class LocalizerEngine:
             events.extend(stage["events"])
 
         for event in events:
+            if "choice" in event:
+                event["original_input_span"] = event["choice"]["source_span"].copy()
+                event["final_output_span"] = event["choice"]["output_span"].copy()
+                continue
             original_span = event.get("original_input_span")
             if original_span:
                 event["final_output_span"] = list(
@@ -147,6 +152,7 @@ class LocalizerEngine:
                     )
                 )
 
+        assign_choice_ids(events)
         return {
             "input": text,
             "output": current_text,
@@ -614,6 +620,7 @@ class LocalizerEngine:
                 continue
 
             level = min(level for _, level in ranked_rows)
+            all_ranked_rows = ranked_rows
             rows = [row for row, rank in ranked_rows if rank == level]
             selected_context = (
                 context_selection(usage_chain, level) if usage_chain is not None else None
@@ -627,6 +634,11 @@ class LocalizerEngine:
                 alignment, input_start, input_end
             )
             output_start = out_len
+            regional = target_locale in ("zh-HK", "zh-TW")
+            choice_rows = [
+                (row["target_text"], rank, int(row["priority"]))
+                for row, rank in all_ranked_rows
+            ]
 
             if len(winner_targets) != 1:
                 out.append(source_text)
@@ -655,6 +667,15 @@ class LocalizerEngine:
                 )
                 if selected_context is not None:
                     events[-1]["context_selection"] = selected_context
+                if regional:
+                    events[-1]["choice"] = make_choice(
+                        choice_rows,
+                        source_text,
+                        [original_start, original_end],
+                        [input_start, input_end],
+                        [output_start, out_len],
+                        source_text,
+                    )
                 i = input_end
                 continue
 
@@ -674,12 +695,12 @@ class LocalizerEngine:
                     seen.add(row["target_text"])
                     alternatives.append(self._public_rule(row))
 
-            if replacement != source_text:
+            if replacement != source_text or regional:
                 event = self._public_rule(winner)
                 event.update(
                     {
                         "type": "term_rule",
-                        "applied": True,
+                        "applied": replacement != source_text,
                         "review_needed": False,
                         "reason": "highest_priority_longest_match",
                         "stage": stage_name,
@@ -696,6 +717,15 @@ class LocalizerEngine:
                 events.append(event)
                 if selected_context is not None:
                     event["context_selection"] = selected_context
+                if regional:
+                    event["choice"] = make_choice(
+                        choice_rows,
+                        source_text,
+                        [original_start, original_end],
+                        [input_start, input_end],
+                        [output_start, out_len],
+                        replacement,
+                    )
             i = input_end
 
         return {

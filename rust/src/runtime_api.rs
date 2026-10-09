@@ -108,6 +108,17 @@ impl Runtime {
                                 event["stage"] = json!(stage);
                             }
                         }
+                        if let Some(choice) = &change.choice {
+                            if let Some(id) = change.matched_rule_id {
+                                event["rule_id"] = json!(id);
+                            }
+                            if let Some(stage) = &change.matched_stage {
+                                event["stage"] = json!(stage);
+                            }
+                            event["choice"] = json!(choice);
+                            event["original_input_span"] = json!(choice.source_span);
+                            event["final_output_span"] = json!(choice.output_span);
+                        }
                         event
                     })
                     .collect();
@@ -299,7 +310,7 @@ fn enrich_term_rule(
     object: &mut Map<String, Value>,
 ) -> Result<()> {
     // A reviewed context conflict has no chosen provenance record. Do not guess one.
-    if object.contains_key("context_selection")
+    if (object.contains_key("context_selection") || object.contains_key("choice"))
         && object.get("review_needed").and_then(Value::as_bool) == Some(true)
     {
         return Ok(());

@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-10-10 — Issue #48 alternative terms and one-time occurrence review
+
+- Added grouped deterministic regional candidates with Recommended, Also valid and Needs your decision states, retaining #47's longest eligible phrase, context ranking and no-guess decisions.
+- Added optional nested `choice` metadata with session-local IDs, exact Unicode source/stage/output spans, frozen candidates and current-text anchors; Runtime API v1 still has the same nine outer response fields.
+- Carried traversal/alignment positions through Rust stages and composed user-layer segment offsets explicitly, so repeated terms/replacements are independently tracked without substring guessing.
+- Added in-memory Rust review sessions and matching Python reference behavior for validated this-time-only edits, later-span shifts, monotonic revisions and atomic stale/invalid-choice rejection.
+- Added reversible LIFO undo, including adjacent/length-changing edits, repeated edits to one occurrence and choices with no visible text change.
+- Added stable unsupported remember-intent hooks without writing preferences or changing dictionaries.
+- Added 25 synthetic #48 scenarios alongside the existing 50 context cases, live candidate/ID/span/edit/undo parity, reversed-insertion golden checks and stale-state regressions.
+- Preserved entity/user protection, script neutrality, locale/routes, schemas, desktop settings, data/licence gates and update/signing behavior. #49 persistence and #50 desktop choice UX remain separate work.
+
 ## 2026-10-09 — Issue #47 deterministic context-aware terminology selection
 
 - Added optional `context.usage_context_id` using a validated immutable #46 profile snapshot, with built-in defaults and clear errors for unknown/disabled chains.

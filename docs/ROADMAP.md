@@ -1,6 +1,6 @@
 # Roadmap
 
-Updated: 2026-10-09. This consolidated direction supersedes the earlier roadmap.
+Updated: 2026-10-10. This consolidated direction supersedes the earlier roadmap.
 Planned capabilities must not be presented as implemented.
 
 ## Current priority and next phase
@@ -8,22 +8,23 @@ Planned capabilities must not be presented as implemented.
 Phase 3J / Issue #38 desktop settings persistence is complete.
 
 Issue #46's approved standalone profile/model/store foundation is merged; see
-`CONTEXT_PROFILES.md`. Issue #47's approved core terminology selection is implemented
-in its focused PR, subject to protected-main CI/review/merge; see `CONTEXT_SELECTION.md`.
-Desktop context controls, context-sensitive My Terms and alternatives remain future work.
+`CONTEXT_PROFILES.md`. Issue #47's core terminology selection is merged; see
+`CONTEXT_SELECTION.md`. Issue #48's approved core candidate/one-time review layer is
+implemented in its focused PR, subject to protected-main CI/review/merge; see
+`ALTERNATIVE_TERMS.md`. Desktop choice/context controls and remembered My Terms remain future work.
 
 Review `HANCONTEXT_ALPHA_MVP.md` and the scoped work packages:
 
 1. Context profile/data model foundation (#46); merged.
-2. Context-aware deterministic terminology selection (#47); review its focused PR.
-3. Alternative-term and ambiguity handling.
+2. Context-aware deterministic terminology selection (#47); merged.
+3. Core alternative terms and occurrence-safe one-time review (#48); review its focused PR.
 4. Context-aware My Terms / remembered preferences.
 5. Alpha desktop UX and plain-language explanations.
 6. Limited Alpha packaging and onboarding.
 
 Each requires separate approval and a focused PR. Preserve Runtime API v1 unless
 a specific issue approves a change; preserve licence gates and offline operation.
-Issues #48–#51 need separate design/implementation approval; do not start them automatically.
+Issues #49–#51 need separate design/implementation approval; do not start them automatically.
 
 ## Consolidated delivery direction
 

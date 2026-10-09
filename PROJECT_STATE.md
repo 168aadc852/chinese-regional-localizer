@@ -1,6 +1,6 @@
 # Current Project State
 
-Updated: 2026-10-09
+Updated: 2026-10-10
 
 ## Status
 
@@ -11,10 +11,10 @@ General Alpha preferences are not implemented. Runtime API v1 remains unchanged.
 
 Working product identity is HanContext; repository/application identifiers remain unchanged.
 
-Issue #46's approved context-profile foundation is merged. Issue #47's approved
-context-aware regional terminology selection is implemented in this focused PR;
-closeout remains subject to protected-main CI, review and merge. It preserves
-Runtime API v1 and adds no desktop context controls or context-sensitive My Terms.
+Issues #46/#47 are merged. Issue #48's approved alternative-term and one-time
+occurrence review layer is implemented in this focused PR; closeout remains subject
+to protected-main CI, review and merge. It preserves Runtime API v1 and #47 precedence,
+with no desktop choice UI, context-sensitive My Terms or remembered preferences.
 
 The project currently has:
 - governed, licence-aware source ingestion;
@@ -24,6 +24,7 @@ The project currently has:
 - private user-dictionary support;
 - versioned usage-context profiles with seven built-ins, validated single-parent inheritance and independent local storage;
 - explicit context-aware shared terminology selection with Python/Rust parity, inherited fallback and no-guess ties;
+- deterministic alternative candidates, exact occurrence spans, in-memory one-time edits and revision-checked LIFO undo;
 - Tauri 2 desktop UI with validated database selection;
 - versioned non-secret desktop database preferences, atomic saving, safe restart fallback and persisted dictionary enabled state;
 - signed, authenticated shared-data update discovery/install/rollback;
@@ -35,14 +36,14 @@ The project currently has:
 - OpenCC remains a partial/reference implementation rather than full upstream runtime parity.
 - Desktop updates are manual only; retry/resume and production hosting are not implemented.
 - Release trust-root rotation/delegation, key-vault/HSM operations and installer signing are not implemented.
-- General Alpha preferences, desktop context controls, context-sensitive My Terms, alternatives and modes are not implemented.
+- General Alpha preferences, desktop context/alternative controls, context-sensitive My Terms, remembered preferences and modes are not implemented.
 - Production Windows/macOS installers and mobile packaging are not started.
 
 ## Likely next work
 
-1. Review and merge the focused Issue #47 selection PR; details are in `docs/CONTEXT_SELECTION.md`.
+1. Review and merge the focused Issue #48 PR; details are in `docs/ALTERNATIVE_TERMS.md`.
 2. Separately approve the next Alpha package before implementation.
-   Remaining Alpha proposals (#48–#51) retain their dependencies and approval gates in
+   Remaining Alpha proposals (#49–#51) retain their dependencies and approval gates in
    `docs/HANCONTEXT_ALPHA_MVP.md`; none are implemented automatically.
 3. Track remaining release hosting, retry/resume, key operations and production packaging work separately.
 

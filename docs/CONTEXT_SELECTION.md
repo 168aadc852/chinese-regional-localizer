@@ -95,7 +95,9 @@ record supplies existing provenance. Conflicting targets get no invented winner.
 
 Output/review decisions depend only on input, route/context, validated profile
 snapshot, shared data version and user dictionary state. Repeat calls and different
-SQLite insertion orders must agree. This is not the future #48 candidate-list contract.
+SQLite insertion orders must agree. #47's context explanation is not a candidate-list
+contract; [Issue #48](ALTERNATIVE_TERMS.md) adds a separate optional nested choice
+object while preserving this selection order and applied/review decisions.
 
 ## Validation
 

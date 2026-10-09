@@ -1,7 +1,7 @@
 # HanContext Alpha MVP — planning specification
 
-Updated: 2026-10-09. Issue #46's approved profile foundation is merged. Issue #47's
-approved core selection is implemented in its focused PR, pending CI/review/merge.
+Updated: 2026-10-10. Issues #46/#47 are merged. Issue #48's approved core
+candidate/one-time review layer is implemented in its focused PR, pending CI/review/merge.
 Other Alpha packages remain proposed and require separate approval.
 
 **HanContext — Chinese, localized with context. / 懂情境的中文地區化**.
@@ -66,7 +66,9 @@ The approved #47 reconciliation preserves longest eligible phrase before context
 and numeric priority, existing entity/user protection, and the actual
 `zh-CN → zh-Hant → zh-HK/zh-TW` pipeline. Script conversion stays context-neutral;
 #47 does not reorder stages to implement the proposed Alpha precedence above.
-Context-sensitive user preferences and candidate labels/UI remain future work.
+Issue #48's [core candidate/review contract](ALTERNATIVE_TERMS.md) implements the
+three candidate labels and one-time occurrence edits/undo without changing #47 ranking.
+Context-sensitive user preferences, remembered choices and desktop choice UI remain future work.
 
 Alternative selection updates a specific occurrence without rerunning the document.
 Define stable span tracking and undo so adjacent edits remain correct. Offer Use this
@@ -77,8 +79,8 @@ time only / Remember for this context / Remember for all contexts.
 | Package | Scope | Dependencies |
 | --- | --- | --- |
 | [#46 Context profiles/model](https://github.com/168aadc852/chinese-regional-localizer/issues/46) | Merged standalone model/store; no desktop wiring | Phase 3J complete |
-| [#47 Context-aware selection](https://github.com/168aadc852/chinese-regional-localizer/issues/47) | Approved core selection and inheritance implemented in its focused PR; no My Terms/UI | Merged #46; protected-main CI/review/merge |
-| [#48 Alternatives/ambiguity](https://github.com/168aadc852/chinese-regional-localizer/issues/48) | Candidates, ties, spans and local alternative application | #47 |
+| [#47 Context-aware selection](https://github.com/168aadc852/chinese-regional-localizer/issues/47) | Merged core selection/inheritance; no My Terms/UI | Merged #46 |
+| [#48 Alternatives/ambiguity](https://github.com/168aadc852/chinese-regional-localizer/issues/48) | Approved core candidates, exact spans, one-time edits and undo implemented in its focused PR; no persistence/UI | Merged #47; protected-main CI/review/merge |
 | [#49 My Terms](https://github.com/168aadc852/chinese-regional-localizer/issues/49) | Context/all-context preferences and private-dictionary migration | #46–#48 |
 | [#50 Alpha desktop UX](https://github.com/168aadc852/chinese-regional-localizer/issues/50) | Plain-text workflow, modes, explanations and preference controls | #46–#49; mode semantics approval |
 | [#51 Alpha packaging/onboarding](https://github.com/168aadc852/chinese-regional-localizer/issues/51) | Limited development distribution and offline first-use guidance | #50; fixture vs release-data distinction |
