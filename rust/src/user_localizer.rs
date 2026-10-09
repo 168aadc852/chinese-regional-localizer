@@ -96,8 +96,16 @@ impl UserControlledLocalizer {
                     let output_start_chars = output.chars().count();
                     let input_start_chars = text[..segment.start].chars().count();
                     for change in &result.changes {
-                        let local_input = find_char_span(source_text, &change.original);
-                        let local_output = find_char_span(&result.output, &change.replacement);
+                        let local_input = change
+                            .choice
+                            .as_ref()
+                            .map(|choice| choice.source_span)
+                            .or_else(|| find_char_span(source_text, &change.original));
+                        let local_output = change
+                            .choice
+                            .as_ref()
+                            .map(|choice| choice.output_span)
+                            .or_else(|| find_char_span(&result.output, &change.replacement));
                         let mut event = json!({
                             "type": change.kind,
                             "applied": change.applied,
@@ -120,6 +128,18 @@ impl UserControlledLocalizer {
                             if let Some(stage) = &change.matched_stage {
                                 event["stage"] = json!(stage);
                             }
+                        }
+                        if let Some(mut choice) = change.choice.clone() {
+                            if let Some(id) = change.matched_rule_id {
+                                event["rule_id"] = json!(id);
+                            }
+                            if let Some(stage) = &change.matched_stage {
+                                event["stage"] = json!(stage);
+                            }
+                            choice.offset(input_start_chars, output_start_chars);
+                            event["original_input_span"] = json!(choice.source_span);
+                            event["final_output_span"] = json!(choice.output_span);
+                            event["choice"] = json!(choice);
                         }
                         changes.push(event);
                     }
@@ -153,6 +173,7 @@ impl UserControlledLocalizer {
         let review_needed = changes
             .iter()
             .any(|event| event.get("review_needed").and_then(Value::as_bool) == Some(true));
+        crate::alternative_terms::assign_event_ids(&mut changes);
         Ok(UserLocalizationResult {
             input: text.to_owned(),
             output,

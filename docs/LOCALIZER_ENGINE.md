@@ -68,6 +68,15 @@ Every entity/term event carries its original input span. After all stages, the e
 
 Existing stage-local span fields remain for debugging/provenance compatibility.
 
+Issue #48 adds optional nested `choice` metadata to shared regional term events.
+It groups eligible targets for the already selected longest phrase, retaining each
+target's best rank across the inherited levels without changing the applied winner.
+The [alternative-term contract](ALTERNATIVE_TERMS.md) defines candidate statuses,
+exact occurrence spans, one-time edit validation and LIFO undo. Script, entity and
+user events are not alternative-term choosers. Legacy event fields remain available;
+the new nested candidate set is the canonical #48 choice contract, not the older
+same-level `alternatives`/`candidates` explanation fields.
+
 ## Performance model
 
 Entity and term indexes are compiled into prefix tries once per `LocalizerEngine` instance and cached by locale/stage instead of being rebuilt on every call. Long-running desktop/mobile runtimes should reuse one engine instance for a static database and call `clear_cache()` after database mutation.

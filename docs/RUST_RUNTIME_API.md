@@ -80,6 +80,25 @@ an actual eligible rule; equal-level conflicting targets do not invent a winning
 These are additive explanation fields, not an alternatives-choice UI contract or
 changes to the existing v1 outer fields.
 
+## Occurrence choices — Issue #48
+
+Shared regional term events may add optional nested `choice` with deterministic
+session-local occurrence/candidate IDs, states, target texts, exact Unicode spans,
+expected current text and selected candidate ID. The same nine outer response
+fields and legacy request behavior remain; entities, user fixed/protected terms
+and generic script events do not receive choices. See [Alternative Terms](ALTERNATIVE_TERMS.md)
+for the exact contract and trust boundary. Identity recommendations may produce
+an unapplied regional event so that an otherwise valid alternative remains reviewable.
+
+`alternative_terms::ReviewSession::from_response(&response)` copies the trusted
+core result into an in-memory review. `snapshot()` returns a detached view;
+`apply_choice(revision, occurrence_id, candidate_id, ChoiceIntent::UseThisTimeOnly)`
+and `undo(revision)` operate on this owned state without invoking the runtime again.
+Invalid/stale requests return `ChoiceError` without changing text, revision or history.
+Remember intents return `UnsupportedIntent`; no preference is stored.
+This is an internal shared-core operation, not a new Tauri command, Runtime v2,
+frontend engine, or #49 persistence workflow.
+
 ## CLI
 
 The CLI is now a thin caller of the runtime API. Shared-only example:

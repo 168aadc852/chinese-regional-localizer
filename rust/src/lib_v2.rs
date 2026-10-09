@@ -3,6 +3,7 @@ mod shared {
 }
 
 pub use shared::*;
+pub mod alternative_terms;
 pub mod context_profiles;
 mod usage_context;
 pub mod user_localizer;

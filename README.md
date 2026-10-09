@@ -23,6 +23,7 @@ Implemented foundations include:
 - private user-dictionary support and protected/user-preferred terms;
 - Rust usage-context profile foundation: seven built-ins, validated single-parent inheritance and a separate versioned local store;
 - explicit context-aware regional terminology selection in the shared Rust runtime and Python reference engine (no desktop context controls yet);
+- occurrence-specific alternative terms and in-memory one-time choices with stale-edit checks and undo in the core/reference (no desktop choice UI yet);
 - Tauri 2 desktop shell with Rust-managed validated database selection;
 - versioned non-secret desktop database preferences with safe restart validation and atomic saves;
 - full local database paths kept inside Rust rather than exposed to frontend JavaScript;
@@ -63,6 +64,7 @@ Current desktop capabilities include:
 Current desktop limitations:
 
 - persisted settings cover database choices and private-dictionary enabled state only; general Alpha preferences are not implemented;
+- core context/alternative-term capabilities are not yet exposed as desktop pickers or clickable term choices;
 - shared-data update checks are manual rather than background scheduled;
 - interrupted-download retry/resume and production hosting/CDN configuration are not complete;
 - production Windows/macOS installers and platform signing are not complete;
@@ -130,7 +132,9 @@ The proposed HanContext Alpha MVP is in `docs/HANCONTEXT_ALPHA_MVP.md`, with del
 `docs/ROADMAP.md`. The approved Issue #46 profile foundation is described in
 [Usage Context Profiles](docs/CONTEXT_PROFILES.md). Issue #47 adds
 [deterministic context-aware terminology selection](docs/CONTEXT_SELECTION.md), preserving
-Runtime API v1 and existing protection/route rules. Desktop context controls,
+Runtime API v1 and existing protection/route rules. Issue #48 adds
+[alternative terms and occurrence-safe one-time choices](docs/ALTERNATIVE_TERMS.md)
+to the core/reference, without a full-document rerun or remembered preferences. Desktop context controls,
 context-sensitive My Terms, clickable alternatives, Alpha modes/UX and an MCP server
 remain planned, not implemented.
 
@@ -153,9 +157,10 @@ Third-party data is **not** relicensed under the software licence. Each source k
 Validated shared-database and optional user-dictionary choices survive app restarts while
 preserving the Rust-only filesystem-path boundary, safe fallback behavior and Runtime API v1 compatibility.
 
-Issue #46's context-profile foundation is merged. Issue #47's approved core terminology
-selection is implemented in this focused PR, subject to CI, review and merge;
-Issues #48–#51 still require separate approval and implementation. Suggested
+Issue #46's context-profile foundation and #47's core terminology selection are merged.
+Issue #48's approved core alternative/one-time review layer is implemented in this
+focused PR, subject to CI, review and merge; Issues #49–#51 still require separate
+approval and implementation. Suggested
 longer-term order: Desktop Alpha → CLI → MCP Server → production Windows/macOS
 packaging/signing → editor/plugin integrations → optional AI assistance. All clients
 reuse the same Core / Runtime.

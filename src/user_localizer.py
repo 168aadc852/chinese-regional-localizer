@@ -7,6 +7,8 @@ entities/OpenCC rules. Matched user spans are never passed to the shared engine.
 from __future__ import annotations
 
 from typing import Any
+from copy import deepcopy
+from alternative_terms import assign_choice_ids
 
 from localizer_engine import LocalizerEngine, PrefixMatcher, ROUTES, UnsupportedRouteError
 from user_dictionary import UserDictionary, UserTerm, group_by_surface, specificity
@@ -54,6 +56,10 @@ class UserControlledLocalizer:
                     copied = dict(event)
                     self._offset_span(copied, "original_input_span", start)
                     self._offset_span(copied, "final_output_span", output_cursor)
+                    if "choice" in copied:
+                        copied["choice"] = deepcopy(copied["choice"])
+                        self._offset_span(copied["choice"], "source_span", start)
+                        self._offset_span(copied["choice"], "output_span", output_cursor)
                     copied["user_layer_segment_input_span"] = [start, end]
                     events.append(copied)
             else:
@@ -71,6 +77,7 @@ class UserControlledLocalizer:
             output_cursor += len(replacement)
 
         output = "".join(output_parts)
+        assign_choice_ids(events)
         return {
             "input": text,
             "output": output,
