@@ -66,8 +66,8 @@ zh-Hant → zh-TW
 - deterministic 中文地區化核心；
 - Usage Context 與情境化術語選擇；
 - Alternative Terms、精確位置追蹤、單次選擇及 undo 核心；
+- My Terms、多個私人詞庫、情境／全情境記憶偏好及安全兼容遷移核心；
 - 人名、專有名稱及 protected terms 處理；
-- 私人使用者詞庫基礎；
 - Python reference engine 與 Rust shared core；
 - Runtime API v1；
 - Tauri 2 Desktop 基礎；
@@ -76,13 +76,10 @@ zh-Hant → zh-TW
 
 Desktop Alpha 仍在完成：
 
-- Desktop 內的情境選擇及可點擊替代詞介面；
-- My Terms / 我的用詞及 remembered preferences；
-- 多個私人詞庫；
+- Desktop 內的情境選擇、可點擊替代詞及記憶選擇介面；
+- Desktop My Dictionaries 管理、匯入及啟用／停用介面；
 - 簡化 Desktop Alpha 操作流程；
 - Alpha 安裝及新手使用體驗。
-
-Issue #49 的 My Terms、多私人詞庫及記憶偏好核心已在獨立 PR 中實作，仍待 CI、審閱及合併；這不代表 Desktop 詞庫管理或記憶選擇介面已完成。
 
 詳情請參閱 `PROJECT_STATE.md`、`docs/HANCONTEXT_ALPHA_MVP.md` 及 `docs/ALTERNATIVE_TERMS.md`。
 私人詞庫核心與兼容遷移詳見 [My Dictionaries](docs/MY_DICTIONARIES.md)。
@@ -113,7 +110,7 @@ HanContext 軟件採用 **Apache License 2.0**。
 - versioned Usage Context profiles
 - deterministic context-aware terminology selection
 - occurrence-specific alternatives and one-time review sessions
-- private user-dictionary foundation
+- versioned private My Dictionaries / My Terms core
 - Tauri 2 desktop shell
 - authenticated shared-data package updates
 - protected `main` with required tests
@@ -148,7 +145,7 @@ The fixture database is for tests/development only and is not an authoritative t
 
 HanContext is an offline-first, open-source Chinese regional localization project focused on deterministic, explainable and controllable terminology adaptation across the Chinese Mainland, Hong Kong and Taiwan.
 
-Its core does not require an LLM, allowing reproducible, auditable and offline localization. Context-aware terminology selection and occurrence-specific one-time alternatives are implemented in the shared core/reference; the project is currently in **Desktop Alpha development**.
+Its core does not require an LLM, allowing reproducible, auditable and offline localization. Context-aware terminology selection, occurrence-specific alternatives and core private remembered preferences are implemented in the shared core/reference; the project is currently in **Desktop Alpha development**.
 
 ---
 
