@@ -1,124 +1,110 @@
 <!doctype html>
-<html lang="zh-Hant">
+<html lang="zh-HK" data-theme="light">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Chinese Regional Localizer</title>
+  <title data-i18n="app.title"></title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <main class="app-shell">
+  <main class="app-shell hidden" id="appShell">
     <header class="topbar">
       <div>
-        <p class="eyebrow">Offline-first · Runtime API v1</p>
-        <h1>Chinese Regional Localizer</h1>
-        <p class="subtitle">中國大陸、香港、台灣中文地區化轉換</p>
+        <p class="eyebrow" data-i18n="app.eyebrow"></p>
+        <h1 data-i18n="app.title"></h1>
+        <p class="subtitle" data-i18n="app.subtitle"></p>
       </div>
-      <span id="runtimeBadge" class="badge">Rust runtime</span>
+      <span id="runtimeBadge" class="badge"></span>
     </header>
-
-    <section class="card settings-panel" aria-label="Database settings">
+    <section class="card settings-panel" data-i18n-label="presentation.title">
+      <h2 data-i18n="presentation.title"></h2>
+      <div class="presentation-grid">
+        <label><span data-i18n="presentation.language"></span>
+          <select id="uiLocale" disabled>
+            <option value="zh-HK" data-i18n-self="zh-HK"></option>
+            <option value="zh-TW" data-i18n-self="zh-TW"></option>
+            <option value="zh-CN" data-i18n-self="zh-CN"></option>
+            <option value="en" data-i18n-self="en"></option>
+          </select>
+        </label>
+        <label><span data-i18n="presentation.appearance"></span>
+          <select id="appearance" disabled>
+            <option value="system" data-i18n="appearance.system"></option>
+            <option value="light" data-i18n="appearance.light"></option>
+            <option value="dark" data-i18n="appearance.dark"></option>
+            <option value="eink_mono" data-i18n="appearance.eink_mono"></option>
+          </select>
+        </label>
+      </div>
+      <p id="presentationMessage" class="settings-message hidden" role="status"></p>
+    </section>
+    <section class="card settings-panel" data-i18n-label="database.title">
       <div class="panel-heading">
-        <div>
-          <h2>資料庫設定</h2>
-          <p class="muted">檔案選擇與 SQLite 驗證全部由 Rust 處理；前端不會取得完整檔案路徑。</p>
-        </div>
-        <button id="refreshDatabaseStatus" class="secondary-button" type="button">重新檢查</button>
+        <div><h2 data-i18n="database.title"></h2><p class="muted" data-i18n="database.description"></p></div>
+        <button id="refreshDatabaseStatus" class="secondary-button" type="button" data-i18n="action.refresh"></button>
       </div>
       <div class="database-grid">
         <article class="database-item">
-          <div>
-            <strong>Shared regional database</strong>
-            <p id="sharedDatabaseStatus" class="muted">檢查中…</p>
-          </div>
-          <button id="chooseSharedDatabase" class="secondary-button" type="button">選擇檔案</button>
+          <div><strong id="sharedLabel" data-i18n="database.shared"></strong><p id="sharedDatabaseStatus" class="muted" role="status" data-i18n="status.checking"></p></div>
+          <button id="chooseSharedDatabase" class="secondary-button" type="button" data-i18n="action.choose_file" aria-describedby="sharedLabel"></button>
         </article>
         <article class="database-item">
-          <div>
-            <strong>私人 user dictionary（可選）</strong>
-            <p id="userDatabaseStatus" class="muted">檢查中…</p>
-          </div>
+          <div><strong id="privateLabel" data-i18n="database.private"></strong><p id="userDatabaseStatus" class="muted" role="status" data-i18n="status.checking"></p></div>
           <div class="button-row">
-            <button id="chooseUserDatabase" class="secondary-button" type="button">選擇檔案</button>
-            <button id="enableUserDatabase" class="secondary-button" type="button" disabled>啟用</button>
-            <button id="clearUserDatabase" class="ghost-button" type="button">停用</button>
+            <button id="chooseUserDatabase" class="secondary-button" type="button" data-i18n="action.choose_file" aria-describedby="privateLabel"></button>
+            <button id="enableUserDatabase" class="secondary-button" type="button" disabled data-i18n="action.enable"></button>
+            <button id="clearUserDatabase" class="ghost-button" type="button" data-i18n="action.disable"></button>
           </div>
         </article>
       </div>
       <p id="databaseMessage" class="settings-message hidden" role="status"></p>
     </section>
-
-    <section class="card settings-panel" aria-label="Data updates">
+    <section class="card settings-panel" data-i18n-label="update.title">
       <div class="panel-heading">
-        <div>
-          <h2>共享資料更新</h2>
-          <p class="muted">只接受 Rust 內已設定並通過簽章、hash、SQLite 及 package 驗證的更新。</p>
-        </div>
-        <span id="updateBadge" class="badge">檢查中…</span>
+        <div><h2 data-i18n="update.title"></h2><p class="muted" data-i18n="update.description"></p></div>
+        <span id="updateBadge" class="badge" data-i18n="status.checking"></span>
       </div>
       <div class="database-item update-item">
-        <div>
-          <strong>Regional data package</strong>
-          <p id="updateStatusText" class="muted">正在讀取更新狀態…</p>
-        </div>
+        <div><strong data-i18n="update.package"></strong><p id="updateStatusText" class="muted" role="status" data-i18n="update.loading"></p></div>
         <div class="button-row">
-          <button id="checkDataUpdate" class="secondary-button" type="button">檢查更新</button>
-          <button id="installDataUpdate" type="button" disabled>安裝更新</button>
+          <button id="checkDataUpdate" class="secondary-button" type="button" data-i18n="action.check_update"></button>
+          <button id="installDataUpdate" type="button" disabled data-i18n="action.install_update"></button>
         </div>
       </div>
       <p id="updateMessage" class="settings-message hidden" role="status"></p>
     </section>
-
-    <section class="controls card" aria-label="Localization settings">
-      <label>
-        <span>來源</span>
-        <select id="sourceLocale">
-          <option value="zh-CN">中國大陸 · 簡體</option>
-          <option value="zh-Hant">繁體中文</option>
-        </select>
+    <section class="controls card" data-i18n-label="localization.settings">
+      <label><span data-i18n="localization.source"></span>
+        <select id="sourceLocale"><option value="zh-CN" data-i18n="route.cn"></option><option value="zh-Hant" data-i18n="route.hant"></option></select>
       </label>
       <div class="arrow" aria-hidden="true">→</div>
-      <label>
-        <span>目標</span>
-        <select id="targetLocale">
-          <option value="zh-HK">香港</option>
-          <option value="zh-TW">台灣</option>
-        </select>
+      <label><span data-i18n="localization.target"></span>
+        <select id="targetLocale"><option value="zh-HK" data-i18n="route.hk"></option><option value="zh-TW" data-i18n="route.tw"></option></select>
       </label>
-      <button id="localizeButton" type="button">地區化</button>
+      <button id="localizeButton" type="button"></button>
     </section>
-
     <section class="workspace">
       <article class="card editor-panel">
-        <div class="panel-heading">
-          <h2>原文</h2>
-          <span id="inputCount" class="muted">0 字</span>
-        </div>
-        <textarea id="inputText" spellcheck="false" placeholder="貼上需要地區化的中文文字…">布拉德·皮特研究人工智能。</textarea>
+        <div class="panel-heading"><h2 id="inputLabel" data-i18n="editor.input"></h2><span id="inputCount" class="muted"></span></div>
+        <textarea id="inputText" aria-labelledby="inputLabel" spellcheck="false" data-i18n-placeholder="editor.input_placeholder">布拉德·皮特研究人工智能。</textarea>
       </article>
-
       <article class="card editor-panel">
-        <div class="panel-heading">
-          <h2>結果</h2>
-          <span id="reviewBadge" class="review-badge hidden">需要檢查</span>
-        </div>
-        <textarea id="outputText" readonly placeholder="地區化結果會顯示在這裡"></textarea>
+        <div class="panel-heading"><h2 id="outputLabel" data-i18n="editor.output"></h2><span id="reviewBadge" class="review-badge hidden" data-i18n="changes.review_needed"></span></div>
+        <textarea id="outputText" aria-labelledby="outputLabel" readonly data-i18n-placeholder="editor.output_placeholder"></textarea>
       </article>
     </section>
-
     <section class="card review-panel">
       <div class="panel-heading">
-        <div>
-          <h2>變更與來源</h2>
-          <p class="muted">只顯示 Runtime API 回傳的決策；前端不直接讀取 SQLite。</p>
-        </div>
-        <span id="changeCount" class="muted">0 項變更</span>
+        <div><h2 data-i18n="changes.title"></h2><p class="muted" data-i18n="changes.description"></p></div>
+        <span id="changeCount" class="muted"></span>
       </div>
-      <div id="changes" class="changes empty-state">按「地區化」後，這裡會顯示術語、人物名稱、來源與檢查狀態。</div>
+      <div id="changes" class="changes empty-state" aria-live="polite"></div>
     </section>
-
     <p id="errorMessage" class="error hidden" role="alert"></p>
   </main>
+  <script src="i18n/locales.js"></script>
+  <script src="i18n.js"></script>
+  <script src="presentation.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

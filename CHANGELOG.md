@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-10-10 — Issue #60 Desktop Alpha Stage A (PR review)
+
+- Added a human-editable UTF-8 CSV translation table and deterministic, offline validation/generation for four independent UI locales: zh-HK, zh-TW, zh-CN and en.
+- Migrated the existing static shell to semantic keys, live UI language switching and self-labelled language options without flags; document source/target choices remain independent.
+- Added semantic Light/Dark/E-ink / Mono tokens, platform Light/Dark resolution for System, visible keyboard focus, reduced-motion guards, non-colour-only status patterns and responsive zoom-friendly layout.
+- Added separate typed presentation preferences to safely migrated desktop settings v2; preserved atomic-save, path privacy, concurrency and unsupported-document protection.
+- Added translation release/build gates, zero-dependency Node presentation tests and translation/contrast/settings regressions. No localization engine, Runtime API v1, route, review-session or private-store semantics changed.
+- This is a UI foundation, not the full #50 workflow, dictionary manager, new localization modes, installer or complete WCAG certification.
+
 ## 2026-10-10 — Issue #49 context-aware My Terms / My Dictionaries
 
 - Added separate private SQLite v2 dictionary containers, reserved Personal/Legacy identities and target/context-scoped preferred terms without new numeric priority controls.

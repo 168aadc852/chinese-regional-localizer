@@ -88,6 +88,8 @@ Desktop Alpha 仍在完成：
 詳情請參閱 `PROJECT_STATE.md`、`docs/HANCONTEXT_ALPHA_MVP.md` 及 `docs/ALTERNATIVE_TERMS.md`。
 私人詞庫核心與兼容遷移詳見 [My Dictionaries](docs/MY_DICTIONARIES.md)。
 
+Issue #60 的 Stage A 實作提供四語切換、四種外觀選項及安全保存介面顯示設定，待 PR 審核；這不是完整 Desktop Alpha 流程，也不代表已取得 WCAG 認證。使用情境、模式及私人詞庫管理介面仍屬後續工作。詳見 [Desktop 介面基礎](docs/DESKTOP_UI_FOUNDATION.md)。
+
 ## 開源與資料授權
 
 HanContext 軟件採用 **Apache License 2.0**。

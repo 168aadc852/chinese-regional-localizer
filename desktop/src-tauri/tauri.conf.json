@@ -16,9 +16,19 @@
         "height": 820,
         "minWidth": 760,
         "minHeight": 560,
-        "resizable": true
+        "resizable": true,
+        "zoomHotkeysEnabled": true
       }
-    ]
+    ],
+    "security": {
+      "capabilities": [
+        {
+          "identifier": "presentation-zoom",
+          "windows": ["main"],
+          "permissions": ["core:webview:allow-set-webview-zoom"]
+        }
+      ]
+    }
   },
   "bundle": {
     "active": false

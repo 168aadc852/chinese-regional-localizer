@@ -50,8 +50,13 @@ existing application identifier `org.chineseregionallocalizer.desktop`. On Windo
 this is normally under `%APPDATA%` followed by that identifier. This is independent
 of the working product name; no repository or application-identifier rename is made.
 
-The v1 JSON document contains only `schema_version: 1`, `shared_db`, optional
-`user_db`, and `user_enabled`. Paths are absolute and remain private to Rust-side
+Phase 3J's v1 JSON document contained only `schema_version: 1`, `shared_db`, optional
+`user_db`, and `user_enabled`. Issue #60 adds settings v2 with a separate
+`presentation` object (`ui_locale`, `appearance`). Valid v1 documents migrate in
+memory with zh-HK/System defaults; startup never rewrites them. Only an accepted
+settings change writes v2. Presentation does not enter localization requests or
+change database choices. See [UI foundation](DESKTOP_UI_FOUNDATION.md).
+Paths are absolute and remain private to Rust-side
 storage. Local paths are non-secret preferences, but the file is not encrypted;
 it must never hold keys, tokens, text input, or release/update trust settings.
 
@@ -74,8 +79,9 @@ At startup:
 - Unsupported schema versions or unknown fields fall back safely and block writes
   for that session, preserving the original document for an explicit future
   migration. To use this build with that file, close the app and back up/remove it
-  locally before restarting. There is no earlier persisted schema to migrate in
-  Phase 3J; v0 is unsupported rather than guessed into v1.
+  locally before restarting. v0 remains unsupported rather than guessed into v1/v2;
+  settings versions newer than v2 and unknown fields (including presentation fields)
+  remain write-protected for explicit future migration.
 
 Changes are serialized under one Rust lock. Rust validates a candidate, writes a
 same-directory temporary file, syncs its contents, and atomically replaces the old

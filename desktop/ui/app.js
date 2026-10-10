@@ -1,269 +1,307 @@
-const sourceLocale = document.getElementById('sourceLocale');
-const targetLocale = document.getElementById('targetLocale');
-const inputText = document.getElementById('inputText');
-const outputText = document.getElementById('outputText');
-const localizeButton = document.getElementById('localizeButton');
-const inputCount = document.getElementById('inputCount');
-const changeCount = document.getElementById('changeCount');
-const changes = document.getElementById('changes');
-const reviewBadge = document.getElementById('reviewBadge');
-const errorMessage = document.getElementById('errorMessage');
-const runtimeBadge = document.getElementById('runtimeBadge');
-const sharedDatabaseStatus = document.getElementById('sharedDatabaseStatus');
-const userDatabaseStatus = document.getElementById('userDatabaseStatus');
-const chooseSharedDatabase = document.getElementById('chooseSharedDatabase');
-const chooseUserDatabase = document.getElementById('chooseUserDatabase');
-const clearUserDatabase = document.getElementById('clearUserDatabase');
-const enableUserDatabase = document.getElementById('enableUserDatabase');
-const refreshDatabaseStatus = document.getElementById('refreshDatabaseStatus');
-const databaseMessage = document.getElementById('databaseMessage');
-const updateBadge = document.getElementById('updateBadge');
-const updateStatusText = document.getElementById('updateStatusText');
-const checkDataUpdate = document.getElementById('checkDataUpdate');
-const installDataUpdate = document.getElementById('installDataUpdate');
-const updateMessage = document.getElementById('updateMessage');
+const { t, setLocale, apply: applyTranslations } = globalThis.HanContextI18n;
+const { applyAppearance } = globalThis.HanContextPresentation;
+const key = value => value; // Register dynamic semantic keys for release validation.
+const elements = Object.fromEntries([
+  'appShell', 'uiLocale', 'appearance', 'presentationMessage',
+  'sourceLocale', 'targetLocale', 'inputText', 'outputText', 'localizeButton',
+  'inputCount', 'changeCount', 'changes', 'reviewBadge', 'errorMessage', 'runtimeBadge',
+  'sharedDatabaseStatus', 'userDatabaseStatus', 'chooseSharedDatabase', 'chooseUserDatabase',
+  'clearUserDatabase', 'enableUserDatabase', 'refreshDatabaseStatus', 'databaseMessage',
+  'updateBadge', 'updateStatusText', 'checkDataUpdate', 'installDataUpdate', 'updateMessage',
+].map(id => [id, document.getElementById(id)]));
+const systemAppearance = window.matchMedia('(prefers-color-scheme: dark)');
+let preferences = { ui_locale: 'zh-HK', appearance: 'system' };
 let lastDatabaseStatus = null;
+let lastUpdateStatus = null;
+let lastResponse = null;
+let hasRun = false;
+let localizationBusy = false;
+let settingsBusy = false;
+let updateBusy = false;
+const messages = new Map();
 
 function invokeTauri() {
   const invoke = window.__TAURI__?.core?.invoke;
-  if (!invoke) {
-    throw new Error('Tauri runtime 未載入。請用 Tauri desktop app 開啟此介面。');
-  }
+  if (!invoke) throw new Error('runtime_unavailable');
   return invoke;
 }
 
+function operationError(error, fallback) {
+  return error?.message === 'runtime_unavailable' ? key('error.runtime_unavailable') : fallback;
+}
+
+function setMessage(id, messageKey = null, isError = false) {
+  messages.set(id, { messageKey, isError });
+  renderMessage(id);
+}
+
+function renderMessage(id) {
+  const message = messages.get(id);
+  const element = elements[id];
+  element.textContent = message?.messageKey ? t(message.messageKey) : '';
+  element.classList.toggle('hidden', !message?.messageKey);
+  element.classList.toggle('settings-error', Boolean(message?.isError));
+}
+
 function updateCount() {
-  inputCount.textContent = `${[...inputText.value].length} 字`;
+  elements.inputCount.textContent = t('editor.count', { count: [...elements.inputText.value].length });
 }
 
-function setBusy(busy) {
-  localizeButton.disabled = busy;
-  localizeButton.textContent = busy ? '處理中…' : '地區化';
-}
-
-function setSettingsBusy(busy) {
-  for (const button of [chooseSharedDatabase, chooseUserDatabase, clearUserDatabase, enableUserDatabase, refreshDatabaseStatus]) {
-    button.disabled = busy;
+function renderBusy() {
+  elements.localizeButton.disabled = localizationBusy;
+  elements.localizeButton.textContent = localizationBusy ? t('action.processing') : t('action.localize');
+  elements.localizeButton.setAttribute('aria-busy', String(localizationBusy));
+  for (const id of ['chooseSharedDatabase', 'chooseUserDatabase', 'clearUserDatabase', 'enableUserDatabase', 'refreshDatabaseStatus']) {
+    elements[id].disabled = settingsBusy;
   }
-  if (!busy && lastDatabaseStatus) renderDatabaseStatus(lastDatabaseStatus);
-}
-
-function setUpdateBusy(busy) {
-  checkDataUpdate.disabled = busy;
-  installDataUpdate.disabled = busy || installDataUpdate.dataset.available !== 'true';
-  checkDataUpdate.textContent = busy ? '處理中…' : '檢查更新';
-}
-
-function showError(message) {
-  errorMessage.textContent = message;
-  errorMessage.classList.toggle('hidden', !message);
-}
-
-function showDatabaseMessage(message, isError = false) {
-  databaseMessage.textContent = message || '';
-  databaseMessage.classList.toggle('hidden', !message);
-  databaseMessage.classList.toggle('settings-error', Boolean(message) && isError);
-}
-
-function showUpdateMessage(message, isError = false) {
-  updateMessage.textContent = message || '';
-  updateMessage.classList.toggle('hidden', !message);
-  updateMessage.classList.toggle('settings-error', Boolean(message) && isError);
-}
-
-function text(value) {
-  return value == null ? '' : String(value);
+  if (!settingsBusy && lastDatabaseStatus) {
+    elements.clearUserDatabase.disabled = !lastDatabaseStatus.user_name || !lastDatabaseStatus.user_enabled;
+    elements.enableUserDatabase.disabled = !lastDatabaseStatus.user_name || lastDatabaseStatus.user_enabled || !lastDatabaseStatus.user_ready;
+  }
+  elements.checkDataUpdate.disabled = updateBusy || !lastUpdateStatus?.configured;
+  elements.installDataUpdate.disabled = updateBusy || !lastUpdateStatus?.update_available;
+  elements.checkDataUpdate.textContent = updateBusy ? t('action.processing') : t('action.check_update');
 }
 
 function renderDatabaseStatus(status) {
-  lastDatabaseStatus = status;
-  const sharedName = status?.shared_name || '未設定';
-  sharedDatabaseStatus.textContent = status?.shared_ready
-    ? `可用：${sharedName}`
-    : `不可用：${sharedName}${status?.shared_message ? ` · ${status.shared_message}` : ''}`;
-  sharedDatabaseStatus.classList.toggle('status-ok', Boolean(status?.shared_ready));
-  sharedDatabaseStatus.classList.toggle('status-error', !status?.shared_ready);
-
-  if (!status?.user_name) {
-    userDatabaseStatus.textContent = '未啟用；會只使用 shared regional database。';
-    userDatabaseStatus.classList.remove('status-error');
-    userDatabaseStatus.classList.add('status-ok');
-    clearUserDatabase.disabled = true;
-    enableUserDatabase.disabled = true;
+  const name = status.shared_name || t('status.unset');
+  elements.sharedDatabaseStatus.textContent = status.shared_ready
+    ? t('database.ready', { name }) : t('database.unavailable', { name });
+  elements.sharedDatabaseStatus.classList.toggle('status-ok', Boolean(status.shared_ready));
+  elements.sharedDatabaseStatus.classList.toggle('status-error', !status.shared_ready);
+  if (!status.user_name) {
+    elements.userDatabaseStatus.textContent = t('database.private_unused');
   } else {
-    userDatabaseStatus.textContent = status?.user_ready
-      ? `${status.user_enabled ? '已啟用' : '已停用'}：${status.user_name}`
-      : `不可用：${status.user_name}${status?.user_message ? ` · ${status.user_message}` : ''}`;
-    userDatabaseStatus.classList.toggle('status-ok', Boolean(status?.user_ready));
-    userDatabaseStatus.classList.toggle('status-error', !status?.user_ready);
-    clearUserDatabase.disabled = !status.user_enabled;
-    enableUserDatabase.disabled = status.user_enabled || !status.user_ready;
+    const userKey = !status.user_ready ? key('database.unavailable')
+      : status.user_enabled ? key('database.private_enabled') : key('database.private_disabled');
+    elements.userDatabaseStatus.textContent = t(userKey, { name: status.user_name });
   }
+  elements.userDatabaseStatus.classList.toggle('status-ok', Boolean(status.user_ready));
+  elements.userDatabaseStatus.classList.toggle('status-error', !status.user_ready);
 }
 
 function renderUpdateStatus(status) {
-  const configured = Boolean(status?.configured);
-  const available = Boolean(status?.update_available);
-  installDataUpdate.dataset.available = available ? 'true' : 'false';
-  installDataUpdate.disabled = !available;
-  checkDataUpdate.disabled = !configured;
-
-  if (!configured) {
-    updateBadge.textContent = '未設定';
-    updateStatusText.textContent = status?.message || '更新服務尚未設定；離線功能仍可正常使用。';
+  if (!status.configured) {
+    elements.updateBadge.textContent = t('status.unset');
+    elements.updateStatusText.textContent = t('update.unconfigured');
     return;
   }
-
-  const current = status?.current_version || '未由 package store 管理';
-  if (available) {
-    updateBadge.textContent = '有更新';
-    updateStatusText.textContent = `目前版本：${current} · 可安裝版本：${status.offered_version}`;
-  } else {
-    updateBadge.textContent = '已就緒';
-    updateStatusText.textContent = `目前版本：${current}`;
-  }
-  if (status?.message) showUpdateMessage(status.message);
-}
-
-async function loadDatabaseStatus() {
-  showDatabaseMessage('');
-  setSettingsBusy(true);
-  try {
-    const status = await invokeTauri()('database_status');
-    renderDatabaseStatus(status);
-    showDatabaseMessage(status.settings_message, Boolean(status.settings_message));
-  } catch (error) {
-    showDatabaseMessage(typeof error === 'string' ? error : error?.message || String(error), true);
-  } finally {
-    setSettingsBusy(false);
-  }
-}
-
-async function loadUpdateStatus() {
-  showUpdateMessage('');
-  try {
-    const status = await invokeTauri()('update_status');
-    renderUpdateStatus(status);
-  } catch (error) {
-    showUpdateMessage(typeof error === 'string' ? error : error?.message || String(error), true);
-  }
-}
-
-async function runUpdateCommand(command) {
-  showUpdateMessage('');
-  setUpdateBusy(true);
-  try {
-    const status = await invokeTauri()(command);
-    renderUpdateStatus(status);
-    if (command === 'install_data_update') await loadDatabaseStatus();
-  } catch (error) {
-    showUpdateMessage(typeof error === 'string' ? error : error?.message || String(error), true);
-  } finally {
-    setUpdateBusy(false);
-  }
-}
-
-async function runDatabaseCommand(command, successMessage) {
-  showDatabaseMessage('');
-  setSettingsBusy(true);
-  try {
-    const status = await invokeTauri()(command);
-    renderDatabaseStatus(status);
-    showDatabaseMessage(status.settings_message || successMessage, Boolean(status.settings_message));
-  } catch (error) {
-    showDatabaseMessage(typeof error === 'string' ? error : error?.message || String(error), true);
-  } finally {
-    setSettingsBusy(false);
-  }
+  const version = status.current_version || t('update.unmanaged');
+  elements.updateBadge.textContent = status.update_available ? t('update.available') : t('update.ready');
+  elements.updateStatusText.textContent = status.update_available
+    ? t('update.versions', { version, offered: status.offered_version })
+    : t('update.version', { version });
 }
 
 function renderChanges(items) {
-  changes.replaceChildren();
-  changeCount.textContent = `${items.length} 項變更`;
+  elements.changes.replaceChildren();
+  elements.changeCount.textContent = t('changes.count', { count: items.length });
   if (!items.length) {
-    changes.className = 'changes empty-state';
-    changes.textContent = '沒有需要顯示的變更。';
+    elements.changes.className = 'changes empty-state';
+    elements.changes.textContent = hasRun ? t('changes.empty') : t('changes.initial');
     return;
   }
-
-  changes.className = 'changes';
+  elements.changes.className = 'changes';
+  // Existing read-only v1 technical list, not the future Alpha review workflow.
+  // Document text and protocol identifiers are data, never UI translations.
+  const fields = [
+    ['reason', key('changes.reason')], ['qid', key('changes.qid')],
+    ['source_id', key('changes.source')], ['provenance', key('changes.provenance')],
+    ['user_term_id', key('changes.user_rule')], ['original_input_span', key('changes.input_span')],
+    ['final_output_span', key('changes.output_span')],
+  ];
   for (const item of items) {
     const card = document.createElement('article');
     card.className = 'change-card';
-
     const top = document.createElement('div');
     top.className = 'change-top';
     const type = document.createElement('span');
     type.className = 'change-type';
-    type.textContent = text(item.type || item.reason || 'change');
+    type.textContent = t('changes.type', { value: item.type || item.reason || '' });
     const status = document.createElement('span');
     status.className = item.review_needed ? 'review-badge' : 'muted';
-    status.textContent = item.review_needed ? '需要檢查' : '已套用';
+    status.textContent = item.review_needed ? t('changes.review_needed') : t('changes.applied');
     top.append(type, status);
-
     const body = document.createElement('p');
     body.className = 'change-text';
-    body.textContent = `${text(item.original)} → ${text(item.replacement)}`;
-
+    body.textContent = String(item.original ?? '') + ' → ' + String(item.replacement ?? '');
     const meta = document.createElement('div');
     meta.className = 'change-meta';
-    const parts = [
-      item.reason && `原因：${item.reason}`,
-      item.qid && `Wikidata：${item.qid}`,
-      item.source_id && `來源：${item.source_id}`,
-      item.provenance && `資料層：${item.provenance}`,
-      item.user_term_id && `User rule #${item.user_term_id}`,
-      Array.isArray(item.original_input_span) && `原文位置：${item.original_input_span.join('–')}`,
-      Array.isArray(item.final_output_span) && `結果位置：${item.final_output_span.join('–')}`,
-    ].filter(Boolean);
-    for (const part of parts) {
+    for (const [field, messageKey] of fields) {
+      if (item[field] == null || item[field] === '') continue;
       const span = document.createElement('span');
-      span.textContent = part;
+      const value = Array.isArray(item[field]) ? item[field].join('–') : item[field];
+      span.textContent = t(messageKey, { value });
       meta.appendChild(span);
     }
-
     card.append(top, body, meta);
-    changes.appendChild(card);
+    elements.changes.appendChild(card);
+  }
+}
+
+function renderShell() {
+  setLocale(preferences.ui_locale);
+  applyTranslations();
+  elements.uiLocale.value = preferences.ui_locale;
+  elements.appearance.value = preferences.appearance;
+  applyAppearance(preferences.appearance, systemAppearance.matches);
+  updateCount();
+  if (lastDatabaseStatus) renderDatabaseStatus(lastDatabaseStatus);
+  if (lastUpdateStatus) renderUpdateStatus(lastUpdateStatus);
+  elements.runtimeBadge.textContent = lastResponse?.user_dictionary_applied ? t('runtime.private') : t('runtime.core');
+  elements.reviewBadge.classList.toggle('hidden', !lastResponse?.review_needed);
+  renderChanges(lastResponse?.changes || []);
+  for (const id of messages.keys()) renderMessage(id);
+  renderBusy();
+}
+
+async function loadPresentation() {
+  try {
+    if (!window.__TAURI__?.core?.invoke) {
+      setMessage('presentationMessage', key('presentation.preview'));
+    } else {
+      preferences = await invokeTauri()('presentation_settings');
+    }
+  } catch {
+    setMessage('presentationMessage', key('error.preferences_load'), true);
+  } finally {
+    renderShell();
+    elements.uiLocale.disabled = false;
+    elements.appearance.disabled = false;
+  }
+}
+
+const presentationErrors = {
+  preferences_unavailable: key('error.preferences_unavailable'),
+  settings_unsupported: key('error.settings_unsupported'),
+  settings_save_failed: key('error.settings_save_failed'),
+};
+
+async function savePresentation() {
+  const focused = document.activeElement;
+  const desired = { ui_locale: elements.uiLocale.value, appearance: elements.appearance.value };
+  elements.uiLocale.disabled = true;
+  elements.appearance.disabled = true;
+  try {
+    if (!window.__TAURI__?.core?.invoke) {
+      // Explicit browser-only preview, no localStorage or persistence simulation.
+      preferences = desired;
+      setMessage('presentationMessage', key('presentation.preview'));
+    } else {
+      preferences = await invokeTauri()('save_presentation_settings', { preferences: desired });
+      setMessage('presentationMessage', key('presentation.saved'));
+    }
+  } catch (error) {
+    setMessage('presentationMessage', presentationErrors[error] || key('error.settings_save_failed'), true);
+  } finally {
+    // Failed save restores the last accepted theme and locale, not an unsaved choice.
+    renderShell();
+    elements.uiLocale.disabled = false;
+    elements.appearance.disabled = false;
+    // Disabling a native select during the write can blur it. Restore focus only
+    // if the user has not moved elsewhere while waiting; keep keyboard continuity.
+    if (document.activeElement === document.body) focused?.focus();
+  }
+}
+
+async function loadDatabaseStatus() {
+  setMessage('databaseMessage');
+  settingsBusy = true;
+  renderBusy();
+  try {
+    lastDatabaseStatus = await invokeTauri()('database_status');
+    if (lastDatabaseStatus.settings_message) setMessage('databaseMessage', key('error.settings_restore'), true);
+  } catch (error) {
+    setMessage('databaseMessage', operationError(error, key('error.database_operation')), true);
+  } finally {
+    settingsBusy = false;
+    renderShell();
+  }
+}
+
+async function loadUpdateStatus() {
+  setMessage('updateMessage');
+  try {
+    lastUpdateStatus = await invokeTauri()('update_status');
+    if (lastUpdateStatus.message && lastUpdateStatus.configured) setMessage('updateMessage', key('update.notice'));
+  } catch (error) {
+    setMessage('updateMessage', operationError(error, key('error.update_operation')), true);
+  } finally {
+    renderShell();
+  }
+}
+
+async function runUpdateCommand(command) {
+  setMessage('updateMessage');
+  updateBusy = true;
+  renderBusy();
+  try {
+    lastUpdateStatus = await invokeTauri()(command);
+    if (lastUpdateStatus.message && lastUpdateStatus.configured) setMessage('updateMessage', key('update.notice'));
+    if (command === 'install_data_update') await loadDatabaseStatus();
+  } catch (error) {
+    setMessage('updateMessage', operationError(error, key('error.update_operation')), true);
+  } finally {
+    updateBusy = false;
+    renderShell();
+  }
+}
+
+async function runDatabaseCommand(command, successKey) {
+  setMessage('databaseMessage');
+  settingsBusy = true;
+  renderBusy();
+  try {
+    lastDatabaseStatus = await invokeTauri()(command);
+    setMessage('databaseMessage', lastDatabaseStatus.settings_message ? key('error.settings_restore') : successKey, Boolean(lastDatabaseStatus.settings_message));
+  } catch (error) {
+    setMessage('databaseMessage', operationError(error, key('error.database_operation')), true);
+  } finally {
+    settingsBusy = false;
+    renderShell();
   }
 }
 
 async function localize() {
-  showError('');
-  setBusy(true);
+  setMessage('errorMessage');
+  localizationBusy = true;
+  hasRun = true;
+  renderBusy();
   try {
-    const response = await invokeTauri()('localize_text', {
+    lastResponse = await invokeTauri()('localize_text', {
       request: {
         api_version: '1',
-        text: inputText.value,
-        source_locale: sourceLocale.value,
-        target_locale: targetLocale.value,
+        text: elements.inputText.value,
+        source_locale: elements.sourceLocale.value,
+        target_locale: elements.targetLocale.value,
         context: null,
       },
     });
-    outputText.value = response.output || '';
-    reviewBadge.classList.toggle('hidden', !response.review_needed);
-    runtimeBadge.textContent = response.user_dictionary_applied ? 'Rust + user dictionary' : 'Rust runtime';
-    renderChanges(Array.isArray(response.changes) ? response.changes : []);
+    elements.outputText.value = lastResponse.output || '';
   } catch (error) {
-    outputText.value = '';
-    reviewBadge.classList.add('hidden');
-    renderChanges([]);
-    showError(typeof error === 'string' ? error : error?.message || String(error));
+    lastResponse = null;
+    elements.outputText.value = '';
+    setMessage('errorMessage', operationError(error, key('error.localization')), true);
   } finally {
-    setBusy(false);
+    localizationBusy = false;
+    renderShell();
   }
 }
 
-inputText.addEventListener('input', updateCount);
-localizeButton.addEventListener('click', localize);
-refreshDatabaseStatus.addEventListener('click', loadDatabaseStatus);
-chooseSharedDatabase.addEventListener('click', () => runDatabaseCommand('choose_shared_database', 'Shared database 設定已更新。'));
-chooseUserDatabase.addEventListener('click', () => runDatabaseCommand('choose_user_database', 'User dictionary 設定已更新。'));
-clearUserDatabase.addEventListener('click', () => runDatabaseCommand('clear_user_database', 'User dictionary 已停用。'));
-enableUserDatabase.addEventListener('click', () => runDatabaseCommand('enable_user_database', 'User dictionary 已啟用。'));
-checkDataUpdate.addEventListener('click', () => runUpdateCommand('check_data_update'));
-installDataUpdate.addEventListener('click', () => runUpdateCommand('install_data_update'));
-
-updateCount();
+elements.uiLocale.addEventListener('change', savePresentation);
+elements.appearance.addEventListener('change', savePresentation);
+systemAppearance.addEventListener('change', () => applyAppearance(preferences.appearance, systemAppearance.matches));
+elements.inputText.addEventListener('input', updateCount);
+elements.localizeButton.addEventListener('click', localize);
+elements.refreshDatabaseStatus.addEventListener('click', loadDatabaseStatus);
+elements.chooseSharedDatabase.addEventListener('click', () => runDatabaseCommand('choose_shared_database', key('database.shared_saved')));
+elements.chooseUserDatabase.addEventListener('click', () => runDatabaseCommand('choose_user_database', key('database.private_saved')));
+elements.clearUserDatabase.addEventListener('click', () => runDatabaseCommand('clear_user_database', key('database.disabled')));
+elements.enableUserDatabase.addEventListener('click', () => runDatabaseCommand('enable_user_database', key('database.enabled')));
+elements.checkDataUpdate.addEventListener('click', () => runUpdateCommand('check_data_update'));
+elements.installDataUpdate.addEventListener('click', () => runUpdateCommand('install_data_update'));
+renderShell();
+elements.appShell.classList.remove('hidden');
+loadPresentation();
 loadDatabaseStatus();
 loadUpdateStatus();

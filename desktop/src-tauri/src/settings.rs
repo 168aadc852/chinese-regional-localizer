@@ -6,7 +6,7 @@ use std::io::{Read, Write};
 use std::path::PathBuf;
 use tempfile::NamedTempFile;
 
-const SETTINGS_VERSION: u64 = 1;
+const SETTINGS_VERSION: u64 = 2;
 const MAX_SETTINGS_BYTES: u64 = 64 * 1024;
 const FALLBACK_MESSAGE: &str = "無法還原部分已儲存的設定；已使用可用的啟動預設設定。";
 const FUTURE_MESSAGE: &str = "設定檔版本或欄位不受支援；已使用啟動預設設定，原檔不會被覆寫。";
@@ -21,6 +21,55 @@ struct SettingsV1 {
     user_enabled: bool,
 }
 
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
+pub(super) enum UiLocale {
+    #[default]
+    #[serde(rename = "zh-HK")]
+    HongKong,
+    #[serde(rename = "zh-TW")]
+    Taiwan,
+    #[serde(rename = "zh-CN")]
+    ChineseMainland,
+    #[serde(rename = "en")]
+    English,
+}
+
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum Appearance {
+    #[default]
+    System,
+    Light,
+    Dark,
+    EinkMono,
+}
+
+/// Presentation only: never passed to the localization Runtime.
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct PresentationPreferences {
+    pub(super) ui_locale: UiLocale,
+    pub(super) appearance: Appearance,
+}
+
+#[derive(Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+struct SettingsV2 {
+    schema_version: u64,
+    shared_db: PathBuf,
+    user_db: Option<PathBuf>,
+    user_enabled: bool,
+    presentation: PresentationPreferences,
+}
+
+#[derive(Debug, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum PresentationError {
+    PreferencesUnavailable,
+    SettingsUnsupported,
+    SettingsSaveFailed,
+}
+
 enum DecodeError {
     Corrupt,
     Unsupported,
@@ -28,22 +77,45 @@ enum DecodeError {
 
 // Version dispatch is explicit: a future migration must return a complete,
 // validated model. Never deserialize a newer document as an older version.
-fn decode(bytes: &[u8]) -> Result<SettingsV1, DecodeError> {
+fn decode(bytes: &[u8]) -> Result<SettingsV2, DecodeError> {
     let value: serde_json::Value =
         serde_json::from_slice(bytes).map_err(|_| DecodeError::Corrupt)?;
     match value.get("schema_version").and_then(|v| v.as_u64()) {
-        Some(SETTINGS_VERSION) => {
+        Some(version @ (1 | SETTINGS_VERSION)) => {
             let object = value.as_object().ok_or(DecodeError::Corrupt)?;
             if object.keys().any(|key| {
                 !matches!(
                     key.as_str(),
                     "schema_version" | "shared_db" | "user_db" | "user_enabled"
-                )
+                ) && !(version == SETTINGS_VERSION && key == "presentation")
             }) {
                 return Err(DecodeError::Unsupported);
             }
             // Parse the original bytes so duplicate fields are rejected too.
-            serde_json::from_slice(bytes).map_err(|_| DecodeError::Corrupt)
+            if version == 1 {
+                let old: SettingsV1 =
+                    serde_json::from_slice(bytes).map_err(|_| DecodeError::Corrupt)?;
+                Ok(SettingsV2 {
+                    schema_version: SETTINGS_VERSION,
+                    shared_db: old.shared_db,
+                    user_db: old.user_db,
+                    user_enabled: old.user_enabled,
+                    presentation: PresentationPreferences::default(),
+                })
+            } else {
+                // Unknown nested fields are preserved, not silently discarded.
+                if value
+                    .get("presentation")
+                    .and_then(|v| v.as_object())
+                    .is_some_and(|p| {
+                        p.keys()
+                            .any(|k| !matches!(k.as_str(), "ui_locale" | "appearance"))
+                    })
+                {
+                    return Err(DecodeError::Unsupported);
+                }
+                serde_json::from_slice(bytes).map_err(|_| DecodeError::Corrupt)
+            }
         }
         Some(_) => Err(DecodeError::Unsupported),
         None => Err(DecodeError::Corrupt),
@@ -109,6 +181,7 @@ impl SettingsStore {
                 return fallback;
             }
         };
+        fallback.presentation = stored.presentation;
         if stored.shared_db.is_absolute() && validate_shared_db(&stored.shared_db).is_ok() {
             fallback.shared_db = stored.shared_db;
         } else {
@@ -148,11 +221,12 @@ impl SettingsStore {
         {
             return Err(SAVE_MESSAGE.into());
         }
-        let bytes = serde_json::to_vec_pretty(&SettingsV1 {
+        let bytes = serde_json::to_vec_pretty(&SettingsV2 {
             schema_version: SETTINGS_VERSION,
             shared_db: config.shared_db.clone(),
             user_db: config.user_db.clone(),
             user_enabled: config.user_enabled,
+            presentation: config.presentation.clone(),
         })
         .map_err(|_| SAVE_MESSAGE.to_string())?;
         if bytes.len() as u64 > MAX_SETTINGS_BYTES {
@@ -171,6 +245,17 @@ impl SettingsStore {
             .map_err(|_| SAVE_MESSAGE.to_string())?;
         staged.persist(path).map_err(|_| SAVE_MESSAGE.to_string())?;
         Ok(())
+    }
+
+    pub(super) fn save_presentation(
+        &self,
+        config: &DatabaseConfig,
+    ) -> Result<(), PresentationError> {
+        if self.write_blocked {
+            return Err(PresentationError::SettingsUnsupported);
+        }
+        self.save(config)
+            .map_err(|_| PresentationError::SettingsSaveFailed)
     }
 }
 
@@ -210,12 +295,14 @@ mod tests {
                 user_db: Some(database("fallback-user.sqlite", true)),
                 user_enabled: true,
                 settings_message: None,
+                presentation: PresentationPreferences::default(),
             };
             let selected = DatabaseConfig {
                 shared_db: database("selected.sqlite", false),
                 user_db: Some(database("selected-user.sqlite", true)),
                 user_enabled: true,
                 settings_message: None,
+                presentation: PresentationPreferences::default(),
             };
             let path = temp.path().join("preferences").join("settings.json");
             Self {
@@ -256,6 +343,157 @@ mod tests {
         assert_eq!(loaded.user_db, f.fallback.user_db);
         assert!(loaded.user_enabled);
         assert!(!f.path.exists());
+    }
+
+    #[test]
+    fn v1_migrates_in_memory_and_only_writes_v2_after_accepted_change() {
+        let f = Fixture::new();
+        let old = serde_json::to_vec(&SettingsV1 {
+            schema_version: 1,
+            shared_db: f.selected.shared_db.clone(),
+            user_db: f.selected.user_db.clone(),
+            user_enabled: false,
+        })
+        .unwrap();
+        f.write(&old);
+        let restored = f.restart();
+        assert_eq!(restored.shared_db, f.selected.shared_db);
+        assert_eq!(restored.user_db, f.selected.user_db);
+        assert!(!restored.user_enabled);
+        assert_eq!(restored.presentation, PresentationPreferences::default());
+        assert_eq!(fs::read(&f.path).unwrap(), old);
+        let state = AppState {
+            config: RwLock::new(restored),
+            ..f.state(f.store())
+        };
+        crate::change_presentation(
+            &state,
+            PresentationPreferences {
+                ui_locale: UiLocale::English,
+                appearance: Appearance::EinkMono,
+            },
+        )
+        .unwrap();
+        let saved: serde_json::Value = serde_json::from_slice(&fs::read(&f.path).unwrap()).unwrap();
+        assert_eq!(saved["schema_version"], 2);
+        assert_eq!(saved["presentation"]["ui_locale"], "en");
+        assert_eq!(saved["presentation"]["appearance"], "eink_mono");
+        assert_eq!(f.restart().user_db, f.selected.user_db);
+        assert!(!f.restart().user_enabled);
+    }
+
+    #[test]
+    fn all_presentation_choices_round_trip_without_changing_database_choices() {
+        let f = Fixture::new();
+        let state = f.state(f.store());
+        for ui_locale in [
+            UiLocale::HongKong,
+            UiLocale::Taiwan,
+            UiLocale::ChineseMainland,
+            UiLocale::English,
+        ] {
+            for appearance in [
+                Appearance::System,
+                Appearance::Light,
+                Appearance::Dark,
+                Appearance::EinkMono,
+            ] {
+                let preferences = PresentationPreferences {
+                    ui_locale,
+                    appearance,
+                };
+                crate::change_presentation(&state, preferences.clone()).unwrap();
+                let restored = f.restart();
+                assert_eq!(restored.presentation, preferences);
+                assert_eq!(
+                    fs::canonicalize(restored.shared_db).unwrap(),
+                    fs::canonicalize(&f.fallback.shared_db).unwrap()
+                );
+                assert_eq!(restored.user_db, f.fallback.user_db);
+                assert_eq!(restored.user_enabled, f.fallback.user_enabled);
+                accept_shared_database(&state, f.selected.shared_db.clone()).unwrap();
+                assert_eq!(f.restart().presentation, preferences);
+                accept_shared_database(&state, f.fallback.shared_db.clone()).unwrap();
+            }
+        }
+    }
+
+    #[test]
+    fn invalid_presentation_is_rejected_and_future_fields_are_write_protected() {
+        let f = Fixture::new();
+        for presentation in [
+            serde_json::json!({"ui_locale":"fr", "appearance":"system"}),
+            serde_json::json!({"ui_locale":"en", "appearance":"sepia"}),
+            serde_json::json!({"ui_locale":"en"}),
+            serde_json::json!({"ui_locale":"en", "appearance":"light", "future":true}),
+        ] {
+            let bytes = serde_json::to_vec(&serde_json::json!({
+                "schema_version":2, "shared_db":f.selected.shared_db,
+                "user_db":f.selected.user_db, "user_enabled":true,
+                "presentation":presentation,
+            }))
+            .unwrap();
+            f.write(&bytes);
+            let mut store = f.store();
+            let loaded = store.restore(f.fallback.clone());
+            assert!(loaded.settings_message.is_some());
+            assert_eq!(loaded.presentation, PresentationPreferences::default());
+            assert_eq!(fs::read(&f.path).unwrap(), bytes);
+            if presentation.get("future").is_some() {
+                assert_eq!(
+                    store.save_presentation(&loaded),
+                    Err(PresentationError::SettingsUnsupported)
+                );
+                assert_eq!(fs::read(&f.path).unwrap(), bytes);
+            }
+        }
+        assert!(serde_json::from_str::<PresentationPreferences>(
+            r#"{"ui_locale":"en","ui_locale":"zh-HK","appearance":"light"}"#
+        )
+        .is_err());
+    }
+
+    #[test]
+    fn failed_presentation_save_has_typed_path_free_error_and_no_session_change() {
+        let f = Fixture::new();
+        let blocked_parent = f.temp.path().join("blocked");
+        fs::write(&blocked_parent, b"preserve").unwrap();
+        let state = f.state(SettingsStore::new(Some(
+            blocked_parent.join("settings.json"),
+        )));
+        let error = crate::change_presentation(
+            &state,
+            PresentationPreferences {
+                ui_locale: UiLocale::Taiwan,
+                appearance: Appearance::Dark,
+            },
+        )
+        .unwrap_err();
+        assert_eq!(serde_json::to_value(error).unwrap(), "settings_save_failed");
+        assert_eq!(
+            state.config.read().unwrap().presentation,
+            PresentationPreferences::default()
+        );
+        assert_eq!(fs::read(blocked_parent).unwrap(), b"preserve");
+    }
+
+    #[test]
+    fn concurrent_presentation_and_database_changes_keep_both() {
+        let f = Fixture::new();
+        let state = f.state(f.store());
+        let preferences = PresentationPreferences {
+            ui_locale: UiLocale::English,
+            appearance: Appearance::Dark,
+        };
+        std::thread::scope(|scope| {
+            scope.spawn(|| accept_shared_database(&state, f.selected.shared_db.clone()).unwrap());
+            scope.spawn(|| crate::change_presentation(&state, preferences.clone()).unwrap());
+        });
+        assert_eq!(f.restart().presentation, preferences);
+        assert_eq!(
+            f.restart().shared_db,
+            fs::canonicalize(f.selected.shared_db).unwrap()
+        );
     }
 
     #[test]
@@ -457,7 +695,7 @@ mod tests {
         let f = Fixture::new();
         for bytes in [
             b"{\"schema_version\":0}".as_slice(),
-            b"{\"schema_version\":2}",
+            b"{\"schema_version\":3}",
             b"{\"schema_version\":1,\"future_preference\":true}",
         ] {
             f.write(bytes);
