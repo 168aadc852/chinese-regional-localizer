@@ -85,7 +85,7 @@ changes to the existing v1 outer fields.
 Shared regional term events may add optional nested `choice` with deterministic
 session-local occurrence/candidate IDs, states, target texts, exact Unicode spans,
 expected current text and selected candidate ID. The same nine outer response
-fields and legacy request behavior remain; entities, user fixed/protected terms
+fields and legacy request behavior remain; entities, legacy user fixed/protected terms
 and generic script events do not receive choices. See [Alternative Terms](ALTERNATIVE_TERMS.md)
 for the exact contract and trust boundary. Identity recommendations may produce
 an unapplied regional event so that an otherwise valid alternative remains reviewable.
@@ -95,9 +95,15 @@ core result into an in-memory review. `snapshot()` returns a detached view;
 `apply_choice(revision, occurrence_id, candidate_id, ChoiceIntent::UseThisTimeOnly)`
 and `undo(revision)` operate on this owned state without invoking the runtime again.
 Invalid/stale requests return `ChoiceError` without changing text, revision or history.
-Remember intents return `UnsupportedIntent`; no preference is stored.
-This is an internal shared-core operation, not a new Tauri command, Runtime v2,
-frontend engine, or #49 persistence workflow.
+The standalone session's remember intents return `UnsupportedIntent`.
+Issue #49 adds `Runtime::review(&request)` returning a request-bound
+`private_review::PrivateReviewSession`. It delegates one-time edits/undo to #48 and
+atomically writes remembered choices through `PrivateStore`; persistence failures
+clearly distinguish the accepted text choice from nothing remembered.
+New private preferred events can use the same nested choice object plus optional
+`private_selection`; partial original-source expansions have `rememberable: false`.
+See [My Dictionaries](MY_DICTIONARIES.md). These are internal shared-core operations,
+not new Tauri commands, Runtime v2 or a frontend engine.
 
 ## CLI
 

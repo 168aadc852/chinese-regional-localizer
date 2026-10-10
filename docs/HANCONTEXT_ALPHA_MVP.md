@@ -1,7 +1,6 @@
 # HanContext Alpha MVP — planning specification
 
-Updated: 2026-10-10. Issues #46/#47 are merged. Issue #48's approved core
-candidate/one-time review layer is implemented in its focused PR, pending CI/review/merge.
+Updated: 2026-10-10. Issues #46–#49 are merged.
 Other Alpha packages remain proposed and require separate approval.
 
 **HanContext — Chinese, localized with context. / 懂情境的中文地區化**.
@@ -44,35 +43,33 @@ version handling in the [Issue #46 foundation](CONTEXT_PROFILES.md).
 core/runtime requests, without desktop controls or automatic profile-file loading.
 Do not duplicate every rule or require LLM context classification.
 
-My Terms preferences conceptually depend on source term, preferred term, target locale
-and context, not a permanent global replacement. Explain them as “Use X instead of Y
-when writing Hong Kong Chinese for Technology / Software.” Keep priorities internal.
-Preserve private dictionaries through an explicit compatibility/migration plan;
-desktop settings v1 is not the user-term/context schema.
+My Terms preferences depend on source term, preferred term, target locale and context,
+not a permanent global replacement. Explain them as “Use X instead of Y when writing
+Hong Kong Chinese for Technology / Software.” Keep priorities internal. The merged
+[#49 private foundation](MY_DICTIONARIES.md) preserves legacy data through explicit
+compatibility/migration and keeps the private schema separate from desktop settings v1.
 
-Proposed effective precedence:
+Effective private preference precedence is now:
 
 1. Exact-context user preference.
-2. All-context user preference.
-3. Governed current-context terminology.
-4. General target-region terminology.
-5. Script / character conversion.
-
-Reconcile inherited-context ranking, protected terms, entities and longest-match rules
-with the existing contract before changing behavior. Equal-level ties stay unresolved;
-preserve original text rather than guess. Use Recommended / Also valid / Needs your decision.
+2. Nearest inherited-parent user preference.
+3. All-context user preference for the same target locale.
+4. Governed terminology using #47's exact/parent/General/unscoped contract.
+5. Script / character conversion where applicable.
 
 The approved #47 reconciliation preserves longest eligible phrase before context rank
 and numeric priority, existing entity/user protection, and the actual
-`zh-CN → zh-Hant → zh-HK/zh-TW` pipeline. Script conversion stays context-neutral;
-#47 does not reorder stages to implement the proposed Alpha precedence above.
+`zh-CN → zh-Hant → zh-HK/zh-TW` pipeline. Script conversion stays context-neutral.
 Issue #48's [core candidate/review contract](ALTERNATIVE_TERMS.md) implements the
 three candidate labels and one-time occurrence edits/undo without changing #47 ranking.
-Context-sensitive user preferences, remembered choices and desktop choice UI remain future work.
+Issue #49's [My Dictionaries foundation](MY_DICTIONARIES.md) adds context-sensitive
+private selection, safe migration and remembered choices in core/storage; desktop
+context, dictionary-manager and choice/remember UI remain future work.
 
 Alternative selection updates a specific occurrence without rerunning the document.
-Define stable span tracking and undo so adjacent edits remain correct. Offer Use this
-time only / Remember for this context / Remember for all contexts.
+Stable span tracking and undo keep adjacent edits correct. The core supports Use this
+time only / Remember for this context / Remember for all contexts through the approved
+request-bound remembering contract.
 
 ## Reviewable work packages
 
@@ -80,9 +77,9 @@ time only / Remember for this context / Remember for all contexts.
 | --- | --- | --- |
 | [#46 Context profiles/model](https://github.com/168aadc852/chinese-regional-localizer/issues/46) | Merged standalone model/store; no desktop wiring | Phase 3J complete |
 | [#47 Context-aware selection](https://github.com/168aadc852/chinese-regional-localizer/issues/47) | Merged core selection/inheritance; no My Terms/UI | Merged #46 |
-| [#48 Alternatives/ambiguity](https://github.com/168aadc852/chinese-regional-localizer/issues/48) | Approved core candidates, exact spans, one-time edits and undo implemented in its focused PR; no persistence/UI | Merged #47; protected-main CI/review/merge |
-| [#49 My Terms](https://github.com/168aadc852/chinese-regional-localizer/issues/49) | Context/all-context preferences and private-dictionary migration | #46–#48 |
-| [#50 Alpha desktop UX](https://github.com/168aadc852/chinese-regional-localizer/issues/50) | Plain-text workflow, modes, explanations and preference controls | #46–#49; mode semantics approval |
+| [#48 Alternatives/ambiguity](https://github.com/168aadc852/chinese-regional-localizer/issues/48) | Merged core candidates, exact spans, one-time edits and undo; no UI | Merged #47 |
+| [#49 My Terms](https://github.com/168aadc852/chinese-regional-localizer/issues/49) | Merged private-store v2, multiple dictionaries, context/all-context remembered preferences and CSV core; no manager UI | Merged #46–#48 |
+| [#50 Alpha desktop UX](https://github.com/168aadc852/chinese-regional-localizer/issues/50) | Plain-text workflow, modes, explanations and preference controls | Merged #46–#49; mode semantics approval |
 | [#51 Alpha packaging/onboarding](https://github.com/168aadc852/chinese-regional-localizer/issues/51) | Limited development distribution and offline first-use guidance | #50; fixture vs release-data distinction |
 
 Issue creation records proposals/dependencies, not blanket implementation approval.

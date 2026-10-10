@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Iterable
+from private_store import prepare_store, schema_version
 
 
 @dataclass(frozen=True)
@@ -20,10 +21,19 @@ class UserTerm:
     priority: int
     enabled: bool
     note: str | None
+    dictionary_id: str = "legacy"
+    usage_context_id: str | None = None
+    legacy: bool = True
+    context_level: int = 0
 
 
 def utc_now_iso() -> str:
-    return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+    return (
+        datetime.now(timezone.utc)
+        .replace(microsecond=0)
+        .isoformat()
+        .replace("+00:00", "Z")
+    )
 
 
 class UserDictionary:
@@ -36,9 +46,12 @@ class UserDictionary:
         path.parent.mkdir(parents=True, exist_ok=True)
         conn = sqlite3.connect(path)
         conn.row_factory = sqlite3.Row
-        conn.executescript(schema_path.read_text(encoding="utf-8"))
-        conn.commit()
-        return cls(conn)
+        try:
+            prepare_store(conn)
+            return cls(conn)
+        except Exception:
+            conn.close()
+            raise
 
     def close(self) -> None:
         self.conn.close()
@@ -103,6 +116,7 @@ class UserDictionary:
             """
             SELECT user_term_id FROM user_terms
             WHERE kind = ? AND source_text = ?
+              AND dictionary_id = 'legacy' AND usage_context_id IS NULL
               AND ifnull(source_locale, '') = ifnull(?, '')
               AND ifnull(target_locale, '') = ifnull(?, '')
             """,
@@ -166,8 +180,28 @@ class UserDictionary:
         return [self._row_to_term(row) for row in rows]
 
     def candidates(
-        self, source_locale: str, target_locale: str
+        self, source_locale: str, target_locale: str, chain=None
     ) -> list[UserTerm]:
+        if schema_version(self.conn) == "2":
+            rows = self.conn.execute(
+                """SELECT t.* FROM user_terms t JOIN user_dictionaries d USING(dictionary_id)
+                WHERE t.enabled=1 AND d.enabled=1 AND (source_locale IS NULL OR source_locale=?)
+                AND (target_locale IS NULL OR target_locale=?)""",
+                (source_locale, target_locale),
+            ).fetchall()
+            result = []
+            from dataclasses import replace
+
+            for row in rows:
+                term = self._row_to_term(row)
+                if term.usage_context_id is None:
+                    level = len(chain) if chain else 0
+                elif chain and term.usage_context_id in chain:
+                    level = chain.index(term.usage_context_id)
+                else:
+                    continue
+                result.append(replace(term, context_level=level))
+            return result
         rows = self.conn.execute(
             """
             SELECT * FROM user_terms
@@ -192,6 +226,13 @@ class UserDictionary:
             priority=int(row["priority"]),
             enabled=bool(row["enabled"]),
             note=row["note"],
+            dictionary_id=row["dictionary_id"]
+            if "dictionary_id" in row.keys()
+            else "legacy",
+            usage_context_id=row["usage_context_id"]
+            if "usage_context_id" in row.keys()
+            else None,
+            legacy=bool(row["legacy"]) if "legacy" in row.keys() else True,
         )
 
 

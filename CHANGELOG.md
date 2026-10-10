@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-10-10 — Issue #49 context-aware My Terms / My Dictionaries
+
+- Added separate private SQLite v2 dictionary containers, reserved Personal/Legacy identities and target/context-scoped preferred terms without new numeric priority controls.
+- Added atomic/idempotent v0.1 migration preserving term IDs, every legacy field, disabled state and null scopes; injected failure rolls back schema/data/version and leaves the old store usable.
+- Filtered enabled dictionary/term, locale and validated context before longest matching; exact/nearest ancestor/all-context preferences precede unchanged shared processing. Same targets deduplicate; equal-level conflicts preserve original text.
+- Added request-bound review remembering to Personal using original input spelling, current source/target locale and exact/all-context scope; stale/foreign candidates cannot write. Failed writes explicitly report nothing remembered while keeping valid one-time text/undo.
+- Added optional fail-closed `choice.rememberable: false` for partial source expansions; existing occurrence edits/spans/undo remain valid and Runtime API v1's nine outer fields stay unchanged.
+- Added reserved-safe dictionary activation/management, preferred-term edits and transactional CSV preview/import foundation; no third-party downloads or polished #50 UI.
+- Added synthetic selection, migration/recovery, persistence/reopen, insertion-order, CSV and live Python/Rust parity regressions. Shared schema, supported routes, desktop settings and update/licence boundaries remain unchanged.
+
 ## 2026-10-10 — Issue #48 alternative terms and one-time occurrence review
 
 - Added grouped deterministic regional candidates with Recommended, Also valid and Needs your decision states, retaining #47's longest eligible phrase, context ranking and no-guess decisions.

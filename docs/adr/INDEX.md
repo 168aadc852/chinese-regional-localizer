@@ -26,3 +26,4 @@ Read only decisions relevant to the current task.
 - [D-022](D-022-independent-context-profile-foundation.md) — Usage-context identity, validated single-parent chains and versioned local storage stay separate from localization and desktop settings.
 - [D-023](D-023-context-aware-regional-terminology-selection.md) — Explicit usage-context ranking extends regional term selection after longest eligible phrase, preserving protection, staged routes, no-guess ties and Runtime API v1.
 - [D-024](D-024-occurrence-safe-one-time-alternatives.md) — Alternative candidates use exact traversal spans and owned, revision-checked in-memory one-time review/undo without reruns or preference persistence.
+- [D-025](D-025-versioned-private-context-preferences.md) — Private SQLite v2 preserves legacy data and adds deterministic context-scoped My Terms, multiple dictionaries and request-bound atomic remembering.

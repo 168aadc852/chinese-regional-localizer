@@ -21,9 +21,25 @@ pub struct Occurrence {
     pub expected_text: String,
     pub selected_candidate_id: Option<String>,
     pub candidates: Vec<Candidate>,
+    /// False only when the stage occurrence is a partial original-source expansion.
+    #[serde(
+        default = "rememberable_default",
+        skip_serializing_if = "is_rememberable"
+    )]
+    pub rememberable: bool,
+}
+fn rememberable_default() -> bool {
+    true
+}
+fn is_rememberable(value: &bool) -> bool {
+    *value
 }
 
 impl Occurrence {
+    pub(crate) fn with_rememberable(mut self, value: bool) -> Self {
+        self.rememberable = value;
+        self
+    }
     pub(crate) fn assign_id(&mut self, index: usize) {
         let id = format!("occurrence-{}", index + 1);
         let selected = self.selected_candidate_id.clone();
@@ -102,6 +118,7 @@ pub(crate) fn build_choice(
         expected_text: current.into(),
         selected_candidate_id: (!tied).then(|| "candidate-1".into()),
         candidates,
+        rememberable: true,
     }
 }
 
@@ -139,6 +156,8 @@ pub enum ChoiceError {
     UnknownOccurrence,
     InvalidCandidate,
     UnsupportedIntent,
+    UnsafeRememberSource,
+    MissingUsageContext,
     NoUndo,
     RevisionExhausted,
 }
@@ -150,6 +169,12 @@ impl std::fmt::Display for ChoiceError {
             Self::UnknownOccurrence => "Unknown occurrence; refresh review",
             Self::InvalidCandidate => "Candidate does not belong to this occurrence",
             Self::UnsupportedIntent => "Choice intent is not implemented; nothing was saved",
+            Self::UnsafeRememberSource => {
+                "This partial source expansion cannot be safely remembered; use this time only"
+            }
+            Self::MissingUsageContext => {
+                "Select a Usage Context before remembering for this context"
+            }
             Self::NoUndo => "No one-time choice to undo",
             Self::RevisionExhausted => "Review revision exhausted; start a new review",
         })

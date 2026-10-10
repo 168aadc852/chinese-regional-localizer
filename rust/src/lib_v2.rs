@@ -5,6 +5,8 @@ mod shared {
 pub use shared::*;
 pub mod alternative_terms;
 pub mod context_profiles;
+pub mod private_review;
+pub mod private_store;
 mod usage_context;
 pub mod user_localizer;
 pub use user_localizer::{UserControlledLocalizer, UserLocalizationResult};
