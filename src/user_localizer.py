@@ -8,9 +8,14 @@ from __future__ import annotations
 
 from typing import Any
 from copy import deepcopy
-from alternative_terms import assign_choice_ids
+from alternative_terms import assign_choice_ids, make_choice
 
-from localizer_engine import LocalizerEngine, PrefixMatcher, ROUTES, UnsupportedRouteError
+from localizer_engine import (
+    LocalizerEngine,
+    PrefixMatcher,
+    ROUTES,
+    UnsupportedRouteError,
+)
 from user_dictionary import UserDictionary, UserTerm, group_by_surface, specificity
 
 
@@ -18,6 +23,13 @@ class UserControlledLocalizer:
     def __init__(self, shared_engine: LocalizerEngine, user_dictionary: UserDictionary):
         self.shared_engine = shared_engine
         self.user_dictionary = user_dictionary
+
+    def review(self, text, source_locale, target_locale, *, context=None):
+        from private_review import PrivateReviewSession
+
+        chain = self.shared_engine.validate_usage_context(context)
+        result = self.localize(text, source_locale, target_locale, context=context)
+        return PrivateReviewSession(result, chain[0] if chain else None)
 
     def localize(
         self,
@@ -29,10 +41,12 @@ class UserControlledLocalizer:
     ) -> dict[str, Any]:
         route = ROUTES.get((source_locale, target_locale))
         if route is None:
-            raise UnsupportedRouteError(f"Unsupported route: {source_locale} -> {target_locale}")
-        self.shared_engine.validate_usage_context(context)
+            raise UnsupportedRouteError(
+                f"Unsupported route: {source_locale} -> {target_locale}"
+            )
+        chain = self.shared_engine.validate_usage_context(context)
 
-        terms = self.user_dictionary.candidates(source_locale, target_locale)
+        terms = self.user_dictionary.candidates(source_locale, target_locale, chain)
         by_surface = group_by_surface(terms)
         matcher = PrefixMatcher(by_surface)
         segments = self._segments(text, matcher, by_surface)
@@ -59,7 +73,9 @@ class UserControlledLocalizer:
                     if "choice" in copied:
                         copied["choice"] = deepcopy(copied["choice"])
                         self._offset_span(copied["choice"], "source_span", start)
-                        self._offset_span(copied["choice"], "output_span", output_cursor)
+                        self._offset_span(
+                            copied["choice"], "output_span", output_cursor
+                        )
                     copied["user_layer_segment_input_span"] = [start, end]
                     events.append(copied)
             else:
@@ -71,6 +87,55 @@ class UserControlledLocalizer:
                     [start, end],
                     output_cursor,
                 )
+                preferred = [
+                    term for term in segment["terms"] if term.kind == "override"
+                ]
+                if (
+                    preferred
+                    and not any(term.kind == "protected" for term in segment["terms"])
+                    and any(not term.legacy for term in preferred)
+                ):
+                    level = min(term.context_level for term in preferred)
+                    keys = {}
+                    for term in preferred:
+                        legacy_level = all(
+                            other.legacy
+                            for other in preferred
+                            if other.context_level == term.context_level
+                        )
+                        keys[term.user_term_id] = (
+                            term.context_level,
+                            -specificity(term) if legacy_level else 0,
+                            -term.priority if legacy_level else 0,
+                        )
+                    ranks = {key: i for i, key in enumerate(sorted(set(keys.values())))}
+                    event["choice"] = make_choice(
+                        [
+                            (term.replacement, ranks[keys[term.user_term_id]], 0)
+                            for term in preferred
+                        ],
+                        source_text,
+                        [start, end],
+                        [start, end],
+                        [output_cursor, output_cursor + len(replacement)],
+                        replacement,
+                    )
+                    event["private_selection"] = {
+                        "level": "all_contexts"
+                        if any(
+                            term.context_level == level
+                            and term.usage_context_id is None
+                            for term in preferred
+                        )
+                        else ("exact" if level == 0 else "ancestor"),
+                        "dictionary_ids": sorted(
+                            {
+                                term.dictionary_id
+                                for term in preferred
+                                if term.context_level == level
+                            }
+                        ),
+                    }
                 events.append(event)
 
             output_parts.append(replacement)
@@ -180,11 +245,14 @@ class UserControlledLocalizer:
                 "provenance": "user_dictionary",
             }
 
+        level = min(term.context_level for term in ranked)
+        ranked = [term for term in ranked if term.context_level == level]
+        legacy_only = all(term.legacy for term in ranked)
         top_rank = (specificity(ranked[0]), ranked[0].priority)
         top = [
             term
             for term in ranked
-            if (specificity(term), term.priority) == top_rank
+            if not legacy_only or (specificity(term), term.priority) == top_rank
         ]
         replacements = {term.replacement for term in top}
         if len(replacements) != 1:
@@ -205,7 +273,6 @@ class UserControlledLocalizer:
                         "replacement": term.replacement,
                         "source_locale": term.source_locale,
                         "target_locale": term.target_locale,
-                        "priority": term.priority,
                     }
                     for term in top
                 ],
@@ -237,6 +304,7 @@ class UserControlledLocalizer:
             key=lambda term: (
                 -specificity(term),
                 -term.priority,
+                term.dictionary_id,
                 term.user_term_id,
             ),
         )

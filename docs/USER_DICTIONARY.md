@@ -2,6 +2,12 @@
 
 Phase 2D adds a private local customization database that is deliberately separate from shared/open-data packs.
 
+Issue #49 evolves this foundation to versioned My Dictionaries/My Terms. See
+[the current v2 contract](MY_DICTIONARIES.md) for transactional legacy migration,
+dictionary activation, context-aware preference ranking and remembered-choice writes.
+The examples below remain the legacy/default dictionary compatibility commands;
+they are not the new Alpha dictionary-manager UI.
+
 ## Why it is separate
 
 `user_dictionary.sqlite` belongs to the local user. It is not redistributed, is ignored by Git, and is not subject to the source-pack licensing model used for OpenCC/Wikidata/etc.
@@ -72,4 +78,5 @@ Without `--user-db`, behavior remains the existing shared deterministic engine.
 4. shared regional terminology;
 5. generic/script rules.
 
-See ADR D-012 for the formal contract.
+See ADR D-012 for legacy behavior and [D-025](adr/D-025-versioned-private-context-preferences.md)
+for v2 context preferences; #47 shared stages/routes remain unchanged.

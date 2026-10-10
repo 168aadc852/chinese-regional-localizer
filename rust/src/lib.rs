@@ -13,6 +13,13 @@ pub enum LocalizerError {
     Sql(rusqlite::Error),
     UnsupportedRoute(String, String),
     UsageContext(String),
+    PrivateStore(crate::private_store::StoreError),
+}
+
+impl From<crate::private_store::StoreError> for LocalizerError {
+    fn from(error: crate::private_store::StoreError) -> Self {
+        Self::PrivateStore(error)
+    }
 }
 
 impl From<rusqlite::Error> for LocalizerError {
@@ -494,6 +501,10 @@ impl LocalizerEngine {
             ];
             let output_start_chars = out.chars().count();
             let regional = target_locale == "zh-HK" || target_locale == "zh-TW";
+            let rememberable = (stage_input_span[0] == 0
+                || alignment[stage_input_span[0] - 1][1] <= source_span[0])
+                && (stage_input_span[1] == alignment.len()
+                    || alignment[stage_input_span[1]][0] >= source_span[1]);
 
             if targets.len() != 1 {
                 let output_start = out.len();
@@ -516,6 +527,7 @@ impl LocalizerEngine {
                             [output_start_chars, out.chars().count()],
                             source_text,
                         )
+                        .with_rememberable(rememberable)
                     }),
                     stage_input_span,
                     stage_output_span: [output_start_chars, out.chars().count()],
@@ -547,6 +559,7 @@ impl LocalizerEngine {
                         [output_start_chars, out.chars().count()],
                         &replacement,
                     )
+                    .with_rememberable(rememberable)
                 }),
                 stage_input_span,
                 stage_output_span: [output_start_chars, out.chars().count()],

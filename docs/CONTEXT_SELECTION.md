@@ -68,7 +68,9 @@ General and unscoped are distinct, including when General itself is selected.
 ## Preserved boundaries
 
 - Existing user protected terms and fixed overrides remain ahead of shared rules;
-  private dictionary schema/context preferences do not change.
+  #47 itself does not change private context preferences. The separately approved
+  [#49 private foundation](MY_DICTIONARIES.md) integrates private eligibility/ranking
+  before shared processing without changing this regional pipeline.
 - Conservative entity resolution runs first in shared processing. Resolved and
   ambiguous entity spans remain protected from context terminology.
 - Hong Kong and Taiwan candidates never cross target regions.
@@ -78,8 +80,8 @@ General and unscoped are distinct, including when General itself is selected.
   stage, which may already have undergone script conversion.
 - Existing Runtime API v1 outer fields and their meanings stay unchanged.
 - Context profiles authorize no new data. Source/ingestion/licence gates stay intact.
-- No #48 candidate-choice UI, #49 My Terms migration, #50 desktop controls/modes,
-  new routes, packaging or automatic context detection is implemented.
+- #47 itself includes no #48 candidate-choice UI, #49 My Terms migration, #50 desktop
+  controls/modes, new routes, packaging or automatic context detection.
 
 ## Explanation and determinism
 

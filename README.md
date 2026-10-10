@@ -82,7 +82,10 @@ Desktop Alpha 仍在完成：
 - 簡化 Desktop Alpha 操作流程；
 - Alpha 安裝及新手使用體驗。
 
+Issue #49 的 My Terms、多私人詞庫及記憶偏好核心已在獨立 PR 中實作，仍待 CI、審閱及合併；這不代表 Desktop 詞庫管理或記憶選擇介面已完成。
+
 詳情請參閱 `PROJECT_STATE.md`、`docs/HANCONTEXT_ALPHA_MVP.md` 及 `docs/ALTERNATIVE_TERMS.md`。
+私人詞庫核心與兼容遷移詳見 [My Dictionaries](docs/MY_DICTIONARIES.md)。
 
 ## 開源與資料授權
 

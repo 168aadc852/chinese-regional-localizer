@@ -635,6 +635,11 @@ class LocalizerEngine:
             )
             output_start = out_len
             regional = target_locale in ("zh-HK", "zh-TW")
+            rememberable = (
+                input_start == 0 or self._original_span_for_current(alignment, input_start-1, input_start)[1] <= original_start
+            ) and (
+                input_end == len(text) or self._original_span_for_current(alignment, input_end, input_end+1)[0] >= original_end
+            )
             choice_rows = [
                 (row["target_text"], rank, int(row["priority"]))
                 for row, rank in all_ranked_rows
@@ -676,6 +681,8 @@ class LocalizerEngine:
                         [output_start, out_len],
                         source_text,
                     )
+                    if not rememberable:
+                        events[-1]["choice"]["rememberable"] = False
                 i = input_end
                 continue
 
@@ -726,6 +733,8 @@ class LocalizerEngine:
                         [output_start, out_len],
                         replacement,
                     )
+                    if not rememberable:
+                        event["choice"]["rememberable"] = False
             i = input_end
 
         return {

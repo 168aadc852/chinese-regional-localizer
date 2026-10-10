@@ -56,6 +56,23 @@ impl Runtime {
         self
     }
 
+    /// Keeps request scope in the core. Callers never supply locale/context on edits.
+    pub fn review(
+        &self,
+        request: &RuntimeRequest,
+    ) -> Result<crate::private_review::PrivateReviewSession> {
+        let chain = crate::usage_context::resolve_usage_context(
+            &self.context_profiles,
+            request.context.as_ref(),
+        )?;
+        let response = self.localize(request)?;
+        crate::private_review::PrivateReviewSession::from_response(
+            &response,
+            chain.and_then(|chain| chain.first().cloned()),
+        )
+        .map_err(|error| crate::LocalizerError::UsageContext(error.to_string()))
+    }
+
     pub fn localize(&self, request: &RuntimeRequest) -> Result<RuntimeResponse> {
         let context = request.context.as_ref();
         let (output, route, review_needed, user_dictionary_applied, raw_changes) =

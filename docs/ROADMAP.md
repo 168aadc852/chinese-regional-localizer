@@ -9,22 +9,23 @@ Phase 3J / Issue #38 desktop settings persistence is complete.
 
 Issue #46's approved standalone profile/model/store foundation is merged; see
 `CONTEXT_PROFILES.md`. Issue #47's core terminology selection is merged; see
-`CONTEXT_SELECTION.md`. Issue #48's approved core candidate/one-time review layer is
-implemented in its focused PR, subject to protected-main CI/review/merge; see
-`ALTERNATIVE_TERMS.md`. Desktop choice/context controls and remembered My Terms remain future work.
+`CONTEXT_SELECTION.md`. Issue #48's core candidate/one-time review layer is merged;
+see `ALTERNATIVE_TERMS.md`. Issue #49's approved My Dictionaries/private preferences
+core is implemented in its focused PR, pending CI/review/merge; see `MY_DICTIONARIES.md`.
+Desktop choice/context/remember and dictionary-manager controls remain future work.
 
 Review `HANCONTEXT_ALPHA_MVP.md` and the scoped work packages:
 
 1. Context profile/data model foundation (#46); merged.
 2. Context-aware deterministic terminology selection (#47); merged.
-3. Core alternative terms and occurrence-safe one-time review (#48); review its focused PR.
-4. Context-aware My Terms / remembered preferences.
+3. Core alternative terms and occurrence-safe one-time review (#48); merged.
+4. Context-aware My Terms / remembered preferences (#49); review its focused PR.
 5. Alpha desktop UX and plain-language explanations.
 6. Limited Alpha packaging and onboarding.
 
 Each requires separate approval and a focused PR. Preserve Runtime API v1 unless
 a specific issue approves a change; preserve licence gates and offline operation.
-Issues #49–#51 need separate design/implementation approval; do not start them automatically.
+Issues #50–#51 need separate design/implementation approval; do not start them automatically.
 
 ## Consolidated delivery direction
 

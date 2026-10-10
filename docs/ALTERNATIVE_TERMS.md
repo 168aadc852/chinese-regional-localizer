@@ -3,6 +3,10 @@
 Date: 2026-10-10. Core/runtime and Python reference only; no desktop picker or
 clickable-choice UI, no remembered preferences and no new terminology coverage.
 
+This document describes the standalone #48 layer. Issue #49 adds a separate
+[request-bound remembering wrapper](MY_DICTIONARIES.md) and private preferred choices;
+the standalone one-time session retains its original behavior and trust boundary.
+
 Baseline: [approved design](https://github.com/168aadc852/chinese-regional-localizer/issues/48#issuecomment-6086843519),
 [approval](https://github.com/168aadc852/chinese-regional-localizer/issues/48#issuecomment-6086853168)
 and [Implementation Brief v0.1](https://github.com/168aadc852/chinese-regional-localizer/issues/48#issuecomment-6086902626).
@@ -37,7 +41,10 @@ the new nested object, not old `alternatives`/`candidates`, is the #48 contract.
 
 ## Optional nested `choice` event contract
 
-Only shared **regional term** change/review events acquire this optional object:
+In #48 only shared **regional term** change/review events acquire this optional object.
+#49 also uses it for new private preferred-term events and may add
+`rememberable: false` when a stage occurrence covers only part of an original-source
+expansion. The flag is omitted when true; it restricts remembering, not one-time editing.
 
 ```json
 {
@@ -128,7 +135,7 @@ redo is not implemented. Revision exhaustion fails safely rather than wrapping.
 
 ## Exclusions and validation
 
-No #49 My Terms schema/migration/categories/import or remembered preferences;
+#48 itself includes no #49 My Terms schema/migration/categories/import or remembered preferences;
 no #50 desktop redesign/modes; no new routes, entity alternatives, sources, LLM,
 packaging or separate production-client engines. Shared/private schemas, settings v1,
 source/licence gates and update/signing/network code are untouched.

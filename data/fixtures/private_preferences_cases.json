@@ -1,0 +1,33 @@
+{
+  "fixture_policy": "Project-authored synthetic My Terms tests; no third-party data or coverage claim.",
+  "cases": [
+    {"id":"exact-personal","terms":[["personal","測試詞","個人詞","technology-software"]],"expected":"個人詞"},
+    {"id":"child-over-parent","context":"hi-fi-audio","terms":[["a","測試詞","父詞","audio"],["personal","測試詞","子詞","hi-fi-audio"]],"expected":"子詞"},
+    {"id":"nearest-parent","context":"hi-fi-audio","terms":[["a","測試詞","父詞","audio"],["b","測試詞","較遠詞","technology-software"]],"expected":"父詞"},
+    {"id":"all-fallback","terms":[["a","測試詞","全部詞",null]],"expected":"全部詞"},
+    {"id":"locale-isolation","target":"zh-TW","terms":[["personal","測試詞","香港詞",null]],"expected":"台灣詞"},
+    {"id":"dictionary-disabled","disabled":["a"],"terms":[["a","測試詞","停用詞",null]],"expected":"官方詞"},
+    {"id":"term-disabled","terms":[["a","測試詞","停用詞",null,"zh-HK",null,false]],"expected":"官方詞"},
+    {"id":"same-target-dedup","terms":[["a","測試詞","同詞",null],["b","測試詞","同詞",null]],"expected":"同詞"},
+    {"id":"different-target-conflict","terms":[["a","測試詞","甲詞",null],["b","測試詞","乙詞",null]],"expected":"測試詞","review":true},
+    {"id":"protected-first","protect":true,"terms":[["personal","測試詞","偏好詞",null]],"expected":"測試詞"},
+    {"id":"longest-first","input":"測試詞組","terms":[["a","測試詞","短詞","technology-software"],["b","測試詞組","完整詞",null]],"expected":"完整詞"},
+    {"id":"ineligible-longer","input":"測試詞組","terms":[["a","測試詞","短詞",null],["b","測試詞組","法律詞","legal"]],"expected":"短詞組"},
+    {"id":"private-before-official","terms":[["a","測試詞","私人詞",null]],"expected":"私人詞"},
+    {"id":"no-private","terms":[],"expected":"官方詞"},
+    {"id":"different-context","terms":[["a","測試詞","法律詞","legal"]],"expected":"官方詞"},
+    {"id":"source-isolation","terms":[["a","測試詞","來源錯誤",null,"zh-HK","zh-CN"]],"expected":"官方詞"},
+    {"id":"repeated-unicode","input":"😀測試詞測試詞","terms":[["a","測試詞","短",null],["b","測試詞","很長的替代詞",null]],"expected":"😀測試詞測試詞","review":true},
+    {"id":"context-omitted","context":null,"terms":[["personal","測試詞","情境詞","technology-software"],["a","測試詞","無情境詞",null]],"expected":"無情境詞"},
+    {"id":"custom-root-no-general","context":"custom-root","terms":[["personal","測試詞","通用詞","general"],["a","測試詞","根詞",null]],"expected":"根詞"},
+    {"id":"scoped-tie-no-fallback","terms":[["a","測試詞","甲詞","technology-software"],["b","測試詞","乙詞","technology-software"],["personal","測試詞","全部词",null]],"expected":"測試詞","review":true},
+    {"id":"cn-original-private","source":"zh-CN","input":"测试词","terms":[["a","测试词","私詞",null]],"expected":"私詞"},
+    {"id":"identity-preference","terms":[["a","測試詞","測試詞",null]],"expected":"測試詞"},
+    {"id":"no-context-general-not-implicit","context":null,"terms":[["a","測試詞","通用詞","general"]],"expected":"官方詞"},
+    {"id":"legacy-specificity","legacy":[["測試詞","全球",null,null,100],["測試詞","香港","zh-Hant","zh-HK",0]],"terms":[],"expected":"香港"},
+    {"id":"new-vs-legacy-tie","legacy":[["測試詞","舊詞",null,null,999]],"terms":[["a","測試詞","新詞",null]],"expected":"測試詞","review":true},
+    {"id":"exact-new-beats-legacy","legacy":[["測試詞","舊詞",null,null,999]],"terms":[["a","測試詞","新詞","technology-software"]],"expected":"新詞"},
+    {"id":"lower-new-legacy-priority","context":"hi-fi-audio","legacy":[["測試詞","低詞",null,null,1],["測試詞","舊優先","zh-Hant",null,9]],"terms":[["a","測試詞","新詞",null]],"expected":"測試詞","review":true},
+    {"id":"tw-private","target":"zh-TW","terms":[["personal","測試詞","臺灣私人詞",null,"zh-TW"]],"expected":"臺灣私人詞"}
+  ]
+}
