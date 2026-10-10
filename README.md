@@ -1,85 +1,131 @@
-# Chinese Regional Localizer
+# HanContext
 
-Working product identity: **HanContext — Chinese, localized with context. / 懂情境的中文地區化**.
-The repository name and existing application identifier are unchanged.
+**懂情境的中文地區化**  
+**Chinese, localized with context.**
 
-Offline-first, open-source Chinese regional localization project for converting and localizing text across the Chinese Mainland (`zh-CN`), Hong Kong (`zh-HK`) and Taiwan (`zh-TW`).
+> **同一種中文，不只換字，更要換對語境。**
 
-The project goes beyond Simplified/Traditional character conversion by combining deterministic script conversion, regional terminology, named-entity localization, user overrides, provenance, ambiguity review and updateable SQLite data packs.
+HanContext 是一個 offline-first、可控制、可解釋、可重現的中文地區化工具。
 
-## Current state
+它不只是處理簡體與繁體字形，還會考慮中國內地、香港、台灣之間不同的地區用詞、專業術語、人名及專有名稱，以及不同使用情境下的用詞習慣。
 
-**Phase 3J / Issue #38 desktop settings persistence is complete. Phase 0 source-whitelist review has a usable first-pass conclusion for all 24 machine source IDs.**
+目標是：
 
-Desktop settings persistence covers database choices and the private-dictionary enabled state only.
-General Alpha preferences are not implemented. Runtime API v1 remains unchanged.
+> **盡量保留原句，只處理真正需要地區化的內容。**
 
-Implemented foundations include:
+## 為甚麼核心不依賴 LLM？
 
-- governed, licence-aware source ingestion with machine-readable allow-lists;
-- SQLite schema v0.2 with source/version/provenance history;
-- deterministic Python reference localization engine;
-- Rust shared core and versioned Runtime API v1 for supported CN/HK/TW routes;
-- private user-dictionary support and protected/user-preferred terms;
-- Rust usage-context profile foundation: seven built-ins, validated single-parent inheritance and a separate versioned local store;
-- explicit context-aware regional terminology selection in the shared Rust runtime and Python reference engine (no desktop context controls yet);
-- occurrence-specific alternative terms and in-memory one-time choices with stale-edit checks and undo in the core/reference (no desktop choice UI yet);
-- Tauri 2 desktop shell with Rust-managed validated database selection;
-- versioned non-secret desktop database preferences with safe restart validation and atomic saves;
-- full local database paths kept inside Rust rather than exposed to frontend JavaScript;
-- immutable versioned shared-data packages with staging, activation and rollback;
-- pinned Ed25519 signatures for release catalogs and package manifests;
-- authenticated HTTPS update discovery/download with rollback protection and bounded downloads;
-- desktop controls for explicit authenticated shared-data update checks and installs;
-- offline fixture-backed CI covering Python, Rust, Tauri and package/catalog flows;
-- protected `main` requiring pull requests and the `test` status check.
+HanContext 的核心使用 **詞庫 + 規則 + 使用情境 + deterministic engine**，而不是每次把全文交給生成式 AI 重新判斷。
 
-See `PROJECT_STATE.md` for the concise current status and next work.
+這種設計特別適合需要穩定術語的工作：
 
-## Supported localization routes
+- **一致**：相同文字、設定及資料版本，得到相同結果；
+- **可解釋**：重要修改可以說明原因；
+- **可控制**：有多個合理答案時，由使用者決定；
+- **不亂猜**：沒有足夠依據時保留原文；
+- **可離線**：核心功能不需要帳戶、API 或雲端 LLM；
+- **較穩定**：不直接依賴 token 費用、模型版本或外部服務可用性。
 
-Current supported forward routes include:
+**Same rules. Same result. Every time.**
 
-- `zh-CN -> zh-HK`
-- `zh-CN -> zh-TW`
-- `zh-Hant -> zh-HK`
-- `zh-Hant -> zh-TW`
+HanContext 並不排斥 AI。未來 AI 可以作為選擇性輔助，但 deterministic core 可以獨立運作。
 
-Reverse routes are not yet implemented. OpenCC behavior remains a documented partial/reference implementation rather than full upstream runtime parity.
+## 情境化用詞與替代詞
 
-## Desktop application status
+同一個詞，在不同情境可以有不同答案。HanContext 以明確的 **Usage Context / 使用情境** 協助選詞，而不是暗中猜測文章內容。
 
-A Tauri 2 desktop application now exists and uses the Rust runtime rather than frontend-side SQLite access.
+目前 Alpha 的基本情境包括：
 
-Current desktop capabilities include:
+- General / 一般
+- Technology / Software / 科技・軟件
+- Banking / Finance / 銀行・金融
+- Business / Marketing / 商業・市場推廣
+- Legal / 法律
+- Education / 教育
+- Government / Public Administration / 政府・公共行政
 
-- text localization through Runtime API v1;
-- validated shared-database selection through a native chooser;
-- optional private user-dictionary selection/clearing;
-- persisted shared/private database choices and private dictionary enabled state;
-- structured database status without exposing full filesystem paths to JavaScript;
-- explicit authenticated shared-data update discovery and installation;
-- safe failure behavior where invalid downloads or packages do not replace the active database.
+核心現已支援 occurrence-specific 替代詞及一次性選擇：有明確答案時標示 **Recommended**；其他合理選擇列為 **Also valid**；如果無法安全判斷，則標示 **Needs your decision**。同一詞在不同位置可以獨立選擇，並支援安全的單次修改、位置追蹤及 undo。
 
-Current desktop limitations:
+> **寧願保留原文，也不要自行猜測。**
 
-- persisted settings cover database choices and private-dictionary enabled state only; general Alpha preferences are not implemented;
-- core context/alternative-term capabilities are not yet exposed as desktop pickers or clickable term choices;
-- shared-data update checks are manual rather than background scheduled;
-- interrupted-download retry/resume and production hosting/CDN configuration are not complete;
-- production Windows/macOS installers and platform signing are not complete;
-- mobile packaging has not started.
+## 目前支援
 
-Relevant documentation:
+```text
+zh-CN   → zh-HK
+zh-CN   → zh-TW
+zh-Hant → zh-HK
+zh-Hant → zh-TW
+```
 
-- `docs/DESKTOP_DATABASE_SETTINGS.md`
-- `docs/DESKTOP_DATA_UPDATES.md`
-- `docs/NETWORK_UPDATES.md`
-- `docs/DATA_PACKAGE_FORMAT.md`
+目前尚未支援所有反向轉換。
 
-## Quick development demo
+## Desktop Alpha 狀態
 
-The Python reference path remains useful for local development and regression checks:
+已完成主要基礎：
+
+- deterministic 中文地區化核心；
+- Usage Context 與情境化術語選擇；
+- Alternative Terms、精確位置追蹤、單次選擇及 undo 核心；
+- 人名、專有名稱及 protected terms 處理；
+- 私人使用者詞庫基礎；
+- Python reference engine 與 Rust shared core；
+- Runtime API v1；
+- Tauri 2 Desktop 基礎；
+- 本機資料庫、版本化資料包及經驗證的更新機制；
+- offline fixture-backed CI。
+
+Desktop Alpha 仍在完成：
+
+- Desktop 內的情境選擇及可點擊替代詞介面；
+- My Terms / 我的用詞及 remembered preferences；
+- 多個私人詞庫；
+- 簡化 Desktop Alpha 操作流程；
+- Alpha 安裝及新手使用體驗。
+
+詳情請參閱 `PROJECT_STATE.md`、`docs/HANCONTEXT_ALPHA_MVP.md` 及 `docs/ALTERNATIVE_TERMS.md`。
+
+## 開源與資料授權
+
+HanContext 軟件採用 **Apache License 2.0**。
+
+第三方詞庫、術語表及其他資料來源會獨立審核授權。**公開可以查閱，不代表一定可以重新發佈。** 未確認授權的資料不會因格式轉換而自動變成可重新分發的官方資料。
+
+使用者自行匯入的私人詞庫，也不會自動成為 HanContext 官方資料包的一部分。
+
+詳情請參閱：
+
+- `docs/DATA_POLICY.md`
+- `docs/DATA_SOURCES.md`
+- `docs/LICENSE_PACKAGING.md`
+
+## Developer information
+
+以下內容主要供開發者及貢獻者參考。
+
+目前技術基礎包括：
+
+- Rust shared localization core
+- Python reference implementation
+- SQLite terminology database
+- versioned Usage Context profiles
+- deterministic context-aware terminology selection
+- occurrence-specific alternatives and one-time review sessions
+- private user-dictionary foundation
+- Tauri 2 desktop shell
+- authenticated shared-data package updates
+- protected `main` with required tests
+
+主要文件：
+
+- `PROJECT_STATE.md`
+- `docs/PRODUCT_REQUIREMENTS.md`
+- `docs/HANCONTEXT_ALPHA_MVP.md`
+- `docs/ROADMAP.md`
+- `docs/CONTEXT_PROFILES.md`
+- `docs/CONTEXT_SELECTION.md`
+- `docs/ALTERNATIVE_TERMS.md`
+
+### Quick development demo
 
 ```bash
 python -m pip install -r requirements-dev.txt
@@ -93,74 +139,14 @@ python scripts/localize_text.py \
 
 The fixture database is for tests/development only and is not an authoritative terminology release.
 
-## Data governance
+## English summary
 
-Public visibility is not permission to ingest, transform or redistribute data. External sources are reviewed under `data-registry/` and represented in `data-registry/sources.yaml`.
+**HanContext — Chinese, localized with context.**
 
-Production importers require all of the following:
+HanContext is an offline-first, open-source Chinese regional localization project focused on deterministic, explainable and controllable terminology adaptation across the Chinese Mainland, Hong Kong and Taiwan.
 
-- `ingest_allowed: true`;
-- an exact resource listed in `ingest_resources`;
-- the expected licence pack;
-- revision/version, URL and checksum provenance;
-- input-format and resource-identity validation.
+Its core does not require an LLM, allowing reproducible, auditable and offline localization. Context-aware terminology selection and occurrence-specific one-time alternatives are implemented in the shared core/reference; the project is currently in **Desktop Alpha development**.
 
-Reference-only, pending, rejected or out-of-scope material is blocked from redistributable data builds.
+---
 
-The first-pass whitelist review now has a usable conclusion for all 24 machine source IDs. Sources with unresolved rights are kept reference-only/non-ingest rather than being guessed into an approved state.
-
-See:
-
-- `docs/DATA_POLICY.md`
-- `docs/DATA_SOURCES.md`
-- `docs/REVIEW_PROGRESS.md`
-- `docs/LICENSE_PACKAGING.md`
-
-## Repository workflow
-
-GitHub is the project source of truth. AI tools and human contributors should begin with `AGENTS.md`, then load only the task-specific context routed under `.ai/` and `docs/`.
-
-Behavior changes require tests. Importers must preserve provenance, obey exact machine-readable ingest resources and keep incompatible licence packs separated.
-
-Current-state detail belongs in `PROJECT_STATE.md`; historical detail belongs in `docs/history/`, `CHANGELOG.md` and ADRs under `docs/adr/`.
-
-## Product requirements
-
-The canonical editable requirements are in `docs/PRODUCT_REQUIREMENTS.md`.
-
-The proposed HanContext Alpha MVP is in `docs/HANCONTEXT_ALPHA_MVP.md`, with delivery order in
-`docs/ROADMAP.md`. The approved Issue #46 profile foundation is described in
-[Usage Context Profiles](docs/CONTEXT_PROFILES.md). Issue #47 adds
-[deterministic context-aware terminology selection](docs/CONTEXT_SELECTION.md), preserving
-Runtime API v1 and existing protection/route rules. Issue #48 adds
-[alternative terms and occurrence-safe one-time choices](docs/ALTERNATIVE_TERMS.md)
-to the core/reference, without a full-document rerun or remembered preferences. Desktop context controls,
-context-sensitive My Terms, clickable alternatives, Alpha modes/UX and an MCP server
-remain planned, not implemented.
-
-A dated frozen backup is also kept at:
-
-- `docs/history/PRODUCT_REQUIREMENTS_BACKUP_2026-10-07.md`
-
-The backup is for recovery/reference only and does not supersede the canonical requirements file.
-
-## Licensing
-
-Project-authored software is licensed under Apache License 2.0; see `LICENSE` and `LICENSE_SCOPE.md`.
-
-Third-party data is **not** relicensed under the software licence. Each source keeps its own licence and attribution/share-alike obligations.
-
-## Next planned work
-
-**Phase 3J / Issue #38** is complete with persisted non-secret desktop settings.
-
-Validated shared-database and optional user-dictionary choices survive app restarts while
-preserving the Rust-only filesystem-path boundary, safe fallback behavior and Runtime API v1 compatibility.
-
-Issue #46's context-profile foundation and #47's core terminology selection are merged.
-Issue #48's approved core alternative/one-time review layer is implemented in this
-focused PR, subject to CI, review and merge; Issues #49–#51 still require separate
-approval and implementation. Suggested
-longer-term order: Desktop Alpha → CLI → MCP Server → production Windows/macOS
-packaging/signing → editor/plugin integrations → optional AI assistance. All clients
-reuse the same Core / Runtime.
+The repository retains the historical name `chinese-regional-localizer`; the working product identity is **HanContext**.
