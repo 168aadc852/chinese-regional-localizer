@@ -38,6 +38,17 @@ jobs:
       - name: Run unit tests
         run: python -m unittest discover -s tests -v
 
+      - name: Validate complete UI translations and generated resources
+        run: python scripts/check_ui_translations.py
+
+      - name: Set up Node for lightweight desktop UI tests
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Desktop presentation tests (no npm dependencies)
+        run: node --test desktop/tests/presentation.test.cjs
+
       - name: Build demo database
         run: python scripts/build_demo_database.py
 

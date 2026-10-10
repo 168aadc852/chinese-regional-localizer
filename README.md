@@ -73,6 +73,7 @@ zh-Hant → zh-TW
 - Python reference engine 與 Rust shared core；
 - Runtime API v1；
 - Tauri 2 Desktop 基礎；
+- 四語介面（`zh-HK` / `zh-TW` / `zh-CN` / `en`）、System / Light / Dark / E-ink / Mono 外觀模式，以及 WCAG 2.2 AA 無障礙介面基礎；
 - 本機資料庫、版本化資料包及經驗證的更新機制；
 - offline fixture-backed CI。
 
@@ -80,13 +81,14 @@ Desktop Alpha 仍在完成：
 
 - Desktop 內的使用情境、地區化模式、可點擊替代詞、解釋及記憶選擇介面；
 - Desktop My Dictionaries 管理、匯入及啟用／停用介面；
-- 四語介面（`zh-HK` / `zh-TW` / `zh-CN` / `en`）、System / Light / Dark / E-ink / Mono 外觀模式，以及 WCAG 2.2 AA 無障礙介面基礎；
 - Official Dictionary 版本、已收錄來源及來源詳情的漸進式透明度介面；
 - 簡化 Desktop Alpha 操作流程；
 - Alpha 安裝及新手使用體驗。
 
 詳情請參閱 `PROJECT_STATE.md`、`docs/HANCONTEXT_ALPHA_MVP.md` 及 `docs/ALTERNATIVE_TERMS.md`。
 私人詞庫核心與兼容遷移詳見 [My Dictionaries](docs/MY_DICTIONARIES.md)。
+
+Issue #60 的 Stage A 已實作四語切換、四種外觀選項及安全保存介面顯示設定；這不是完整 Desktop Alpha 流程，也不代表已取得 WCAG 認證。使用情境、模式及私人詞庫管理介面仍屬後續工作。詳見 [Desktop 介面基礎](docs/DESKTOP_UI_FOUNDATION.md)。
 
 ## 開源與資料授權
 

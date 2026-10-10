@@ -14,7 +14,7 @@ use tauri::{AppHandle, Manager, State};
 use tauri_plugin_dialog::DialogExt;
 
 mod settings;
-use settings::SettingsStore;
+use settings::{PresentationError, PresentationPreferences, SettingsStore};
 
 #[derive(Debug, Clone)]
 struct DatabaseConfig {
@@ -22,6 +22,7 @@ struct DatabaseConfig {
     user_db: Option<PathBuf>,
     user_enabled: bool,
     settings_message: Option<String>,
+    presentation: PresentationPreferences,
 }
 
 impl DatabaseConfig {
@@ -95,6 +96,7 @@ fn load_config() -> DatabaseConfig {
         user_enabled: user_db.is_some(),
         user_db,
         settings_message: None,
+        presentation: PresentationPreferences::default(),
     }
 }
 
@@ -388,6 +390,41 @@ fn database_status(state: State<'_, AppState>) -> Result<DatabaseStatus, String>
 }
 
 #[tauri::command]
+fn presentation_settings(
+    state: State<'_, AppState>,
+) -> Result<PresentationPreferences, PresentationError> {
+    state
+        .config
+        .read()
+        .map(|config| config.presentation.clone())
+        .map_err(|_| PresentationError::PreferencesUnavailable)
+}
+
+fn change_presentation(
+    state: &AppState,
+    preferences: PresentationPreferences,
+) -> Result<PresentationPreferences, PresentationError> {
+    let mut current = state
+        .config
+        .write()
+        .map_err(|_| PresentationError::PreferencesUnavailable)?;
+    let mut candidate = current.clone();
+    candidate.presentation = preferences;
+    // Same lock/document as database mutations: no lost updates, no paths to UI.
+    state.settings.save_presentation(&candidate)?;
+    *current = candidate;
+    Ok(current.presentation.clone())
+}
+
+#[tauri::command]
+fn save_presentation_settings(
+    state: State<'_, AppState>,
+    preferences: PresentationPreferences,
+) -> Result<PresentationPreferences, PresentationError> {
+    change_presentation(&state, preferences)
+}
+
+#[tauri::command]
 fn update_status(state: State<'_, AppState>) -> Result<UpdateStatus, String> {
     update_status_for(&state)
 }
@@ -561,7 +598,9 @@ pub fn run() {
             choose_shared_database,
             choose_user_database,
             clear_user_database,
-            enable_user_database
+            enable_user_database,
+            presentation_settings,
+            save_presentation_settings
         ])
         .run(tauri::generate_context!())
         .expect("error while running Chinese Regional Localizer desktop app");
@@ -624,6 +663,7 @@ mod tests {
             user_db: None,
             user_enabled: false,
             settings_message: None,
+            presentation: PresentationPreferences::default(),
         });
         assert_eq!(status.shared_name, "shared.sqlite");
         assert!(status.shared_ready);

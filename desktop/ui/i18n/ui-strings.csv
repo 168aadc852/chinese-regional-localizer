@@ -1,0 +1,94 @@
+key,screen,note,zh-HK,zh-TW,zh-CN,en
+app.title,shell,Working product name,HanContext,HanContext,HanContext,HanContext
+app.eyebrow,shell,Offline shell identity; API version is technical,離線優先 · Runtime API v1,離線優先 · Runtime API v1,离线优先 · Runtime API v1,Offline-first · Runtime API v1
+app.subtitle,shell,Product regional label; not a new route,中國內地、香港、台灣中文地區化,中國內地、香港、台灣中文地區化,中国内地、香港、台湾中文地区本地化,"Chinese localization for Chinese Mainland, Hong Kong and Taiwan"
+locale.self,presentation,Always display from the locale's own column,繁體中文（香港）,繁體中文（台灣）,简体中文（中国内地）,English
+presentation.title,presentation,Presentation preferences separate from document locales,介面顯示,介面顯示,界面显示,Interface
+presentation.language,presentation,UI language only; never document locale,介面語言,介面語言,界面语言,UI language
+presentation.appearance,presentation,Theme selection only,外觀,外觀,外观,Appearance
+appearance.system,presentation,Follows platform Light/Dark only,跟隨系統,跟隨系統,跟随系统,System
+appearance.light,presentation,Light theme,淺色,淺色,浅色,Light
+appearance.dark,presentation,Dark theme,深色,深色,深色,Dark
+appearance.eink_mono,presentation,Manual monochrome high-readability theme,E-ink / Mono,E-ink / Mono,E-ink / Mono,E-ink / Mono
+presentation.saved,presentation,Shown only after durable save,✓ 顯示設定已儲存。,✓ 顯示設定已儲存。,✓ 显示设置已保存。,✓ Display settings saved.
+presentation.preview,presentation,No Tauri in ordinary browser; no persistence promise,ℹ 瀏覽器預覽：顯示設定只用於本次預覽，不會儲存。,ℹ 瀏覽器預覽：顯示設定僅用於本次預覽，不會儲存。,ℹ 浏览器预览：显示设置仅用于本次预览，不会保存。,ℹ Browser preview: display settings apply to this preview only and are not saved.
+error.preferences_load,presentation,Could not read presentation settings; defaults displayed,! 無法讀取顯示設定；現正使用預設顯示。,! 無法讀取顯示設定；目前使用預設顯示。,! 无法读取显示设置；当前使用默认显示。,! Display settings could not be loaded; defaults are shown.
+error.preferences_unavailable,presentation,Typed backend state unavailable,! 顯示設定暫時無法使用，請稍後再試。,! 顯示設定暫時無法使用，請稍後再試。,! 显示设置暂时无法使用，请稍后重试。,! Display settings are unavailable; try again later.
+error.settings_unsupported,presentation,Future document is never overwritten,! 設定檔版本或欄位不受支援；原檔不會被覆寫。,! 設定檔版本或欄位不支援；原檔不會被覆寫。,! 设置文件版本或字段不受支持；原文件不会被覆盖。,! Settings version or fields are unsupported; the original file will not be overwritten.
+error.settings_save_failed,presentation,Durable write failed; keep previous presentation choices,! 無法安全儲存顯示設定；原有設定保持不變。,! 無法安全儲存顯示設定；原有設定保持不變。,! 无法安全保存显示设置；原有设置保持不变。,! Display settings could not be saved safely; previous settings are unchanged.
+database.title,database,Existing technical shell; not My Dictionaries manager,資料庫設定,資料庫設定,数据库设置,Database settings
+database.description,database,Preserve path-free Rust file selection boundary,檔案選擇及 SQLite 驗證由 Rust 處理；介面不會取得完整檔案路徑。,檔案選擇與 SQLite 驗證由 Rust 處理；介面不會取得完整檔案路徑。,文件选择及 SQLite 验证由 Rust 处理；界面不会获取完整文件路径。,Rust handles file selection and SQLite validation; the UI never receives full file paths.
+database.shared,database,Existing shared regional database,共享地區資料庫,共用地區資料庫,共享地区数据库,Shared regional database
+database.private,database,Existing optional private dictionary; no manager in Stage A,私人詞典（可選）,私人字典（選用）,私人词典（可选）,Private dictionary (optional)
+action.refresh,database,Revalidate current databases,重新檢查,重新檢查,重新检查,Recheck
+action.choose_file,database,Open existing Rust file picker,選擇檔案,選擇檔案,选择文件,Choose file
+action.enable,database,Enable already selected private dictionary,啟用,啟用,启用,Enable
+action.disable,database,Disable but retain selected dictionary,停用,停用,停用,Disable
+status.checking,shell,Initial status; ellipsis is not colour-only,檢查中…,檢查中…,检查中…,Checking…
+status.unset,shell,No configured value,未設定,未設定,未设置,Not configured
+database.ready,database,Filename from Rust; never a full path,✓ 可用：{name},✓ 可用：{name},✓ 可用：{name},✓ Available: {name}
+database.unavailable,database,Recoverable database status with filename,! 不可用：{name},! 無法使用：{name},! 不可用：{name},! Unavailable: {name}
+database.private_unused,database,Shared-only localization remains available,○ 私人詞典未啟用；只使用共享地區資料庫。,○ 私人字典未啟用；僅使用共用地區資料庫。,○ 私人词典未启用；仅使用共享地区数据库。,○ Private dictionary not enabled; using shared regional data only.
+database.private_enabled,database,Selected filename and explicit enabled state,✓ 已啟用：{name},✓ 已啟用：{name},✓ 已启用：{name},✓ Enabled: {name}
+database.private_disabled,database,Selected filename retained while disabled,○ 已停用：{name},○ 已停用：{name},○ 已停用：{name},○ Disabled: {name}
+database.shared_saved,database,Accepted database selection,✓ 共享資料庫設定已更新。,✓ 共用資料庫設定已更新。,✓ 共享数据库设置已更新。,✓ Shared database settings updated.
+database.private_saved,database,Accepted private file selection,✓ 私人詞典設定已更新。,✓ 私人字典設定已更新。,✓ 私人词典设置已更新。,✓ Private dictionary settings updated.
+database.disabled,database,Dictionary toggle completed,✓ 私人詞典已停用。,✓ 私人字典已停用。,✓ 私人词典已停用。,✓ Private dictionary disabled.
+database.enabled,database,Dictionary toggle completed,✓ 私人詞典已啟用。,✓ 私人字典已啟用。,✓ 私人词典已启用。,✓ Private dictionary enabled.
+error.settings_restore,database,Legacy settings warning summarized without raw backend prose,! 部分已儲存設定未能還原；已使用可用的啟動預設設定。,! 部分已儲存設定無法還原；已使用可用的啟動預設設定。,! 部分已保存设置无法恢复；已使用可用的启动默认设置。,! Some saved settings could not be restored; available startup defaults are in use.
+error.database_operation,database,Legacy error boundary; do not parse translated backend sentences,! 資料庫操作未能完成。請檢查檔案是否存在、格式相容，以及設定資料夾是否可寫入。,! 資料庫操作無法完成。請檢查檔案是否存在、格式相容，以及設定資料夾是否可寫入。,! 数据库操作未能完成。请检查文件是否存在、格式兼容，以及设置文件夹是否可写入。,"! Database operation could not finish. Check that the file exists, its format is compatible, and the settings folder is writable."
+update.title,update,Existing governed shared-data update controls,共享資料更新,共用資料更新,共享数据更新,Shared data updates
+update.description,update,Existing security checks remain unchanged,只接受通過 Rust 簽章、雜湊、SQLite 及資料套件驗證的已設定更新。,僅接受通過 Rust 簽章、雜湊、SQLite 與資料套件驗證的已設定更新。,仅接受通过 Rust 签名、哈希、SQLite 及数据包验证的已配置更新。,"Only configured updates passing Rust signature, hash, SQLite and package validation are accepted."
+update.package,update,"Existing regional package status, not source drill-down",地區資料套件,地區資料套件,地区数据包,Regional data package
+update.loading,update,Startup update status,正在讀取更新狀態…,正在讀取更新狀態…,正在读取更新状态…,Loading update status…
+action.check_update,update,Explicit network check,檢查更新,檢查更新,检查更新,Check for updates
+action.install_update,update,Explicit governed install,安裝更新,安裝更新,安装更新,Install update
+update.unconfigured,update,No configured update service; offline use unaffected,○ 更新服務未設定；離線功能仍可使用。,○ 更新服務未設定；離線功能仍可使用。,○ 更新服务未配置；离线功能仍可使用。,○ Update service not configured; offline use remains available.
+update.available,update,Explicit availability label,↑ 有更新,↑ 有更新,↑ 有更新,↑ Update available
+update.ready,update,"Configured, without claiming latest until network check",✓ 已就緒,✓ 已就緒,✓ 已就绪,✓ Ready
+update.unmanaged,update,Version fallback for development database,非套件管理的資料庫,非套件管理的資料庫,非数据包管理的数据库,Database not managed by package store
+update.version,update,Version is a backend value,目前版本：{version},目前版本：{version},当前版本：{version},Current version: {version}
+update.versions,update,Current and offered versions from backend,目前版本：{version} · 可安裝版本：{offered},目前版本：{version} · 可安裝版本：{offered},当前版本：{version} · 可安装版本：{offered},Current version: {version} · Available version: {offered}
+update.notice,update,Generic localized legacy backend status notice,ℹ 更新操作已返回狀態；請查看目前版本及是否有可安裝更新。,ℹ 更新操作已回傳狀態；請查看目前版本及是否有可安裝更新。,ℹ 更新操作已返回状态；请查看当前版本及是否有可安装更新。,ℹ Update operation returned a status; check the current version and update availability.
+error.update_operation,update,Recoverable failure distinct from content decisions,! 無法完成更新操作；離線資料不會因此停用。,! 無法完成更新操作；離線資料不會因此停用。,! 无法完成更新操作；离线数据不会因此停用。,! Update operation could not finish; offline data is not disabled by this failure.
+localization.settings,localize,Document route settings separate from presentation,地區化設定,地區化設定,地区本地化设置,Localization settings
+localization.source,localize,"Document source, not UI language",來源,來源,来源,Source
+localization.target,localize,"Document target, not UI language",目標,目標,目标,Target
+route.cn,localize,Supported Simplified Chinese source,中國內地 · 簡體,中國內地 · 簡體,中国内地 · 简体,Chinese Mainland · Simplified
+route.hant,localize,"Generic Traditional input, no regional source claim",繁體中文,繁體中文,繁体中文,Traditional Chinese
+route.hk,localize,Supported Hong Kong target,香港,香港,香港,Hong Kong
+route.tw,localize,Supported Taiwan target,台灣,台灣,台湾,Taiwan
+action.localize,localize,"Existing Runtime v1 command, not new mode semantics",地區化,地區化,本地化,Localize
+action.processing,shell,Busy state,處理中…,處理中…,处理中…,Working…
+editor.input,localize,Input textarea accessible name,原文,原文,原文,Input
+editor.output,localize,Read-only output accessible name,結果,結果,结果,Result
+editor.input_placeholder,localize,"Input instruction, not default document content",貼上需要地區化的中文文字…,貼上需要地區化的中文文字…,粘贴需要地区本地化的中文文字…,Paste Chinese text to localize…
+editor.output_placeholder,localize,Read-only output placeholder,地區化結果會顯示在這裏,地區化結果會顯示在這裡,本地化结果会显示在这里,Localized text will appear here
+editor.count,localize,Unicode character count,{count} 字,{count} 字,{count} 字,{count} characters
+runtime.core,shell,Technical existing runtime badge,Rust runtime,Rust runtime,Rust runtime,Rust runtime
+runtime.private,shell,"Technical badge, existing dictionary application flag",Rust + 私人詞典,Rust + 私人字典,Rust + 私人词典,Rust + private dictionary
+changes.title,review,"Existing technical change list, not Alpha review workflow",變更與來源,變更與來源,变更与来源,Changes and sources
+changes.description,review,Preserve existing read-only technical shell,只顯示 Runtime API 回傳的決策；介面不直接讀取 SQLite。,僅顯示 Runtime API 回傳的決策；介面不直接讀取 SQLite。,仅显示 Runtime API 返回的决策；界面不直接读取 SQLite。,Only decisions returned by Runtime API are shown; the UI never reads SQLite directly.
+changes.count,review,Change count,{count} 項變更,{count} 項變更,{count} 项变更,{count} changes
+changes.initial,review,Existing technical list empty instruction,按「地區化」後顯示術語、名稱、來源及檢查狀態。,按「地區化」後顯示術語、名稱、來源及檢查狀態。,点击「本地化」后显示术语、名称、来源及检查状态。,"After localization, this shows terms, names, sources and review status."
+changes.empty,review,No changes from runtime,沒有需要顯示的變更。,沒有需要顯示的變更。,没有需要显示的变更。,No changes to show.
+changes.review_needed,review,Existing v1 review flag; do not infer new Alpha action state,! 需要檢查,! 需要檢查,! 需要检查,! Review needed
+changes.applied,review,Existing v1 change row label,✓ 已套用,✓ 已套用,✓ 已应用,✓ Applied
+changes.type,review,Protocol change type; technical identifier preserved,變更類型：{value},變更類型：{value},变更类型：{value},Change type: {value}
+changes.reason,review,Raw protocol reason in existing technical list,原因代碼：{value},原因代碼：{value},原因代码：{value},Reason code: {value}
+changes.qid,review,"Wikidata identifier, not translated content",Wikidata：{value},Wikidata：{value},Wikidata：{value},Wikidata: {value}
+changes.source,review,Technical source ID in existing shell,來源：{value},來源：{value},来源：{value},Source: {value}
+changes.provenance,review,Technical provenance identifier; no new source drill-down,資料層：{value},資料層：{value},数据层：{value},Data layer: {value}
+changes.user_rule,review,"Existing technical list only, not My Terms UI",私人規則：{value},私人規則：{value},私人规则：{value},Private rule: {value}
+changes.input_span,review,Original Unicode span shown as diagnostic,原文位置：{value},原文位置：{value},原文位置：{value},Input position: {value}
+changes.output_span,review,Output Unicode span shown as diagnostic,結果位置：{value},結果位置：{value},结果位置：{value},Output position: {value}
+error.runtime_unavailable,shell,Ordinary browser preview cannot run Tauri commands,! Tauri runtime 未載入；請用桌面應用程式執行此操作。,! Tauri runtime 未載入；請用桌面應用程式執行此操作。,! Tauri runtime 未加载；请用桌面应用执行此操作。,! Tauri runtime is not loaded; use the desktop app for this operation.
+error.localization,localize,Blocking existing command error; no new core semantics,! 地區化未能完成。請重新檢查資料庫及支援的來源／目標組合。,! 地區化無法完成。請重新檢查資料庫及支援的來源／目標組合。,! 本地化未能完成。请重新检查数据库及支持的来源／目标组合。,! Localization could not finish. Recheck databases and the supported source/target combination.
+review.applied,foundation,Future Action State vocabulary only; no new review UI,已套用,已套用,已应用,Applied
+review.suggested,foundation,Future Action State vocabulary only,建議,建議,建议,Suggested
+review.needs_decision,foundation,"Normal safe content decision, never styled as blocking error",需要你決定,需要你決定,需要你决定,Needs your decision
+review.unchanged,foundation,Future Action State vocabulary only,未變更,未變更,未更改,Unchanged
+review.protected,foundation,Future Action State vocabulary only,已保護,已保護,已保护,Protected
+candidate.recommended,foundation,"Candidate rank, not Action State",推薦,推薦,推荐,Recommended
+candidate.also_valid,foundation,"Candidate rank, not Action State",同樣有效,同樣有效,同样有效,Also valid
+preference.yours,foundation,Preference source separate from rank,你的偏好,你的偏好,你的偏好,Your preference
