@@ -7,7 +7,7 @@ Updated: 2026-10-10
 **Phase 3J / Issue #38 desktop settings persistence is complete. Phase 0 source whitelist review now has a usable conclusion for all 24 machine source IDs.**
 
 Phase 3J persisted database choices and the private-dictionary enabled state only.
-Issue #60 Stage A is implemented on `feat/desktop-alpha-stage-a` for PR review:
+Issue #60 Stage A is complete:
 four UI locales, System/Light/Dark/E-ink / Mono, accessibility baseline patterns,
 and separate persisted presentation preferences in desktop settings v2.
 Localization defaults/context/modes are not persisted or exposed by Stage A.
@@ -45,8 +45,8 @@ The project currently has:
 
 ## Likely next work
 
-1. Review/merge Issue #60 Stage A before separately approving the next #50
-   Desktop/Core bridge and workflow stage; the #50 Pre-UX contracts are approved.
+1. Prepare/review the separately planned #50 Stage B Desktop ↔ Core bridge work
+   under the approved #50 Pre-UX contracts; implementation remains separately scoped.
 2. Keep #50 and #51 as separately approved, focused work packages under
    `docs/HANCONTEXT_ALPHA_MVP.md`; do not implement them automatically.
 3. Track remaining release hosting, retry/resume, key operations and production packaging work separately.

@@ -1,6 +1,6 @@
 # Changelog
 
-## 2026-10-10 — Issue #60 Desktop Alpha Stage A (PR review)
+## 2026-10-10 — Issue #60 Desktop Alpha Stage A
 
 - Added a human-editable UTF-8 CSV translation table and deterministic, offline validation/generation for four independent UI locales: zh-HK, zh-TW, zh-CN and en.
 - Migrated the existing static shell to semantic keys, live UI language switching and self-labelled language options without flags; document source/target choices remain independent.
