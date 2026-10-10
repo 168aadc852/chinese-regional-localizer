@@ -1,8 +1,7 @@
 # My Dictionaries / My Terms — Issue #49 core foundation
 
-Date: 2026-10-10. Approved core/private-storage work, implemented in the focused
-#49 PR pending protected-main CI, review and merge. No #50 dictionary manager,
-Desktop remember buttons, TXT import UI, cloud sync or terminology coverage claim.
+Date: 2026-10-10. The approved core/private-storage work is merged as Issue #49.
+No #50 dictionary manager, Desktop remember buttons, TXT import UI, cloud sync or terminology coverage claim.
 
 Baseline: [Design Approval v0.1](https://github.com/168aadc852/chinese-regional-localizer/issues/49#issuecomment-6092942948)
 and [Implementation Brief v0.1](https://github.com/168aadc852/chinese-regional-localizer/issues/49#issuecomment-6092948935).
@@ -167,4 +166,4 @@ profile-store case), 25 Tauri tests; Python compile/fatal lint, Rust/Tauri forma
 warnings-denied Clippy, Tauri compile/check and actual Windows debug executable build
 passed. Demo/package/catalog, 8/8 realistic corpus cases, deterministic Python/Rust
 benchmark smoke, diff whitespace and changed-document local links also passed.
-Protected-main CI/review/merge remain the PR gate; no automatic merge.
+Protected-main PoC tests also passed before merge.
