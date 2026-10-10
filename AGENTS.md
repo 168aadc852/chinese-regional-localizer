@@ -18,9 +18,24 @@ Prefer: specific file/section > task guide > index > broad project documentation
 - Localization behavior: `.ai/engine.md`
 - Tests / CI: `.ai/testing.md`
 - Documentation changes: `.ai/docs.md`
+- README / public product copy: `.ai/readme-style.md`
 - Release / packaging: `.ai/release.md`
 
 Read `README.md`, project overview, product requirements, history or unrelated technical docs only when the task actually requires them.
+
+## README communication policy
+
+`README.md` is product-facing and Chinese-user-first.
+
+When updating README:
+- Traditional Chinese product/user content comes first; English and developer details are secondary.
+- Keep the opening concise and product-oriented.
+- Explain HanContext as deterministic, offline-first, controllable, explainable and context-aware.
+- Explain non-LLM core advantages without framing HanContext as anti-AI or "better than LLMs".
+- Keep unfinished Alpha features clearly marked as planned or in progress.
+- Preserve accurate supported-route claims.
+- Use `Chinese Mainland` in English regional wording.
+- Load `.ai/readme-style.md` only when working on README or public product copy.
 
 ## Global rules
 
