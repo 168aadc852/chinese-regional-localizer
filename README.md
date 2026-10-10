@@ -61,6 +61,8 @@ zh-Hant → zh-TW
 
 ## Desktop Alpha 狀態
 
+**目前進度：** 核心功能已完成至 **My Terms / My Dictionaries**。Desktop Alpha 的主要 Pre-UX 設計基線亦已確立；下一階段將集中於把使用情境、地區化模式、替代詞、解釋、記憶選擇、私人詞庫及資料來源透明度整合成一般使用者可以直接操作的流程。
+
 已完成主要基礎：
 
 - deterministic 中文地區化核心；
@@ -76,8 +78,10 @@ zh-Hant → zh-TW
 
 Desktop Alpha 仍在完成：
 
-- Desktop 內的情境選擇、可點擊替代詞及記憶選擇介面；
+- Desktop 內的使用情境、地區化模式、可點擊替代詞、解釋及記憶選擇介面；
 - Desktop My Dictionaries 管理、匯入及啟用／停用介面；
+- 四語介面（`zh-HK` / `zh-TW` / `zh-CN` / `en`）、System / Light / Dark / E-ink / Mono 外觀模式，以及 WCAG 2.2 AA 無障礙介面基礎；
+- Official Dictionary 版本、已收錄來源及來源詳情的漸進式透明度介面；
 - 簡化 Desktop Alpha 操作流程；
 - Alpha 安裝及新手使用體驗。
 
